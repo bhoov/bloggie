@@ -1,6 +1,6 @@
 {
   "name": "bloggie",
-  "description": "Write one story with your AI agent. Publish it as an interactive blog post, and as a talk when you need one.",
+  "description": "Write one story with your AI agent. Publish it as an interactive blog post that ports to slides when you need them.",
   "license": "Apache-2.0",
   "private": true,
   "type": "module",

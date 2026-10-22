@@ -47,7 +47,7 @@ for (const field of ['dependencies', 'devDependencies']) {
   }
 }
 const { name: _, ...rest } = pkg
-const template = { name: 'bloggie', description: 'Write one story with your AI agent. Publish it as an interactive blog post, and as a talk when you need one.', license: 'Apache-2.0', ...rest }
+const template = { name: 'bloggie', description: 'Write one story with your AI agent. Publish it as an interactive blog post that ports to slides when you need them.', license: 'Apache-2.0', ...rest }
 writeFileSync(pkgPath, JSON.stringify(template, null, 2) + '\n')
 execFileSync('npm', ['install', '--package-lock-only', '--ignore-scripts', '--no-audit', '--no-fund'], { cwd: copy, stdio: 'ignore' })
 

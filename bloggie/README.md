@@ -1,6 +1,6 @@
 # Bloggie
 
-Write one story with your AI agent. Publish it as an interactive blog post, and as a talk when you need one.
+Write one story with your AI agent. Publish it as an interactive blog post that ports to slides when you need them.
 
 Bloggie turns one plain-text story into an interactive blog post and, when you want it, a talk deck that runs the same
 live figures. Every post also downloads as a single HTML file that works offline.
