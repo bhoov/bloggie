@@ -157,7 +157,7 @@ for (const file of htmlPages(dist)) {
     })
   }
   if (/^posts\/[^/]+\/slides\/$/.test(path)) {
-    // blog-to-slides rule 16: code on a slide is syntax highlighted, and there is no inline code.
+    // bloggie-slides rule 16: code on a slide is syntax highlighted, and there is no inline code.
     await check(label, 'every code block is syntax highlighted; no inline code', async () => {
       const slides = await page.evaluate(`[...document.querySelectorAll('.deck > .slide')].map((slide) => ({
         title: slide.dataset.title,

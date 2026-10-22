@@ -8,7 +8,8 @@ deck shows most slide kinds; copy from them.
 ## Comments for the agent
 
 The author writes `((…))` in any file, in plain text or in a comment, to leave a note for you: a question, a request or
-a correction. Address each one, then remove it, and say what you did for each. Leave `((IGNORE …))` alone.
+a correction. Address each one, then remove it, and say what you did for each. Leave `((IGNORE …))` alone. A `((…))` inside
+inline code or a code block is an example, as in this file, not a note.
 
 ## Where things go
 
@@ -43,7 +44,8 @@ the author to look:
 3. Figures: numerics first, then the component, `describe.js` and `e2e.js`. Report measured numbers.
 4. Review: read the post in a browser as a first-time reader, use every control, and list each problem with a fix.
    Do not change the author's prose without saying where.
-5. Deck: `slides.mdx`, with the `blog-to-slides` skill.
+5. Deck: `slides.mdx`, made by the `bloggie-slides` skill. Read `.agents/skills/bloggie-slides/SKILL.md` before you make,
+   revise or check a deck; its `check-slides.mjs` checks every slide with nothing to install.
 6. Check: `npm run build` passes before a commit. Run `npm run e2e` when asked, or after a change to
    several figures.
 
@@ -70,7 +72,7 @@ that needs it, and in a shared file add the new export beside the old one before
   link. The build fails on an in-page link without a target. `<h2>` and `<h3>` with ids form the table of contents.
 - MDX: comments are `{/* … */}`, tags close (`<br />`), and `{` `}` in prose are escaped as `\{ \}`.
 - A deck is `slides.mdx` beside the post: `#` is the title or a divider, `## [kind] Title` a slide. Follow the
-  `blog-to-slides` skill. The slide editor (E on a deck under `npm run dev`) writes `<Box style>`, `style` and
+  `bloggie-slides` skill. The slide editor (E on a deck under `npm run dev`) writes `<Box style>`, `style` and
   `titleStyle` into `slides.mdx`; keep them when you revise a deck.
 
 ## Figures

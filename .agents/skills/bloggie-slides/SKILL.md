@@ -1,15 +1,53 @@
 ---
-name: blog-to-slides
-description: Turn a blog post into a presentable slide deck with its live figures. Use when asked to make, revise or review slides from a post. Covers the story (one idea per slide), text sizes for the back of the room, full-slide interactive demos, equation slides with symbol legends, and the feedback to give on the post afterwards.
+name: bloggie-slides
+description: Make, revise or check the slide deck of a Bloggie post (src/pages/posts/<slug>/slides.mdx), with the post's live figures. Use when asked to make, revise or review slides from a post, or to update a deck after the post changed. Covers the story (one idea per slide), text sizes for the back of the room, full-slide interactive demos, equation slides with symbol legends, and the feedback to give on the post afterwards.
 ---
 
-# Blog to slides
+# Bloggie slides
+
+## Quick start
+
+1. Read the post, `src/pages/posts/<slug>/index.mdx`, and the example deck,
+   `src/pages/posts/how-this-blog-works/slides.mdx`, which uses most slide kinds.
+2. Write `src/pages/posts/<slug>/slides.mdx` beside the post (see Mechanics). A minimal deck:
+
+   ```mdx
+   ---
+   layout: '@bloggie/layouts/Slides.astro'
+   title: My Post (slides)
+   ---
+
+   import MyFigure from '@/figures/my-figure/MyFigure.svelte'
+
+   # My Post
+
+   Ada Lovelace · 22 October 2026
+
+   ## The Takeaway in a Few Words
+
+   - **First** supporting point
+   - **Second** supporting point
+
+   <Notes>What to say on this slide.</Notes>
+
+   ## [demo zoom=1.5] See It Work
+
+   <MyFigure client:visible />
+   ```
+
+3. Run `npm run dev`, then check every slide:
+   `node .agents/skills/bloggie-slides/check-slides.mjs http://localhost:4321/posts/<slug>/slides/ <out-dir>`
+   (nothing to install; see Checking). Look at the screenshots, fix, and check again.
+4. Report the deck's URL, the slide list, and feedback on the post (see Feedback on the post).
+
+When the post changes, revise the deck the same way: carry each change to the slides that show it, and keep the
+author's layout (see the slide editor under Mechanics).
+
+## Rules
 
 A deck is presented to a room. The audience at the back must read every word, and the
 presenter must not fight the deck. The post is the source; the deck restates its ideas one at
 a time, with the post's own interactive figures.
-
-## Rules
 
 1. **One idea per slide.** If a slide holds two ideas, it becomes two slides. No exceptions.
    A list is one idea only if every item supports the same title.
@@ -20,12 +58,11 @@ a time, with the post's own interactive figures.
    nothing beside it spans the full width of the stage and takes at most two lines. Remove any
    width cap the site's article styles put on headings (a post's text-column `max-width`
    makes a slide title wrap to three lines in the left half of the slide).
-   "Correct Answers Are Fixed Points", not "Make the answer a fixed point of one dynamical
-   system". "Why ET Failed", not "Why the Energy Transformer did not succeed".
+      "Attention Is a Weighted Average", not "How the attention layer combines the values of
+   the tokens". "Why the Baseline Failed", not "Why the baseline model did not succeed".
 4. **Interactive demos are the center of the talk.** A demo takes the whole slide. Add a
    one-line header with the slide's main idea only if the demo does not speak for itself; when
-   the demo shows a method, the header can name the method ("Trajectory Inpainting via Energy
-   Minimization"). Size the figure so that its own labels are readable from the back of the
+   the demo shows a method, the header can name the method ("Gradient Descent on a Bowl"). Size the figure so that its own labels are readable from the back of the
    room, and check that its parts keep their relative scale (a node graph must not shrink
    while the token boxes beside it grow).
 5. **Videos are full bleed.** A video slide has no title and no margin, and the slide
@@ -55,13 +92,13 @@ a time, with the post's own interactive figures.
 12. **Outlook sections are one list.** A "What's Next?" part is one idea, "what could come
     next", so it is one slide with a bulleted list, not one slide per item.
 13. **A conclusion states why it matters.** A fact without its consequence feels random.
-    Prefer "Fixed Points Check Themselves" (a correct answer stops changing, a wrong one flows
-    back, so the solver also verifies and repairs) to "Correct Answers Are Fixed Points".
+    Prefer "Citations Number Themselves, So Edits Never Break Them" to
+    "Citations Are Numbered".
 14. **Use bold, tastefully, to draw the eye to the main point.** The audience reads a slide in
     a glance, so bold the phrase that carries the slide's point: in a statement, its one or two
-    key terms ("the state **stops changing**", "an **energy minimum**"); in a list, the anchor
+    key terms ("the walker **stays at the flag**"); in a list, the anchor
     phrase of each item ("**Noise** to escape local minima"); in a legend, the line that states
-    the result ("$E = 0$ **exactly when the grid is valid**"); in a demo note, the verb that
+    the result ("each output row is **a weighted average of values**"); in a demo note, the verb that
     names what happens ("each loop **replaces** the belief"). Bold is a pointer, not a
     decoration: at most one phrase per item or sentence, never a whole list or paragraph, and
     never the words the title already says. Bold renders in primary ink, so it stands out even
@@ -103,25 +140,10 @@ its figure components the same way: the deck must run the post's real interactiv
   `#` is a divider, and `##` starts a slide that runs to the next `#` or `##`.
   `## [kind key=value …] Title` sets the kind and its settings. The heading keeps its Markdown,
   so a title can hold math. Everything under the heading is the slide's body: Markdown, math,
-  figure tags, and `<Notes>`. The plugin imports `Slide` and `Notes`; import figures, `Mark` and
-  `TaskGraph` at the top of the deck.
+  figure tags, and `<Notes>`. The plugin imports `Slide` and `Notes`, and `<PostTable>` needs no
+  import (the build replaces it with the post's table); import figures, `Mark` and any picture of your own at the
+  top of the deck, as the Quick start shows.
 
-  ```mdx
-  # Reasoning as a<br />Fixed-Point Problem
-
-  Benjamin Hoover · 23 September 2026
-
-  ## Reasoning Is a Loop
-
-  - **Understand** the constraints
-  - **Examine** the current state
-
-  <Notes>What to say on this slide.</Notes>
-
-  ## [demo zoom=1.5 svgMax=390px] The Step Is Outside the Energy
-
-  <PointerChase client:visible model="twoSlot" params={pointerChaseParams} />
-  ```
 
 - Every shorthand slide becomes the `<Slide>` component (`bloggie/components/slides/Slide.astro`),
   and a hand-written `<Slide kind="…" title="…">` with a Markdown body (blank lines inside its
@@ -137,10 +159,11 @@ its figure components the same way: the deck must run the post's real interactiv
     `$symbol$` they explain (it takes a symbol column); an item that starts with words is a plain
     line. `[equation eqSize=46]` shrinks a long equation. Color a symbol by its role, as the post does, with the role
     macros the blog lists in `src/roles.js` (`\given{X}` for a role named `given`); `npm run build` fails where the deck writes a colored symbol without its role.
-  - `problem`: a picture of the task first (`<TaskGraph params={…} />`), then a list of text
-    anchors, each starting with `<Mark kind="edge|flag|start" />` to tie it to the picture.
+  - `problem`: a picture of the task first (a component of your own in `src/components/slides/`), then a list of
+    text anchors, each starting with `<Mark kind="…" />` to tie it to the picture (the kinds are listed in
+    `bloggie/components/slides/Mark.astro`; add one there for a new picture).
   - `demo`: an optional one-line `title` over a figure tag copied from the post (for example
-    `<PointerChase client:visible model="transformer" params={pointerChaseParams} />`). `zoom`
+    `<PointerChase client:visible model="transformer" />` in the example deck). `zoom`
     sizes the figure so its labels read from the back of the room; `svgMax` caps its SVG heights
     before zoom. A slide-only description over the figure's empty region is
     `<p slot="note">…</p>`, placed with `noteTop=310px` (from the top of the figure area); one
@@ -189,8 +212,10 @@ its figure components the same way: the deck must run the post's real interactiv
 
 ## Checking
 
-Serve the site (`npm run dev`). Copy `check-slides.mjs` (beside this file) into a scratch
-directory with Playwright installed (not the repo) and run `node check-slides.mjs http://localhost:4321/posts/<slug>/slides/ <out-dir>`.
+Serve the site (`npm run dev`) and run
+`node .agents/skills/bloggie-slides/check-slides.mjs http://localhost:4321/posts/<slug>/slides/ <out-dir>`.
+It needs no install: it drives a headless Chromium (Playwright's cached one, Google Chrome, or Chromium; `$CHROME`
+picks another) through `bloggie/e2e/browser.js`, as `npm run e2e` does. Keep `<out-dir>` outside the repository.
 It renders each slide at 1600×936 (the stage at scale 1) with every build shown, screenshots
 it, and flags a slide that fails these checks:
 

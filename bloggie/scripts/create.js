@@ -4,9 +4,10 @@
 // `npm install` there. Options: --title "…", --author "…" and --url "https://…/" set the site's title, author and
 // address in src/site.js (through bloggie/scripts/reset.js, which writes them); --no-install skips the install.
 //
-// npm leaves .gitignore out of what it fetches, so the copy gets the list below when it has none.
+// npm leaves .gitignore out of what it fetches, so the copy gets the list below when it has none, and it may leave out
+// the link .claude/skills/bloggie-slides (to .agents/skills/bloggie-slides, for Claude Code), which the copy gets again.
 import { execFileSync } from 'node:child_process'
-import { cpSync, existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs'
 import { join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
@@ -22,6 +23,7 @@ __pycache__/
 /src/pages/posts/*/_experiments/runs/
 /src/pages/posts/*/_experiments/logs/
 `
+function isLink(path) { try { return lstatSync(path).isSymbolicLink() } catch { return false } }
 const SKIP = new Set(['node_modules', '.git', 'dist', '.astro', '.github/readme']) // .github/readme: Bloggie's README pictures
 
 const { values: opts, positionals } = parseArgs({ allowPositionals: true, options: {
@@ -34,11 +36,16 @@ const from = fileURLToPath(new URL('../..', import.meta.url))
 const to = resolve(positionals[0] ?? 'my-blog')
 if (existsSync(to) && readdirSync(to).length) throw new Error(`bloggie: ${to} is not empty`)
 
-cpSync(from, to, { recursive: true, filter: (path) => {
+cpSync(from, to, { recursive: true, verbatimSymlinks: true, filter: (path) => {
   const parts = relative(from, path).split(/[\\/]/)
   return !SKIP.has(parts[0]) && !SKIP.has(parts.slice(0, 2).join('/'))
 } })
 if (!existsSync(join(to, '.gitignore'))) writeFileSync(join(to, '.gitignore'), GITIGNORE)
+const skillLink = join(to, '.claude/skills/bloggie-slides')
+if (!existsSync(skillLink) && !isLink(skillLink)) {
+  mkdirSync(join(to, '.claude/skills'), { recursive: true })
+  symlinkSync('../../.agents/skills/bloggie-slides', skillLink)
+}
 
 // The example post is dated the day the blog starts; its `edited:` date goes with the old one.
 const post = join(to, 'src/pages/posts/how-this-blog-works/index.mdx')

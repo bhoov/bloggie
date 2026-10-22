@@ -82,7 +82,7 @@ each citation in order of first use, shows the source on hover, and lists every 
 ## One story as blog and slides
 
 A post can have a deck, a talk version in a `slides.mdx` file beside it, which runs the same live figures. Ask an
-agent for it: the `blog-to-slides` skill ships with the blog, makes one idea per slide with text large enough for the
+agent for it: the `bloggie-slides` skill ships with the blog, makes one idea per slide with text large enough for the
 back of the room, and checks every slide in a browser. Then fine-tune it with the mouse in the slide editor. Each
 change goes into `slides.mdx`, so your edits and an agent's mix freely. When the post changes, ask the agent to
 "update the deck for the changes to the post"; it keeps your layout.
@@ -101,7 +101,7 @@ checks what it needs. For example:
 >
 > Read the post as a first-time reader in a browser, use every control, and list what is unclear.
 >
-> Make slides for the post with the blog-to-slides skill.
+> Make slides for the post with the bloggie-slides skill.
 
 Leave a note for the agent anywhere in a file as `((…))`, and it addresses the note and removes it.
 

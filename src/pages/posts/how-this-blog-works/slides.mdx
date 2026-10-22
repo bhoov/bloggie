@@ -22,6 +22,20 @@ cd my-blog && npm run dev
 
 <Notes>A static site built with Astro: no server, no database, no account. It redraws on every save. Add --title, --author and --url to the first command to name the blog, or set them later in src/site.js. Copy this post's folder to start your own.</Notes>
 
+## Everything Is Plain Text
+
+- **index.mdx** the post
+- **slides.mdx** its deck
+- **data/** and **media/** what it shows
+
+<Notes>The folder is src/pages/posts/ and a slug. Copy this post's folder to start a new post; rename it to _how-this-blog-works to take the example off the site. One sentence per line, so a diff shows which sentence changed.</Notes>
+
+## [table] Most Edits Are One Line
+
+<PostTable id="tbl-edits" />
+
+<Notes>You can write a post or its slides yourself, in Markdown and HTML in its .mdx file, or ask an agent to.</Notes>
+
 ## [demo zoom=1.5 svgMax=390px noteTop=310px] A Post Is a Story You Can Play With
 
 <PointerChase client:visible model="transformer" inspect={false} />
@@ -61,11 +75,17 @@ Add a source once to **references.json**; the post numbers it and lists it at th
 
 # One Story as Blog and Slides
 
+## [table] Present From the Keyboard
+
+<PostTable id="tbl-deck-keys" />
+
+<Notes>S on a post opens its deck. P opens the speaker view in a second window: notes, the next slide and a clock; keys in either window move both.</Notes>
+
 ## An Agent Writes the Deck
 
-Ask for **slides for this post** with the blog-to-slides skill, which ships with the blog.
+Ask for **slides for this post** with the bloggie-slides skill, which ships with the blog.
 
-<Notes>It makes one idea per slide, text for the back of the room and full-slide demos, checks every slide in a browser, and then says where the post's story was hard to follow.</Notes>
+<Notes>It lives in .agents/skills/bloggie-slides/, so any coding agent can read it. It makes one idea per slide, text for the back of the room and full-slide demos, checks every slide in a browser, and then says where the post's story was hard to follow.</Notes>
 
 ## [reasons] Fine-Tune It With the Mouse
 
@@ -87,26 +107,18 @@ Change the post, then ask the agent to **update the deck**. Your layout stays.
 
 <Notes>Claude Code and Codex both read AGENTS.md. The build enforces the mechanical rules: a broken link or an unknown citation stops npm run build.</Notes>
 
+## Leave Notes for the Agent
+
+Write **&#40;&#40;shorten this&#41;&#41;** anywhere in a file, and the agent does it and removes the note.
+
+<Notes>In the text or in a comment. It says what it did for each note, and leaves ((IGNORE …)) alone.</Notes>
+
 ## [reasons] Download for Offline Distribution
 
 - **Interactive page** one HTML file that works offline, deck inside
 - **For agents** text, math as TeX, figures described, source code
 
-<Notes>The arrow in the byline, and its menu. Present from a laptop without a network, or hand the post to another agent as reading material.</Notes>
-
-## Everything Is Plain Text
-
-- **index.mdx** the post
-- **slides.mdx** its deck
-- **data/** and **media/** what it shows
-
-<Notes>The folder is src/pages/posts/ and a slug. Copy a folder to start a new post. One sentence per line, so a diff shows which sentence changed.</Notes>
-
-## [table] Most Edits Are One Line
-
-<PostTable id="tbl-edits" />
-
-<Notes>You can write a post or its slides yourself, in Markdown and HTML in its .mdx file, or ask an agent to.</Notes>
+<Notes>The download icon in the byline, and the menu beside it. Present from a laptop without a network, or hand the post to another agent as reading material.</Notes>
 
 <Slide kind="text" title="Push to Publish">
 

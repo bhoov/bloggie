@@ -5,7 +5,8 @@
     "package.json",
     "bloggie.json",
     ".github/workflows/deploy.yml",
-    ".claude/skills/blog-to-slides",
+    ".agents/skills/bloggie-slides",
+    ".claude/skills/bloggie-slides",
     "src/pages/index.astro"
   ],
   "site": [

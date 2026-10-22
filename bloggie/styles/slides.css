@@ -55,7 +55,7 @@
   transition: opacity 320ms ease, transform 320ms ease, visibility 0s;
 }
 
-/* Type scale for the back of the room (see .claude/skills/blog-to-slides). */
+/* Type scale for the back of the room (see .agents/skills/bloggie-slides). */
 .slide h1,
 .slide h2 {
   margin: 0;
