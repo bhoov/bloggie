@@ -1,0 +1,12 @@
+---
+// <RoleKey />: every symbol role of this blog (src/roles.js) as a list, each with its example symbol in its color, its
+// label and its meaning. A post that explains its colors shows the blog's own roles with it, so the text stays true when
+// the roles change. The byline's key (Post.astro) lists only the roles a post uses.
+import katex from 'katex'
+import { katexMacros, roles } from '../lib/roles.js'
+
+const math = (tex) => katex.renderToString(tex, { macros: katexMacros, trust: (context) => context.command === '\\htmlClass', strict: 'ignore' })
+---
+<ul class="role-list">
+  {roles.map((role) => <li><Fragment set:html={math(`\\${role.name}{${role.example}}`)} /> <b>{role.label}</b>: {role.meaning}.</li>)}
+</ul>

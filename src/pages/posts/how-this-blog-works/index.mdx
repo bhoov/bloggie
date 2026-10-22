@@ -15,30 +15,24 @@ lede: >-
 
 import { Code } from 'astro:components'
 import Cite from '@bloggie/components/Cite.astro'
+import RoleKey from '@bloggie/components/RoleKey.astro'
 import PointerChase from '@/figures/pointer-chase/PointerChase.svelte'
 import deckSource from './slides.mdx?raw'
 import slideEditor from './media/slide-editor.png'
 
-<h2 id="start">Start in three commands</h2>
+<h2 id="start">Start in two commands</h2>
 
 ```sh
-git clone https://github.com/bhoov/bloggie.git my-blog && cd my-blog
-npm install
-npm run dev        # http://localhost:4321/
+npx github:bhoov/bloggie my-blog
+cd my-blog && npm run dev        # http://localhost:4321/
 ```
 
 The site opens in your browser and redraws each time you save a file.
 It is a static site built with Astro—no server, no database, no account.
 You need Node 22 and git, and Python only for a post that runs experiments.
+The first command copies Bloggie into `my-blog/`, dates this post today, and installs its packages.
 
-To make the blog yours, one more command removes my posts and keeps this one as your example:
-
-```sh
-npm run reset -- --yes --title "My blog" --author "Ada Lovelace" \
-  --url "https://ada.github.io/notes/"
-```
-
-Without `--yes`, it only lists what it would remove.
+To make the blog yours, set its title, your name and its address in `src/site.js`, and copy this post's folder to start your first post.
 Push the result to GitHub, and each push [publishes the site](#publish).
 
 <h2 id="story">A post is a story you can play with</h2>
@@ -53,26 +47,27 @@ Describe what a figure should show, and an agent builds it, tests its numbers, a
 A demo that needs seconds of work waits behind a *Load demo* button, so a page never stalls.
 
 Equations are typeset when the site builds, so they appear at once, and they are numbered and linked as in Quarto.
-Each one can have braces that name its terms and a legend that names its symbols, as [](#eq-energy) does:
+Each one can have braces that name its terms and a legend that names its symbols, as [](#eq-attention), the self-attention of a transformer, does:
 
 <div class="eq-card">
 
 $$
-\label{eq-energy}
-E(\state{\boldsymbol{x}}) = \underbrace{\tfrac12 \lVert \state{\boldsymbol{x}} \rVert^2}_{\mathclap{\note{stays small}}} \;-\; \underbrace{\tfrac{1}{\beta} \log \sum_{m=1}^{M} e^{\beta\, \state{\boldsymbol{x}}^\top \coupling{\boldsymbol{\xi}_m}}}_{\mathclap{\note{pulls toward a memory}}}
+\label{eq-attention}
+\state{Y} = \underbrace{\operatorname{softmax}\!\left(\frac{\given{X}\coupling{W_Q}\,(\given{X}\coupling{W_K})^\top}{\sqrt{d}}\right)}_{\mathclap{\note{who attends to whom}}}\;\underbrace{\given{X}\coupling{W_V}}_{\mathclap{\note{what each token sends}}}
 $$
 
 <div class="eq-legend">
 
-- **Indices:** memories $m \in \{1, \dots, M\}$; entries $d \in \{1, \dots, D\}$.
-- $\state{x_d}$: **state**, entry $d$ of the vector that descent moves.
-- $\coupling{\xi_{md}}$: **memory $m$**, entry $d$ of a stored pattern.
-- $\beta$: **inverse temperature**, how sharply the nearest memory wins.
+- **Shapes:** $N$ tokens of width $D$; queries, keys and values of width $d$.
+- $\given{X} \in \mathbb{R}^{N \times D}$: **tokens**, one row per token.
+- $\coupling{W_Q}, \coupling{W_K}, \coupling{W_V} \in \mathbb{R}^{D \times d}$: **projections** to queries, keys and values.
+- $\state{Y} \in \mathbb{R}^{N \times d}$: **output**, each row a weighted average of the values.
+- $\sqrt{d}$: keeps the scores near unit scale, so the softmax does not saturate.
 
 </div>
 </div>
 
-A citation is a number in order of first use: hover over <Cite key="hrm2025">[HRM]</Cite>, or tap it, for its source.
+A citation is a number in order of first use: hover over <Cite key="vaswani2017">[Transformer]</Cite>, or tap it, for its source.
 The post ends with the numbered References, and the build fails on a key that is not in `src/references.json`.
 
 Every section heading has a faint # that copies a link to it, so a reader can point a colleague at one paragraph.
@@ -81,17 +76,14 @@ Press T to fold the list away or open it.
 
 <h3 id="symbol-colors">Symbol colors</h3>
 
-Every post colors a math symbol by its role, and a role has the same color in every post and every deck:
+Every post colors a math symbol by its role, and a role has the same color in every post and every deck.
+Each blog names its own roles and their colors in `src/roles.js`; this blog's are:
 
-- $\state{\boldsymbol{x}}$ **state**: what descent changes.
-- $\coupling{\boldsymbol{\xi}}$ **couplings**: the weights between units.
-- $\given{\boldsymbol{b}}$ **given**: what the input fixes.
-- $\truth{\boldsymbol{y}}$ **truth**: the true answer.
+<RoleKey />
 
-A reader who learns the four colors once reads every equation on the blog faster.
-The color says what a symbol does before its legend says what it is.
-So each post opens with a key under its byline, which names the roles that post uses, as this page's does.
-The build checks that a symbol keeps its color wherever the post and its deck write it, in prose too.
+The color says what a symbol does before its legend says what it is, so a reader who learns the colors once reads every equation on the blog faster.
+Each post opens with a key under its byline that names the roles the post uses, as this page's does.
+A role's name is its TeX macro, `$\given{X}$`, and the build checks that a symbol keeps its color wherever the post and its deck write it, in prose too.
 
 <h2 id="slides">One Story as Blog and Slides</h2>
 
@@ -185,8 +177,8 @@ Most edits are a line or two, as [the table below](#tbl-edits) shows.
 | Section | `<h2 id="setup">Setup</h2>` |
 | Equation | `$$ … $$`, with `\label{eq-name}` to number it |
 | Link to it | `[](#eq-name)`, shown as "Eq. (1)" |
-| Symbol color | `$\state{x}$`, `$\coupling{w}$`, `$\given{b}$`, `$\truth{y}$` |
-| Citation | `<Cite key="hrm2025">[HRM]</Cite>` |
+| Symbol color | `$\given{X}$`, one macro per role in `src/roles.js` |
+| Citation | `<Cite key="vaswani2017">[Transformer]</Cite>` |
 | Figure | its tag, such as `<PointerChase client:visible />` |
 | Slide | `## Title` in `slides.mdx` |
 | Demo slide | `## [demo] Title`, then a figure's tag |

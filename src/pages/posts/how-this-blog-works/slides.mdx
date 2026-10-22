@@ -5,6 +5,7 @@ description: The talk version of "How this blog works"; its source uses each way
 ---
 
 import PointerChase from '@/figures/pointer-chase/PointerChase.svelte'
+import RoleKey from '@bloggie/components/RoleKey.astro'
 
 # How This Blog Works
 
@@ -12,16 +13,14 @@ Interactive essays, talk decks, and an agent that keeps them in step
 
 <Notes>Every slide here is written in the same plain text as the post; the post shows this deck's source.</Notes>
 
-## Three Commands to Start
+## Two Commands to Start
 
 ```sh
-git clone \
-  https://github.com/bhoov/bloggie.git
-cd bloggie && npm install
-npm run dev   # http://localhost:4321
+npx github:bhoov/bloggie my-blog
+cd my-blog && npm run dev
 ```
 
-<Notes>A static site built with Astro: no server, no database, no account. It redraws on every save. Then npm run reset -- --yes --title "My blog" removes my posts and keeps this one as the example.</Notes>
+<Notes>A static site built with Astro: no server, no database, no account. It redraws on every save. Then set your title and name in src/site.js, and copy this post's folder to start your own.</Notes>
 
 ## [demo zoom=1.5 svgMax=390px noteTop=310px] A Post Is a Story You Can Play With
 
@@ -34,24 +33,21 @@ npm run dev   # http://localhost:4321
 ## [equation eqSize=54] Equations Explain Themselves
 
 $$
-E(\state{\boldsymbol{x}}) = \underbrace{\tfrac12 \lVert \state{\boldsymbol{x}} \rVert^2}_{\mathclap{\note{stays small}}} \;-\; \underbrace{\tfrac{1}{\beta} \log \sum_{m=1}^{M} e^{\beta\, \state{\boldsymbol{x}}^\top \coupling{\boldsymbol{\xi}_m}}}_{\mathclap{\note{pulls toward a memory}}}
+\state{Y} = \underbrace{\operatorname{softmax}\!\left(\frac{\given{X}\coupling{W_Q}\,(\given{X}\coupling{W_K})^\top}{\sqrt{d}}\right)}_{\mathclap{\note{who attends to whom}}}\;\underbrace{\given{X}\coupling{W_V}}_{\mathclap{\note{what each token sends}}}
 $$
 
-- $\state{\boldsymbol{x}} \in \mathbb{R}^D$ the state
-- $\coupling{\boldsymbol{\xi}_m} \in \mathbb{R}^D$ memory $m$ of $M$
-- $\beta$ the inverse temperature
-- $E$ is **lowest at a stored pattern**
+- $\given{X} \in \mathbb{R}^{N \times D}$ the tokens
+- $\coupling{W_Q}, \coupling{W_K}, \coupling{W_V}$ the projections
+- $\state{Y} \in \mathbb{R}^{N \times d}$ the output
+- Each output row is **a weighted average of values**
 
 <Notes>Typeset when the site builds, numbered and linked as in Quarto. Braces name the terms; the legend names the symbols.</Notes>
 
-## Learn Four Colors, Read Every Equation
+## Learn the Colors Once, Read Every Equation
 
-- $\state{\boldsymbol{x}}$ **state**, what descent changes
-- $\coupling{\boldsymbol{\xi}}$ **couplings**, the weights between units
-- $\given{\boldsymbol{b}}$ **given**, what the input fixes
-- $\truth{\boldsymbol{y}}$ **truth**, the true answer
+<RoleKey />
 
-<Notes>A role has the same color in every post and deck, so the color says what a symbol does before the legend says what it is. That is why each post opens with a key of the roles it uses. The build checks that a symbol keeps its color everywhere.</Notes>
+<Notes>A role has the same color in every post and deck, so the color says what a symbol does before the legend says what it is. Each blog names its roles in src/roles.js, and each post opens with a key of the roles it uses. The build checks that a symbol keeps its color everywhere.</Notes>
 
 # One Story as Blog and Slides
 

@@ -135,8 +135,8 @@ its figure components the same way: the deck must run the post's real interactiv
     renders large above the description.
   - `equation`: one `$$ … $$` display equation, then a legend list whose items start with the
     `$symbol$` they explain (it takes a symbol column); an item that starts with words is a plain
-    line. `[equation eqSize=46]` shrinks a long equation. Color a symbol by its role, as the post does: `\state{p}`, `\coupling{…}`,
-    `\given{…}` or `\truth{…}` (`bloggie/lib/roles.js`); `npm run build` fails where the deck writes a colored symbol without its role.
+    line. `[equation eqSize=46]` shrinks a long equation. Color a symbol by its role, as the post does, with the role
+    macros the blog lists in `src/roles.js` (`\given{X}` for a role named `given`); `npm run build` fails where the deck writes a colored symbol without its role.
   - `problem`: a picture of the task first (`<TaskGraph params={…} />`), then a list of text
     anchors, each starting with `<Mark kind="edge|flag|start" />` to tie it to the picture.
   - `demo`: an optional one-line `title` over a figure tag copied from the post (for example

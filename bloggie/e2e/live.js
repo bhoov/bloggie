@@ -50,7 +50,7 @@ ${lines(12, 'Middle')}
 
 <h2 id="reader">Where the reader is</h2>
 
-HRM <Cite key="hrm2025">[HRM]</Cite> repeats one update.
+A transformer <Cite key="vaswani2017">[Transformer]</Cite> attends to every token.
 
 ${lines(40, 'Below')}
 `
@@ -127,8 +127,8 @@ export async function liveChecks({ check, launch, root }) {
       await ev(`document.documentElement.style.overflowAnchor = 'none'; document.getElementById('reader').scrollIntoView({ block: 'start' })`)
       await sleep(300)
       const top = await ev(`document.getElementById('reader').getBoundingClientRect().top`)
-      // Above the reader: a longer paragraph, a new heading, and a citation that comes before HRM's.
-      writeFileSync(files.post, originals.post.replace('Top paragraph 2,', `Top paragraph 2 now cites TRM <Cite key="trm2025">[TRM]</Cite>, and is long enough to wrap onto a second line of the text column, so that the page grows above the reader.\n\n<h2 id="added">Added heading</h2>\n\nTop paragraph 2,`))
+      // Above the reader: a longer paragraph, a new heading, and a citation that comes before the transformer's.
+      writeFileSync(files.post, originals.post.replace('Top paragraph 2,', `Top paragraph 2 now cites BERT <Cite key="devlin2019">[BERT]</Cite>, and is long enough to wrap onto a second line of the text column, so that the page grows above the reader.\n\n<h2 id="added">Added heading</h2>\n\nTop paragraph 2,`))
       await page.waitFor(`document.getElementById('added')`, { what: 'the new heading' })
       await sleep(300)
       await notReloaded()
@@ -136,7 +136,7 @@ export async function liveChecks({ check, launch, root }) {
       if (after.count !== 3) throw new Error(`the counter reads ${after.count}, not 3: the figure started again`)
       if (Math.abs(after.top - top) > 1) throw new Error(`the reader's heading moved from ${top} to ${after.top} px`)
       if (!after.anchor) throw new Error('the new heading has no # anchor')
-      if (after.markers.join() !== '[1],[2]' || after.references.join() !== 'ref-trm2025,ref-hrm2025') throw new Error(`citations ${after.markers.join()}, references ${after.references.join()}: TRM, now first, should be [1]`)
+      if (after.markers.join() !== '[1],[2]' || after.references.join() !== 'ref-devlin2019,ref-vaswani2017') throw new Error(`citations ${after.markers.join()}, references ${after.references.join()}: BERT, now first, should be [1]`)
       return { counter: after.count, readerMoved: +(after.top - top).toFixed(2), citations: after.markers, references: after.references }
     })
 

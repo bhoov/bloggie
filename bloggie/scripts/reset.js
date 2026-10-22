@@ -5,15 +5,17 @@
 // every other post, every figure the kept post does not use (followed through the figures' own imports;
 // a figure's e2e check is in its folder, so it goes too), every file in src/figures/shared/ and every
 // slide picture in src/components/slides/ that nothing kept uses, and the references it does not cite.
-// It sets the site's title, author and URL in src/site.js, deletes uv.lock (the deleted posts' Python), and replaces AGENTS.md with AGENTS_reset.md:
-// only the rules every new blog needs. Bloggie, the engine (every path in bloggie.json: bloggie/lib, bloggie/layouts,
+// It sets the site's title, author and URL in src/site.js, and deletes uv.lock (the deleted posts' Python). A blog that
+// keeps a starting version of a file of its own (RESET_FILES: AGENTS_reset.md, only the rules every new blog needs, and
+// src/roles_reset.js, neutral symbol roles) has it moved over that file; a blog made by reset has none of them. Bloggie, the engine (every path in bloggie.json: bloggie/lib, bloggie/layouts,
 // bloggie/editor, bloggie/live, the slide kit, styles, the tests' runner, the deploy workflow), stays whole. To take the example post off the site,
 // rename its folder to _how-this-blog-works (Astro skips page folders that start with "_") or delete it.
-import { copyFileSync, existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { parseArgs } from 'node:util'
 
 const KEEP = ['how-this-blog-works']
+const RESET_FILES = { 'AGENTS_reset.md': 'AGENTS.md', 'src/roles_reset.js': 'src/roles.js' } // a starting version: the file it replaces
 const root = new URL('../..', import.meta.url).pathname
 const posts = join(root, 'src/pages/posts')
 const figures = join(root, 'src/figures')
@@ -92,7 +94,8 @@ console.log(`  delete ${dropShared.length} unused file(s) in src/figures/shared:
 console.log(`  delete ${dropSlides.length} unused slide picture(s) in src/components/slides: ${dropSlides.join(', ') || 'none'}`)
 console.log(`  keep ${cited.size} reference(s), delete ${dropReferences.length}`)
 console.log(`  site: title "${opts.title}", author "${opts.author}", url ${opts.url}`)
-console.log('  AGENTS.md: replace with AGENTS_reset.md (only the rules every new blog needs)')
+const resetFiles = Object.entries(RESET_FILES).filter(([from]) => existsSync(join(root, from)))
+for (const [from, to] of resetFiles) console.log(`  ${to}: replace with ${from}`)
 const lockPath = join(root, 'uv.lock')
 if (existsSync(lockPath)) console.log("  uv.lock: delete (it lists the deleted posts' Python; `uv sync` writes a new one)")
 if (!opts.yes) process.exit(0)
@@ -117,7 +120,7 @@ for (const [key, value] of Object.entries({
 // The comment above `url` describes this blog's own hosting; a new blog gets the general one.
 site = site.replace(/^(\s*)\/\/ The deployed site\.[^\n]*(?:\n\s*\/\/[^\n]*)*(?=\n\s*url: )/m, "$1// The deployed site. A downloaded copy of a post links back here (bloggie/scripts/export/common.js), and a heading's\n$1// # copies a link here.")
 writeFileSync(sitePath, site)
-copyFileSync(join(root, 'AGENTS_reset.md'), join(root, 'AGENTS.md'))
+for (const [from, to] of resetFiles) renameSync(join(root, from), join(root, to))
 if (existsSync(lockPath)) rmSync(lockPath)
 
 console.log(`Done. Next: npm run dev, then copy src/pages/posts/${KEEP[0]}/ to start a post.`)

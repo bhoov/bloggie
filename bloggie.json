@@ -4,14 +4,14 @@
     "astro.config.mjs",
     "package.json",
     "bloggie.json",
-    "AGENTS_reset.md",
     ".github/workflows/deploy.yml",
     ".claude/skills/blog-to-slides",
     "src/pages/index.astro"
   ],
   "site": [
     "src/site.js",
-    "src/references.json"
+    "src/references.json",
+    "src/roles.js"
   ],
   "exclude": [
     "bloggie/e2e/report"

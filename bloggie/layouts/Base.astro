@@ -1,8 +1,10 @@
 ---
-// The HTML shell of every page: head, site styles and KaTeX's styles. Pages pass a title and description.
+// The HTML shell of every page: head, site styles, KaTeX's styles and the blog's symbol colors (src/roles.js). Pages
+// pass a title and description.
 import 'katex/dist/katex.min.css'
 import '../styles/site.css'
 import { site } from '../../src/site.js'
+import { roleCss } from '../lib/roles.js'
 
 const { title, description = site.description, bodyClass } = Astro.props
 ---
@@ -13,6 +15,7 @@ const { title, description = site.description, bodyClass } = Astro.props
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <style is:inline set:html={roleCss} />
     <slot name="head" />
   </head>
   <body class={bodyClass}>

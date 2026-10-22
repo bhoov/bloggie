@@ -22,15 +22,6 @@
   --seq-3: #5598e7;
   --seq-4: #256abf;
   --seq-5: #0d366b;
-  /* Symbol roles (bloggie/lib/roles.js), taken from the figures: the state is blue, as φ and the beliefs are; the
-     truth is green, as a right answer is; couplings are orange, as positive couplings are in the Sudoku figure; the
-     given is violet, a hue no figure uses. Validated (dataviz validate_palette.js, all pairs): CVD ΔE ≥ 9.3 and
-     normal-vision ΔE ≥ 16.3 in both modes, each ≥ 3:1 on the surface. The dark mode's violet is lighter than the
-     chart-mark band, so that it parts from the blue by lightness; the band is for marks, not text. */
-  --role-state: var(--series-1);
-  --role-coupling: var(--series-2);
-  --role-given: #4a3aa7;
-  --role-truth: #18a372;
   --content-width: 42rem;
   --wide-width: 50rem;
   --wider-width: 64rem;
@@ -59,8 +50,6 @@
     --seq-3: #256abf;
     --seq-4: #5598e7;
     --seq-5: #9ec5f4;
-    --role-given: #c4b5fd;
-    --role-truth: #1baf7a;
   }
 }
 
@@ -83,8 +72,6 @@
   --seq-3: #256abf;
   --seq-4: #5598e7;
   --seq-5: #9ec5f4;
-  --role-given: #c4b5fd;
-  --role-truth: #1baf7a;
 }
 
 * {
@@ -1569,13 +1556,9 @@ svg text.mark-label {
 
 /* --- annotated equations -------------------------------------------------
    An .eq-card holds one display equation and its legend. A symbol takes its role's color wherever it appears,
-   $\state{v}$ (bloggie/lib/roles.js); a label that points at a term is \underbrace{x}_{\note{...}}, and
-   \state{\note{...}} gives the label the state's color. */
-
-.role-state { color: var(--role-state); }
-.role-coupling { color: var(--role-coupling); }
-.role-given { color: var(--role-given); }
-.role-truth { color: var(--role-truth); }
+   $\given{X}$: the roles and their colors are the blog's own (src/roles.js), and bloggie/lib/roles.js writes their
+   CSS into each page's head. A label that points at a term is \underbrace{x}_{\note{...}}, and \given{\note{...}}
+   gives the label the role's color. */
 
 /* An equation card is static, so it has no box (a box means an interactive figure): the equation is centered,
    and its legend is indented from both sides, in smaller type. */
@@ -1605,11 +1588,6 @@ svg text.mark-label {
   color: var(--text-muted);
   font-family: var(--sans);
 }
-
-.role-state .eq-note { color: var(--role-state); }
-.role-coupling .eq-note { color: var(--role-coupling); }
-.role-given .eq-note { color: var(--role-given); }
-.role-truth .eq-note { color: var(--role-truth); }
 
 .eq-legend ul {
   list-style: none;

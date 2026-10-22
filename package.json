@@ -1,7 +1,11 @@
 {
   "name": "bloggie",
   "description": "Write one story with your AI agent. Publish it as an interactive blog post that ports to slides when you need them.",
+  "version": "0.1.0",
   "license": "Apache-2.0",
+  "bin": {
+    "bloggie": "bloggie/scripts/create.js"
+  },
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,9 +14,7 @@
     "preview": "astro preview",
     "test": "node --test && npm run e2e",
     "e2e": "npm run build && node bloggie/e2e/run.js",
-    "reset": "node bloggie/scripts/reset.js",
-    "bloggie:push": "node bloggie/scripts/push.js",
-    "bloggie:pull": "node bloggie/scripts/pull.js"
+    "reset": "node bloggie/scripts/reset.js"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",

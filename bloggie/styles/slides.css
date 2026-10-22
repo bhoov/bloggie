@@ -237,11 +237,6 @@
   color: var(--text-primary);
 }
 
-.slide .role-state { color: var(--role-state); }
-.slide .role-coupling { color: var(--role-coupling); }
-.slide .role-given { color: var(--role-given); }
-.slide .role-truth { color: var(--role-truth); }
-
 /* Demo slides: the figure fills the stage under an optional one-line header. */
 .slide.demo-slide {
   padding: 40px 56px 28px;
