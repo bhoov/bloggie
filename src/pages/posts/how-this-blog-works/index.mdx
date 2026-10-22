@@ -1,0 +1,211 @@
+---
+layout: '@bloggie/layouts/Post.astro'
+title: How this blog works
+date: 2026-09-22
+edited: 2026-10-08
+description: >-
+  Interactive essays with live figures, a talk deck for each, and an agent that keeps them in step, all in plain text files.
+eyebrow: Notes · Tooling
+lede: >-
+  Each post on this blog is a story told with prose, equations, results and demos the reader can play with.
+  Each post can also become a talk whose slides run the same demos.
+  Everything is plain text, one folder per post, and an agent does the building and the checking.
+  This page shows what you get, and how little it takes to start.
+---
+
+import { Code } from 'astro:components'
+import Cite from '@bloggie/components/Cite.astro'
+import PointerChase from '@/figures/pointer-chase/PointerChase.svelte'
+import deckSource from './slides.mdx?raw'
+import slideEditor from './media/slide-editor.png'
+
+<h2 id="start">Start in three commands</h2>
+
+```sh
+git clone https://github.com/bhoov/bloggie.git my-blog && cd my-blog
+npm install
+npm run dev        # http://localhost:4321/
+```
+
+The site opens in your browser and redraws each time you save a file.
+It is a static site built with Astro—no server, no database, no account.
+You need Node 22 and git, and Python only for a post that runs experiments.
+
+To make the blog yours, one more command removes my posts and keeps this one as your example:
+
+```sh
+npm run reset -- --yes --title "My blog" --author "Ada Lovelace" \
+  --url "https://ada.github.io/notes/"
+```
+
+Without `--yes`, it only lists what it would remove.
+Push the result to GitHub, and each push [publishes the site](#publish).
+
+<h2 id="story">A post is a story you can play with</h2>
+
+A post mixes prose, equations, results and live demos.
+A **figure** is a demo the reader drives in the page.
+It waits for Play, so the page stays still until the reader asks; [](#fig-walk) is one.
+
+<div id="fig-walk"><PointerChase client:visible={{ rootMargin: '600px' }} model="transformer" /></div>
+
+Describe what a figure should show, and an agent builds it, tests its numbers, and checks it in a browser.
+A demo that needs seconds of work waits behind a *Load demo* button, so a page never stalls.
+
+Equations are typeset when the site builds, so they appear at once, and they are numbered and linked as in Quarto.
+Each one can have braces that name its terms and a legend that names its symbols, as [](#eq-energy) does:
+
+<div class="eq-card">
+
+$$
+\label{eq-energy}
+E(\state{\boldsymbol{x}}) = \underbrace{\tfrac12 \lVert \state{\boldsymbol{x}} \rVert^2}_{\mathclap{\note{stays small}}} \;-\; \underbrace{\tfrac{1}{\beta} \log \sum_{m=1}^{M} e^{\beta\, \state{\boldsymbol{x}}^\top \coupling{\boldsymbol{\xi}_m}}}_{\mathclap{\note{pulls toward a memory}}}
+$$
+
+<div class="eq-legend">
+
+- **Indices:** memories $m \in \{1, \dots, M\}$; entries $d \in \{1, \dots, D\}$.
+- $\state{x_d}$: **state**, entry $d$ of the vector that descent moves.
+- $\coupling{\xi_{md}}$: **memory $m$**, entry $d$ of a stored pattern.
+- $\beta$: **inverse temperature**, how sharply the nearest memory wins.
+
+</div>
+</div>
+
+A citation is a number in order of first use: hover over <Cite key="hrm2025">[HRM]</Cite>, or tap it, for its source.
+The post ends with the numbered References, and the build fails on a key that is not in `src/references.json`.
+
+Every section heading has a faint # that copies a link to it, so a reader can point a colleague at one paragraph.
+The sections are listed in the margin of a wide window, with the one you are reading marked; in a narrow window, scroll up a little and a bar at the top names it and opens the list.
+Press T to fold the list away or open it.
+
+<h3 id="symbol-colors">Symbol colors</h3>
+
+Every post colors a math symbol by its role, and a role has the same color in every post and every deck:
+
+- $\state{\boldsymbol{x}}$ **state**: what descent changes.
+- $\coupling{\boldsymbol{\xi}}$ **couplings**: the weights between units.
+- $\given{\boldsymbol{b}}$ **given**: what the input fixes.
+- $\truth{\boldsymbol{y}}$ **truth**: the true answer.
+
+A reader who learns the four colors once reads every equation on the blog faster.
+The color says what a symbol does before its legend says what it is.
+So each post opens with a key under its byline, which names the roles that post uses, as this page's does.
+The build checks that a symbol keeps its color wherever the post and its deck write it, in prose too.
+
+<h2 id="slides">One Story as Blog and Slides</h2>
+
+A post can have a **deck**, a talk version of the post in a `slides.mdx` file beside it.
+The deck runs the same live figures, so a demo you build once works on the page and on the projector.
+Press S on a post to open its deck, as on [this post's deck](slides/).
+There, ▶ Present goes full screen, and Speaker view shows your notes, the next slide and a clock in a second window.
+
+**Ask an agent for the deck.**
+The `blog-to-slides` skill ships with the blog.
+It turns a post into slides with one idea each, text large enough for the back of the room, and full-slide demos.
+It checks every slide in a browser, then tells you where the post's story was hard to follow.
+
+**Fine-tune it with the mouse.**
+Under `npm run dev`, press E on a deck to turn on the **slide editor**.
+Drag, resize and align blocks, change fonts and colors, and edit text in place.
+Double-click words to bold or color only those words, and use the column of slides on the left to duplicate or delete a slide.
+The keys follow Figma's.
+Each change goes straight into `slides.mdx`, so the deck stays a text file, and your edits and an agent's mix freely.
+[](#fig-slide-editor) shows the editor on this post's deck.
+
+<figure id="fig-slide-editor" class="figure-wide">
+  <img src={slideEditor.src} width="1440" height="810" alt="The slide editor on this post's deck: a toolbar of font, size, bold, alignment, color and layer buttons above the slide, a column of slide thumbnails on the left, and a list on the slide selected with resize handles." />
+  <figcaption>**Slide editor**, on this post's deck. The selected list shows its handles; the toolbar above sets its font, size, color and alignment, and the column on the left lists the slides.</figcaption>
+</figure>
+
+**Keep post and deck in step.**
+When the argument changes in one, ask the agent to carry the change to the other: "Update the deck for the changes to the post."
+It keeps the layout you set with the editor.
+
+<h2 id="style">One style, written down for your agent</h2>
+
+`AGENTS.md`, at the top of the repository, is the blog's style guide and the manual for any coding agent (Claude Code and Codex both read it).
+It says how a post is written, how a figure is built and tested, and how a deck looks.
+Some of its rules are one sentence per line, an example beside each idea, legends that read like slides, and one color per role.
+Add your own rules, and every agent follows them in every post and deck.
+The build enforces the mechanical ones—a broken link within a page, an unknown citation, or a symbol without its color stops `npm run build`.
+
+You write the argument; the agent builds and checks what it needs.
+Prompts that work:
+
+> Draft a post in `src/pages/posts/<slug>/` from these notes: …
+>
+> Build a figure for the post that shows …
+>
+> Read the post as a first-time reader in a browser, use every control, and list what is unclear.
+>
+> Make slides for the post with the blog-to-slides skill.
+
+<h2 id="downloads">Download for Offline Distribution</h2>
+
+The arrow in each post's byline downloads the post as one file, and its menu offers two kinds:
+
+- **Interactive page.** Styles, fonts, images, video, figures and the deck, all inside one HTML file. It opens from disk with a double click and needs no internet, so you can present from a laptop offline, or send the post by email.
+- **For agents.** The post as text for a language model, with math as MathML and its TeX source. Each figure becomes a description with traces from its own numbers, and the figures' source code is appended. Give it to another agent as reading material.
+
+<h2 id="files">Everything is a plain text file</h2>
+
+A post is one folder, and every file in it is text you can open in any editor:
+
+```
+src/pages/posts/<slug>/
+  index.mdx       the post: Markdown, math and figure tags
+  slides.mdx      its deck
+  data/  media/   the numbers and pictures it shows
+  _experiments/   the Python behind its numbers (optional)
+```
+
+Copy this post's folder to start a new one; the home page lists every post, newest first.
+Front matter `tags: [wip]` marks a post in progress on the home page, and `tags: [archived]` hides it until the reader asks for it.
+Write one sentence per line, so that a diff shows which sentence changed.
+
+**Experiments live with the post.**
+A post's Python—its data generators, training runs and tests—sits in its `_experiments/` folder, beside the sentences that report its numbers.
+The whole blog shares one Python environment, managed by uv.
+A number the post shows is copied into `data/`, with a comment that names the run behind it.
+A figure can even run the post's own Python in the reader's browser, through MicroPython.
+
+**Edit by hand.**
+Most edits are a line or two, as [the table below](#tbl-edits) shows.
+
+<figure id="tbl-edits">
+<figcaption>
+
+**What to write for each element of a post and its deck.**
+
+</figcaption>
+
+| To add | Write |
+| --- | --- |
+| Section | `<h2 id="setup">Setup</h2>` |
+| Equation | `$$ … $$`, with `\label{eq-name}` to number it |
+| Link to it | `[](#eq-name)`, shown as "Eq. (1)" |
+| Symbol color | `$\state{x}$`, `$\coupling{w}$`, `$\given{b}$`, `$\truth{y}$` |
+| Citation | `<Cite key="hrm2025">[HRM]</Cite>` |
+| Figure | its tag, such as `<PointerChase client:visible />` |
+| Slide | `## Title` in `slides.mdx` |
+| Demo slide | `## [demo] Title`, then a figure's tag |
+| Equation slide | `## [equation] Title`, then the equation and its symbols |
+
+</figure>
+
+Other kinds of slide show a table from the post, a picture of a task, or a full-screen video.
+[This post's deck](slides/) uses most of them, and `AGENTS.md` lists every rule.
+
+<details>
+<summary>The source of this post's deck</summary>
+
+<Code code={deckSource} lang="mdx" wrap />
+
+</details>
+
+<h2 id="publish">Publish</h2>
+
+Push to `main`, and GitHub Actions builds the site and publishes it to GitHub Pages.
+Once, in the repository's Settings → Pages, set the source to GitHub Actions.
+Set the site's address in `src/site.js`, so that a downloaded post links back to it.

@@ -1,0 +1,37 @@
+---
+// Layout of a post's slide deck: src/pages/posts/<slug>/slides.mdx sets `layout: ../../../layouts/Slides.astro`.
+// The deck is a run of <section class="slide"> blocks; bloggie/lib/slides.js shows one at a time on a
+// 1600×900 stage scaled to the window. Figures are the post's own Svelte components.
+import Base from './Base.astro'
+import '../styles/slides.css'
+
+const { frontmatter, file } = Astro.props
+// The deck's post: the page one level up (…/<slug>/slides/ -> …/<slug>/). Esc returns to it.
+const postHref = Astro.url.pathname.replace(/slides(\.html|\/)?$/, '')
+---
+<Base title={frontmatter.title} description={frontmatter.description} bodyClass="slides-body">
+  <div class="deck-viewport">
+    <main class="deck" aria-roledescription="slide deck" aria-label={frontmatter.title} data-post={postHref} data-edit-file={import.meta.env.DEV ? file : undefined}>
+      <slot />
+    </main>
+  </div>
+  <nav class="deck-nav" aria-label="Slide navigation">
+    <button type="button" data-deck="prev" aria-label="Previous">‹</button>
+    <span class="deck-count" aria-live="polite"></span>
+    <button type="button" data-deck="next" aria-label="Next">›</button>
+    <button type="button" data-deck="notes" aria-label="Toggle speaker notes" title="Notes (N)">✎</button>
+    <button type="button" class="deck-text" data-deck="presenter" title="Speaker view: notes, what comes next and a clock, in a second window (P)">Speaker view</button>
+    <button type="button" class="deck-text deck-present" data-deck="present" title="Present to the room: full screen (F)">▶ Present</button>
+    <a class="deck-exit" data-deck="exit" href={postHref} aria-label="Back to the post" title="Back to the post (Esc)">✕</a>
+  </nav>
+  <div class="deck-progress" aria-hidden="true"><div></div></div>
+  <aside class="deck-notes" aria-label="Speaker notes" hidden></aside>
+  <script>
+    import { initDeck } from '../lib/slides.js'
+    const deck = document.querySelector('.deck')
+    initDeck(deck)
+    // `npm run dev` only: the slide editor (bloggie/editor/), which writes changes to slides.mdx. The
+    // build replaces import.meta.env.DEV with false and leaves the editor out.
+    if (import.meta.env.DEV) import('../editor/client.js').then(({ initEditor }) => initEditor(deck))
+  </script>
+</Base>

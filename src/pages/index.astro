@@ -1,0 +1,88 @@
+---
+// The home page: every post under src/pages/posts/<slug>/index.mdx, newest first. A folder whose
+// name starts with "_" is not a page (Astro skips it), so it is not listed either.
+// A post with no tags is part of the main story. Front matter `tags: [wip]` or `tags: [archived]` sets a post apart:
+// the reader shows or hides each tag with a checkbox above the list, and a post shows when none of its tags is off.
+// Front matter `edited:` is the date of the post's last edit. When the reader checks "Last edited", the list shows it
+// after the publication date (for a post edited after the day it was published) and orders the posts by it, most
+// recently edited first; a post with no `edited:` counts as last edited on its publication date.
+import Base from '../../bloggie/layouts/Base.astro'
+import { parseFrontmatter } from '@astrojs/markdown-remark'
+import { site, longDate, isoDate } from '../site.js'
+
+// Each tag's name, its mark after a post's title (an icon, else the name), and whether it starts hidden.
+// A tag not listed here is shown, with its own word as its name.
+const TAGS = {
+  wip: { name: 'Work in progress', icon: '🚧' },
+  archived: { name: 'Archived', hidden: true },
+}
+const tag = (id) => TAGS[id] ?? { name: id }
+
+// Each post is read as text, for its front matter only. Importing it would compile the post and every figure it uses,
+// so one post that does not compile (an agent in the middle of an edit) would take this page down with it.
+const posts = Object.entries(import.meta.glob(['./posts/*/index.mdx', '!./posts/_*/index.mdx'], { query: '?raw', import: 'default', eager: true }))
+  .map(([path, text]) => ({ ...parseFrontmatter(text).frontmatter, url: import.meta.env.BASE_URL + path.slice(2, -'index.mdx'.length) }))
+  .map((post) => ({ ...post, tags: [post.tags ?? []].flat().map(String) }))
+  .sort((a, b) => new Date(b.date) - new Date(a.date))
+
+// The tags in use, those of TAGS first and in its order, each with its number of posts.
+const used = [...new Set([...Object.keys(TAGS), ...posts.flatMap((post) => post.tags)])]
+  .map((id) => ({ id, ...tag(id), count: posts.filter((post) => post.tags.includes(id)).length }))
+  .filter((t) => t.count)
+const hiddenAtFirst = (post) => post.tags.some((id) => tag(id).hidden)
+const wasEdited = (post) => post.edited && isoDate(post.edited) > isoDate(post.date)
+---
+<Base title={site.title}>
+  <main class="wrap">
+    <h1>{site.title}</h1>
+    <p class="lede">{site.lede}</p>
+    <fieldset class="post-filter">
+      <legend>Show</legend>
+      {used.map((t) => (
+        <label>
+          <input type="checkbox" name="tag" value={t.id} checked={!t.hidden} />
+          {t.icon && <span aria-hidden="true">{t.icon}</span>} {t.name} <span class="count">({t.count})</span>
+        </label>
+      ))}
+      <label>
+        <input type="checkbox" name="edited" /> Last edited
+      </label>
+    </fieldset>
+    <ol class="post-list" reversed>
+      {posts.map((post, n) => (
+        <li data-order={n} data-tags={post.tags.join(' ')} data-date={isoDate(post.date)} data-edited={isoDate(post.edited ?? post.date)} hidden={hiddenAtFirst(post)}>
+          <time datetime={isoDate(post.date)}>{longDate(post.date)}</time>
+          {wasEdited(post) && <span class="post-edited" hidden> · edited <time datetime={isoDate(post.edited)}>{longDate(post.edited)}</time></span>}
+          <h2>
+            <a href={post.url}>{post.title}</a>
+            {post.tags.map((id) => tag(id).icon
+              ? <span class="post-icon" title={tag(id).name} role="img" aria-label={tag(id).name}>{tag(id).icon}</span>
+              : <span class="post-tag">{tag(id).name}</span>)}
+          </h2>
+          <p>{post.description}</p>
+        </li>
+      ))}
+    </ol>
+  </main>
+</Base>
+
+<script>
+  // A post shows when none of its tags is unchecked. "Last edited" shows each edit date and orders the posts by it;
+  // unchecked, they are in publication order, newest first. The first render hides the tags that start hidden and every
+  // edit date, in publication order, so the page is right before this runs; the browser may restore a checkbox on Back,
+  // so this also runs once at load.
+  const filter = document.querySelector('.post-filter')
+  const list = document.querySelector('.post-list')
+  const update = () => {
+    const off = [...filter.querySelectorAll('input[name="tag"]:not(:checked)')].map((input) => input.value)
+    for (const li of list.children) {
+      li.hidden = li.dataset.tags.split(' ').some((id) => off.includes(id))
+    }
+    const edited = filter.querySelector('input[name="edited"]').checked
+    for (const span of list.querySelectorAll('.post-edited')) span.hidden = !edited
+    const key = (li) => (edited ? li.dataset.edited : '') + li.dataset.date
+    list.append(...[...list.children].sort((a, b) => key(b).localeCompare(key(a)) || a.dataset.order - b.dataset.order))
+  }
+  filter.addEventListener('change', update)
+  update()
+</script>

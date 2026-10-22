@@ -1,0 +1,7 @@
+# The blog's Python environment: a uv workspace whose members are the posts' _experiments/ folders.
+# One .venv and one uv.lock, here; `uv sync` installs every post's package. See AGENTS.md, "Experiments".
+[tool.uv.workspace]
+members = ["src/pages/posts/*/_experiments"]
+
+[dependency-groups]
+dev = ["pytest>=8.0"]

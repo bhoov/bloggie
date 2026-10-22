@@ -1,0 +1,23 @@
+---
+// <Info label="Solved">the mean over 3 seeds</Info> puts an (i) button after a short label, such as a table's column
+// label, and its note in a popover. <Info term="learned early exit">…</Info> makes the words themselves the button,
+// underlined with dots. The note shows while the pointer rests on the button; a press opens it until a press
+// outside or Esc, which is how it opens on a touch screen. The note is Markdown, math and links included. It needs
+// no script, so it works in the downloaded page too; the agent download writes it in parentheses after the label or
+// term (bloggie/scripts/export/agent.js). The id comes from the note, numbered when a page repeats one, so that every build
+// gives the same page.
+import { createHash } from 'node:crypto'
+
+const { label = '', term } = Astro.props
+const note = await Astro.slots.render('default')
+const base = `info-${createHash('sha1').update(label + (term ?? '') + note).digest('hex').slice(0, 8)}`
+// Astro.request is the same object for every component of one page, so this counts repeats within the page.
+const seen = (globalThis.__infoIds ??= new WeakMap())
+if (!seen.has(Astro.request)) seen.set(Astro.request, new Map())
+const count = (seen.get(Astro.request).get(base) ?? 0) + 1
+seen.get(Astro.request).set(base, count)
+const id = count === 1 ? base : `${base}-${count}`
+---
+<span class="info">{term
+  ? <button type="button" class="info-term" popovertarget={id} style={`anchor-name: --${id}`}>{term}</button>
+  : <button type="button" class="info-button" popovertarget={id} aria-label={label ? `About ${label}` : 'More'} style={`anchor-name: --${id}`}></button>}<span id={id} class="info-note" popover="auto" style={`position-anchor: --${id}`} set:html={note} /></span>

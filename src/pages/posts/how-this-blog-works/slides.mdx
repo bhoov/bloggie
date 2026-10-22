@@ -1,0 +1,110 @@
+---
+layout: '@bloggie/layouts/Slides.astro'
+title: How This Blog Works (slides)
+description: The talk version of "How this blog works"; its source uses each way to write a slide.
+---
+
+import PointerChase from '@/figures/pointer-chase/PointerChase.svelte'
+
+# How This Blog Works
+
+Interactive essays, talk decks, and an agent that keeps them in step
+
+<Notes>Every slide here is written in the same plain text as the post; the post shows this deck's source.</Notes>
+
+## Three Commands to Start
+
+```sh
+git clone \
+  https://github.com/bhoov/bloggie.git
+cd bloggie && npm install
+npm run dev   # http://localhost:4321
+```
+
+<Notes>A static site built with Astro: no server, no database, no account. It redraws on every save. Then npm run reset -- --yes --title "My blog" removes my posts and keeps this one as the example.</Notes>
+
+## [demo zoom=1.5 svgMax=390px noteTop=310px] A Post Is a Story You Can Play With
+
+<PointerChase client:visible model="transformer" />
+
+<p slot="note">The same figure as in the post: it **waits for Play**.</p>
+
+<Notes>A figure is a demo the reader drives. Describe what it should show, and an agent builds it, tests its numbers and checks it in a browser. A slow demo waits behind a Load demo button.</Notes>
+
+## [equation eqSize=54] Equations Explain Themselves
+
+$$
+E(\state{\boldsymbol{x}}) = \underbrace{\tfrac12 \lVert \state{\boldsymbol{x}} \rVert^2}_{\mathclap{\note{stays small}}} \;-\; \underbrace{\tfrac{1}{\beta} \log \sum_{m=1}^{M} e^{\beta\, \state{\boldsymbol{x}}^\top \coupling{\boldsymbol{\xi}_m}}}_{\mathclap{\note{pulls toward a memory}}}
+$$
+
+- $\state{\boldsymbol{x}} \in \mathbb{R}^D$ the state
+- $\coupling{\boldsymbol{\xi}_m} \in \mathbb{R}^D$ memory $m$ of $M$
+- $\beta$ the inverse temperature
+- $E$ is **lowest at a stored pattern**
+
+<Notes>Typeset when the site builds, numbered and linked as in Quarto. Braces name the terms; the legend names the symbols.</Notes>
+
+## Learn Four Colors, Read Every Equation
+
+- $\state{\boldsymbol{x}}$ **state**, what descent changes
+- $\coupling{\boldsymbol{\xi}}$ **couplings**, the weights between units
+- $\given{\boldsymbol{b}}$ **given**, what the input fixes
+- $\truth{\boldsymbol{y}}$ **truth**, the true answer
+
+<Notes>A role has the same color in every post and deck, so the color says what a symbol does before the legend says what it is. That is why each post opens with a key of the roles it uses. The build checks that a symbol keeps its color everywhere.</Notes>
+
+# One Story as Blog and Slides
+
+## An Agent Writes the Deck
+
+Ask for **slides for this post** with the blog-to-slides skill, which ships with the blog.
+
+<Notes>It makes one idea per slide, text for the back of the room and full-slide demos, checks every slide in a browser, and then says where the post's story was hard to follow.</Notes>
+
+## [reasons] Fine-Tune It With the Mouse
+
+- **Press E** on a deck, under npm run dev
+- **Drag, resize, align** blocks, and edit text in place
+- **Every change** is written to the deck's text file
+
+<Notes>Show it live: press E, drag a paragraph, double-click a word and color it. The keys follow Figma's. Because the deck stays a text file, your edits and an agent's mix freely.</Notes>
+
+## Keep Post and Deck in Step
+
+Change the post, then ask the agent to **update the deck**. Your layout stays.
+
+## One Style, Written Down
+
+- **AGENTS.md** is the style guide every agent reads
+- One sentence per line, an example beside each idea
+- Add your own rules in plain English
+
+<Notes>Claude Code and Codex both read AGENTS.md. The build enforces the mechanical rules: a broken link, an unknown citation, or a symbol without its color stops npm run build.</Notes>
+
+## [reasons] Download for Offline Distribution
+
+- **Interactive page** one HTML file that works offline, deck inside
+- **For agents** text, math as TeX, figures described, source code
+
+<Notes>The arrow in the byline, and its menu. Present from a laptop without a network, or hand the post to another agent as reading material.</Notes>
+
+## Everything Is Plain Text
+
+- **index.mdx** the post
+- **slides.mdx** its deck
+- **data/** and **media/** what it shows
+- **_experiments/** the Python behind its numbers
+
+<Notes>The folder is src/pages/posts/ and a slug. Copy a folder to start a new post. One Python environment for the whole blog, managed by uv.</Notes>
+
+## [table] Most Edits Are One Line
+
+<PostTable id="tbl-edits" />
+
+<Slide kind="text" title="Push to Publish">
+
+Push to main, and GitHub Actions **builds and deploys** the site to Pages.
+
+<Notes>A hand-written Slide tag, the form every heading above becomes. Once, set Settings → Pages → Source to GitHub Actions.</Notes>
+
+</Slide>

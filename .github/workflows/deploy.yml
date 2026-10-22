@@ -1,0 +1,48 @@
+# Build and deploy the site to GitHub Pages on every push to main. No tests run here, to keep deploys fast:
+# run `node --test` and `npm run build` before pushing, and `npm run e2e` when a change calls for it (AGENTS.md).
+# Requires Settings → Pages → Build and deployment → Source: "GitHub Actions".
+name: Deploy to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - id: pages
+        uses: actions/configure-pages@v5
+      - name: Build
+        run: npm run build
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,43 @@
+---
+// A colored mark that ties a text anchor to part of a problem picture (a `problem` slide):
+//   - <Mark kind="edge" /> Each node has one arrow out
+// kind  edge (gray →), flag (green ↻), start (orange ●): the pointer-chase graph (TaskGraph)
+//       endpoint (●), path (blue ■), open (gray □): a maze (S and G, the path, the other open cells)
+//       resistor (gray zigzag), current (orange →): the maze as a circuit (MazeResistors)
+//       token (a small token: an off and an on bar), clamped (S and G's dot over a wall token): the maze
+//       as tokens (MazeTokens)
+//       pair (gray →: an example's input to its output), ask (orange ?: the output to give): an ARC task (ArcTask)
+//       record (blue ■), baseline (gray ■): the bars of the speedrun chart (SpeedrunTokens)
+//       item (gray ▸): an anchor that names no one part of the picture
+// A glyph mark is text. An `svg` mark is drawn in its `box` (viewBox width and height), shown at `size`
+// stage pixels, `top` pixels down (to center it on the item's first line), stroked in the mark's color.
+const marks = {
+  edge: { glyph: '→', color: 'var(--text-muted)' },
+  flag: { glyph: '↻', color: 'var(--series-3)' },
+  start: { glyph: '●', color: 'var(--series-2)' },
+  endpoint: { glyph: '●', color: 'var(--text-primary)' },
+  path: { glyph: '■', color: 'var(--series-1)' },
+  open: { glyph: '□', color: 'var(--text-muted)' },
+  resistor: { svg: '<path d="M1 12 H10 L13.5 4 L18.5 20 L23.5 4 L28.5 20 L32 12 H43" />', box: [44, 24], size: [60, 33], top: 18, color: 'var(--text-secondary)' },
+  current: { glyph: '→', color: 'var(--series-2)' },
+  pair: { glyph: '→', color: 'var(--text-muted)' },
+  ask: { glyph: '?', color: 'var(--series-2)' },
+  record: { glyph: '■', color: 'var(--series-1)' },
+  baseline: { glyph: '■', color: 'color-mix(in srgb, var(--text-muted) 55%, transparent)' },
+  item: { glyph: '▸', color: 'var(--text-muted)' },
+  token: {
+    svg: '<rect x="2" y="2" width="30" height="50" rx="5" /><rect x="7" y="32" width="8" height="15" style="fill: var(--maze-off, #97958e); stroke: none" /><rect x="19" y="15" width="8" height="32" style="fill: var(--series-1); stroke: none" />',
+    box: [34, 54], size: [38, 60], top: 4, color: 'var(--text-primary)',
+  },
+  clamped: {
+    svg: '<circle cx="22" cy="22" r="20" style="fill: currentColor; stroke: none" /><rect x="4" y="62" width="36" height="36" rx="5" style="fill: var(--maze-wall, #45443f)" />',
+    box: [44, 100], size: [44, 100], top: 12, color: 'var(--text-primary)',
+  },
+}
+const { kind = 'edge' } = Astro.props
+const mark = marks[kind]
+if (!mark) throw new Error(`Mark: unknown kind "${kind}"`)
+---
+{mark.svg
+  ? <span class="mark mark-svg" style={`color: ${mark.color}`} aria-hidden="true"><svg viewBox={`0 0 ${mark.box.join(' ')}`} width={mark.size[0]} height={mark.size[1]} style={`margin-top: ${mark.top}px`} set:html={mark.svg} /></span>
+  : <span class="mark" style={`color: ${mark.color}`} aria-hidden="true">{mark.glyph}</span>}

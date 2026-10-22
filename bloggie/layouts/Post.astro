@@ -1,0 +1,180 @@
+---
+// Layout of a post: src/pages/posts/<slug>/index.mdx sets `layout: ../../../layouts/Post.astro`.
+// Front matter: title, date, edited (the date of the last edit, shown after the date when it is later),
+// description, eyebrow, lede, author, slides (false hides a deck that exists),
+// equationNumbers (false turns numbering off), toc (false hides the table of contents),
+// agentSummary (a short statement of the post's question, placed at the top of the agent download).
+// `roles` is set by remarkRoles (bloggie/lib/roles.js): the symbol roles the post's math uses, shown as a key.
+import { existsSync } from 'node:fs'
+import { dirname, join } from 'node:path'
+import { createMarkdownProcessor } from '@astrojs/markdown-remark'
+import Base from './Base.astro'
+import { site, longDate, isoDate } from '../../src/site.js'
+import { roles } from '../lib/roles.js'
+
+const { frontmatter, file } = Astro.props
+// The lede is Markdown (links, emphasis, code): front matter is plain data, so render it here, and
+// strip the <p> the processor wraps it in.
+const markdown = await createMarkdownProcessor()
+const lede = frontmatter.lede && (await markdown.render(frontmatter.lede)).code.replace(/^\s*<p>|<\/p>\s*$/g, '')
+// A post has a deck when slides.mdx sits beside its index.mdx; the byline then links to it and
+// the S key opens it. Without one, neither appears.
+const hasSlides = frontmatter.slides !== false && !!file && existsSync(join(dirname(file), 'slides.mdx'))
+// Absolute, so the link works whether or not the post's URL ends in a slash.
+const postHref = Astro.url.pathname.replace(/\/?$/, '/')
+const slidesHref = `${postHref}slides/`
+// bloggie/scripts/export-posts.js writes both files beside the post after `astro build`.
+const slug = postHref.split('/').filter(Boolean).at(-1)
+const downloads = { page: `${slug}.html`, agent: `${slug}-agent.html` }
+// A heading's anchor copies a link to the deployed post, even from a downloaded copy.
+const shareUrl = new URL(`posts/${slug}/`, site.url).href
+const keyRoles = roles.filter((role) => frontmatter.roles?.includes(role.name))
+---
+<Base title={frontmatter.title} description={frontmatter.description}>
+  {frontmatter.agentSummary && <meta slot="head" name="agent-summary" content={frontmatter.agentSummary} />}
+  <main class="wrap" data-share-url={shareUrl}>
+    <nav class="site-nav" aria-label="Blog">
+      <a href={import.meta.env.BASE_URL}>{site.title}</a>
+    </nav>
+    <header class="article-header">
+      {frontmatter.eyebrow && <p class="eyebrow">{frontmatter.eyebrow}</p>}
+      <h1>{frontmatter.title}</h1>
+      <div class="byline">
+        {frontmatter.author ?? site.author} <span aria-hidden="true">/</span>
+        <time datetime={isoDate(frontmatter.date)}>{longDate(frontmatter.date)}</time>
+        {frontmatter.edited && isoDate(frontmatter.edited) > isoDate(frontmatter.date) && <>{' '}(edited <time datetime={isoDate(frontmatter.edited)}>{longDate(frontmatter.edited)}</time>)</>}
+        {hasSlides && <><span aria-hidden="true">/</span> <a href={slidesHref} data-slides-link title="Slides (S)">Slides</a></>}
+        <span aria-hidden="true">/</span>
+        <span class="download" data-download>
+          <a class="download-main" href={`${postHref}${downloads.page}`} download={downloads.page}
+            title="Download this post as one HTML file with working figures" aria-label="Download this post as one HTML file with working figures">
+            <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          </a>
+          <details class="download-menu">
+            <summary title="Download options" aria-label="Download options">
+              <svg viewBox="0 0 10 10" width="10" height="10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            </summary>
+            <div class="download-options">
+              <a href={`${postHref}${downloads.page}`} download={downloads.page}>
+                Interactive page<small>One HTML file. The figures work offline.</small>
+              </a>
+              <a href={`${postHref}${downloads.agent}`} download={downloads.agent}>
+                For agents<small>Text, math as TeX, figure traces and source code.</small>
+              </a>
+            </div>
+          </details>
+        </span>
+      </div>
+      {keyRoles.length > 0 && (
+        <p class="role-key">
+          <span class="role-key-title"><b>Symbol colors.</b> A color marks a symbol's role, the same on every post and deck. Roles in this post:</span>
+          {keyRoles.map((role) => <span class="role-key-item" style={`--swatch: var(--role-${role.name})`}><b>{role.label}</b> {role.meaning}</span>)}
+        </p>
+      )}
+    </header>
+    {lede && <p class="lede" set:html={lede} />}
+    <slot />
+    {/* Filled by initCitations (bloggie/lib/citations.js), which removes it from a post that cites nothing. */}
+    <section class="references" data-bibliography aria-labelledby="references-title">
+      <h2 id="references-title">References</h2>
+      <p>Sources are linked in the text. Citation details require JavaScript.</p>
+    </section>
+  </main>
+  {/* The table of contents, filled from the post's headings by initToc (bloggie/lib/toc.js); outside <main>, so the live
+      update leaves it, and the agent download drops it. */}
+  {frontmatter.toc !== false && (
+    <nav class="toc" data-toc aria-label="Contents" hidden>
+      <div class="toc-toolbar">
+        <button class="toc-toggle" type="button" data-toc-toggle aria-expanded="true" title="Contents (T)">
+          <span class="toc-label">Contents</span>
+          <span class="toc-current" data-toc-current></span>
+          <svg class="toc-chevron" viewBox="0 0 10 10" width="10" height="10" aria-hidden="true"><path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </button>
+        <a class="toc-action" href={import.meta.env.BASE_URL} aria-label="Home" title="Home">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="m2 7 6-5 6 5M3.5 6v8H7v-4h2v4h3.5V6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </a>
+        <a class="toc-action" href="#" aria-label="To Top" title="To Top">
+          <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M8 13V3m-4 4 4-4 4 4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" /></svg>
+        </a>
+      </div>
+      <ol class="toc-list" data-toc-list></ol>
+    </nav>
+  )}
+  <script>
+    import catalog from '../../src/references.json'
+    import { initCitations } from '../lib/citations.js'
+    import { initToc } from '../lib/toc.js'
+
+    // What this script adds to the server's render of the post: the citations' numbers, previews and reference
+    // list, and a faint # after each section heading that links to it. Under `npm run dev`, a save swaps the
+    // changed parts of the server's new render into the page without a reload (bloggie/live/); that render gets
+    // the same, first.
+    function enhance(doc) {
+      initCitations({ catalog, root: doc.querySelector('main'), bibliography: doc.querySelector('[data-bibliography]') })
+      addHeadingAnchors(doc)
+    }
+
+    // S opens the post's deck, when it has one (the byline's Slides link). Not while typing, and
+    // not with a modifier, so Cmd+S and friends keep their meaning.
+    const slidesLink = document.querySelector('[data-slides-link]')
+    if (slidesLink) {
+      document.addEventListener('keydown', (event) => {
+        if (event.key.toLowerCase() !== 's' || event.metaKey || event.ctrlKey || event.altKey || event.defaultPrevented) return
+        if (event.target instanceof Element && event.target.closest('input, select, textarea, [contenteditable]')) return
+        event.preventDefault()
+        location.href = slidesLink.href
+      })
+    }
+
+    // A click on a heading's # puts the section in the address bar and copies its link (to the deployed post, so
+    // a link copied from a downloaded file works too).
+    function addHeadingAnchors(doc) {
+      const shareUrl = doc.querySelector('[data-share-url]').dataset.shareUrl
+      for (const heading of doc.querySelectorAll('.wrap > :is(h2, h3, h4)[id], .wrap > .addendum > :is(h2, h3, h4)[id]')) {
+        const anchor = document.createElement('a')
+        anchor.className = 'heading-anchor'
+        anchor.href = `#${heading.id}`
+        anchor.textContent = '#'
+        anchor.title = 'Copy a link to this section'
+        anchor.setAttribute('aria-label', `Link to “${heading.textContent.trim()}”`)
+        anchor.addEventListener('click', () => {
+          const link = location.protocol === 'file:' ? `${shareUrl}#${heading.id}` : `${location.origin}${location.pathname}#${heading.id}`
+          navigator.clipboard?.writeText(link).then(() => {
+            anchor.dataset.copied = ''
+            setTimeout(() => delete anchor.dataset.copied, 1500)
+          }, () => {})
+        })
+        heading.append(' ', anchor)
+      }
+    }
+
+    enhance(document)
+    if (import.meta.env.DEV) document.addEventListener('live:render', (event) => enhance(event.detail))
+
+    // The table of contents, from the headings that enhance gave their anchors. A live update swaps the new render's
+    // blocks in right after its live:render event, so the list is built again a moment later.
+    const tocNav = document.querySelector('[data-toc]')
+    if (tocNav) {
+      const toc = initToc(tocNav)
+      if (import.meta.env.DEV) document.addEventListener('live:render', () => setTimeout(toc.rebuild))
+    }
+
+    // A link with data-select that points at a figure (`<a href="#fig-…" data-select="rule">`, as the Sudoku table's
+    // "demo" tags) passes the choice to it: the figure's mount gets data-select, which the figure reads when it starts
+    // (it may start only once the link has scrolled it into view), and a figure-select event, for a figure already running.
+    document.addEventListener('click', (event) => {
+      const link = event.target instanceof Element ? event.target.closest('a[data-select][href^="#"]') : null
+      const mount = link && document.getElementById(decodeURIComponent(link.hash.slice(1)))
+      if (!mount) return
+      mount.dataset.select = link.dataset.select
+      mount.dispatchEvent(new CustomEvent('figure-select', { detail: link.dataset.select }))
+    })
+
+    // Close the download menu on Escape or on a click outside it.
+    const menu = document.querySelector('.download-menu')
+    if (menu) {
+      document.addEventListener('click', (event) => { if (!menu.contains(event.target)) menu.open = false })
+      document.addEventListener('keydown', (event) => { if (event.key === 'Escape') menu.open = false })
+    }
+  </script>
+</Base>

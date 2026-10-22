@@ -1,0 +1,1735 @@
+/* Site-wide styles: color tokens, typography, the post column, and the figure kit (.viz, .controls,
+   .readout) that every figure shares. A figure's own styles live in its .svelte file. Color roles come from the
+   dataviz reference palette; dark values are declared under both the OS media
+   query and a data-theme scope so a future toggle wins either way. */
+
+:root {
+  color-scheme: light;
+  --surface-1: #fcfcfb;
+  --page: #f9f9f7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --grid: #e1e0d9;
+  --axis: #c3c2b7;
+  --rule: rgba(11, 11, 11, 0.1);
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
+  --series-4: #eda100;
+  --seq-1: #cde2fb;
+  --seq-2: #9ec5f4;
+  --seq-3: #5598e7;
+  --seq-4: #256abf;
+  --seq-5: #0d366b;
+  /* Symbol roles (bloggie/lib/roles.js), taken from the figures: the state is blue, as φ and the beliefs are; the
+     truth is green, as a right answer is; couplings are orange, as positive couplings are in the Sudoku figure; the
+     given is violet, a hue no figure uses. Validated (dataviz validate_palette.js, all pairs): CVD ΔE ≥ 9.3 and
+     normal-vision ΔE ≥ 16.3 in both modes, each ≥ 3:1 on the surface. The dark mode's violet is lighter than the
+     chart-mark band, so that it parts from the blue by lightness; the band is for marks, not text. */
+  --role-state: var(--series-1);
+  --role-coupling: var(--series-2);
+  --role-given: #4a3aa7;
+  --role-truth: #18a372;
+  --content-width: 42rem;
+  --wide-width: 50rem;
+  --wider-width: 64rem;
+  --serif: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --axis: #383835;
+    --rule: rgba(255, 255, 255, 0.1);
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
+    --series-4: #c98500;
+    --seq-1: #0d366b;
+    --seq-2: #184f95;
+    --seq-3: #256abf;
+    --seq-4: #5598e7;
+    --seq-5: #9ec5f4;
+    --role-given: #c4b5fd;
+    --role-truth: #1baf7a;
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19;
+  --page: #0d0d0d;
+  --text-primary: #ffffff;
+  --text-secondary: #c3c2b7;
+  --text-muted: #898781;
+  --grid: #2c2c2a;
+  --axis: #383835;
+  --rule: rgba(255, 255, 255, 0.1);
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --series-3: #199e70;
+  --series-4: #c98500;
+  --seq-1: #0d366b;
+  --seq-2: #184f95;
+  --seq-3: #256abf;
+  --seq-4: #5598e7;
+  --seq-5: #9ec5f4;
+  --role-given: #c4b5fd;
+  --role-truth: #1baf7a;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--text-primary);
+  font-family: var(--serif);
+  font-size: 1.125rem;
+  line-height: 1.7;
+  -webkit-text-size-adjust: 100%;
+}
+
+.wrap {
+  max-width: calc(var(--content-width) + 3rem);
+  margin-inline: auto;
+  padding: 2.25rem 1.5rem 5rem;
+}
+
+/* Text, equations, and figures share one centered column. */
+.wrap > * {
+  min-width: 0;
+}
+
+/* Opt in only when a figure needs more space; keep the same center line. */
+.wrap > .figure-wide {
+  width: min(var(--wide-width), calc(100vw - 3rem));
+  margin-left: calc((100% - min(var(--wide-width), calc(100vw - 3rem))) / 2);
+}
+
+/* A table with many columns (the Sudoku results) needs more than a wide figure; the same center line. In a collapsed
+   section (`<details>`), the table widens the same way. */
+.wrap > .figure-wider,
+.wrap > details > .figure-wider {
+  width: min(var(--wider-width), calc(100vw - 3rem));
+  margin-left: calc((100% - min(var(--wider-width), calc(100vw - 3rem))) / 2);
+}
+
+.site-nav {
+  font: 0.78rem var(--sans);
+  margin-bottom: 4rem;
+}
+
+.site-nav a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.article-header {
+  margin-bottom: 2.25rem;
+  border-bottom: 1px solid var(--axis);
+}
+
+.eyebrow {
+  font: 500 0.72rem var(--sans);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+h1,
+.wrap > h2,
+.wrap > h3,
+.wrap > .byline,
+.wrap > blockquote,
+.wrap > .note {
+  max-width: var(--content-width);
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--sans);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(2.2rem, 5vw, 3.25rem);
+  font-weight: 500;
+  line-height: 1.12;
+  letter-spacing: -0.035em;
+  margin: 0 0 1.5rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+  margin: 3.5rem 0 1rem;
+}
+
+h3 {
+  font-size: 1rem;
+  margin: 2rem 0 0.4rem;
+}
+
+a {
+  color: var(--series-1);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.87em;
+}
+
+/* A code block in a post. Shiki writes the colors and the background inline. */
+pre.astro-code {
+  margin: 1.25rem 0;
+  padding: 1.1rem 1.4rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+pre.astro-code code {
+  font-size: inherit;
+}
+
+/* A table in a post. Code in a cell never wraps, so a line break shows only where the source has one;
+   the first column (a name, a heading, a command) does not wrap either, and the rest wraps as prose.
+   A table wider than the column scrolls sideways instead of breaking its code; a narrower one is centred on it. */
+.wrap table {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 1.5rem auto;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.wrap th,
+.wrap td {
+  padding: 0.55rem 1rem 0.55rem 0;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--rule);
+}
+
+.wrap th {
+  font: 600 0.8rem var(--sans);
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  border-bottom-color: var(--axis);
+}
+
+.wrap td code,
+.wrap th code,
+.wrap td:first-child {
+  white-space: nowrap;
+}
+
+/* On a phone each row stacks: the first cell on its own line, the description under it, across the column. */
+@media (max-width: 520px) {
+  .wrap table,
+  .wrap tbody,
+  .wrap tr,
+  .wrap td {
+    display: block;
+  }
+
+  .wrap table {
+    width: auto;
+  }
+
+  .wrap thead {
+    display: none;
+  }
+
+  .wrap td {
+    padding-right: 0;
+  }
+
+  .wrap td:first-child {
+    padding-bottom: 0.1rem;
+    border-bottom: 0;
+    font-weight: 600;
+  }
+}
+
+/* A table of numbers (`<div class="num-table">` around a Markdown table): figures right-aligned in
+   tabular digits, and rows that stay rows on a phone, since a number means nothing without its column. */
+.wrap .num-table th:not(:first-child),
+.wrap .num-table td:not(:first-child) {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.wrap .num-table th:last-child,
+.wrap .num-table td:last-child {
+  padding-right: 0;
+}
+
+/* A table's caption goes above it: `<figure class="num-table">` with the `<figcaption>` first. It is as wide as
+   the text column and centred, like the table under it, so a wide figure's caption lines up with the prose. */
+.wrap figure.num-table > figcaption {
+  margin: 0 auto 0.6rem;
+}
+
+.wrap figure.num-table > figcaption p {
+  margin: 0;
+}
+
+.wrap figure.num-table > figcaption p + p {
+  margin-top: 0.4rem;
+}
+
+/* A table of text with a caption (`<figure class="text-table">`, the `<figcaption>` first): the caption sits above
+   it, as for a table of numbers, and every column after the first wraps as prose. */
+.wrap figure.text-table > figcaption {
+  margin: 0 auto 0.6rem;
+}
+
+.wrap figure.text-table > figcaption p {
+  margin: 0;
+}
+
+.wrap figure.text-table > figcaption p + p {
+  margin-top: 0.4rem;
+}
+
+/* A small dropdown under a row's name (the learned weights of that row's model), in tabular digits. Its text
+   wraps, so that an open one widens its column only up to the table's width. */
+.wrap .num-table td > details {
+  margin-top: 0.15rem;
+  font: 0.78rem/1.45 var(--sans);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  white-space: normal;
+}
+
+.wrap .num-table td > details > summary {
+  width: fit-content;
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.wrap .num-table td > details > summary:hover,
+.wrap .num-table td > details[open] > summary {
+  color: var(--text-primary);
+}
+
+/* A review of an earlier post, collapsed until the reader opens it: `<details class="review">` with a `<summary>`. */
+.wrap details.review {
+  margin: 1.6rem 0;
+  padding: 0.7rem 1.1rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface-1);
+}
+
+.wrap details.review > summary {
+  cursor: pointer;
+  font: 600 0.95rem var(--sans);
+  color: var(--text-secondary);
+}
+
+.wrap details.review[open] > summary {
+  margin-bottom: 0.6rem;
+  color: var(--text-primary);
+}
+
+/* A baseline row, a check rather than a contender: `<span class="baseline">` around its name greys the whole row. */
+.wrap .num-table tr:has(.baseline) {
+  color: var(--text-muted);
+}
+
+/* A row that a demo runs: `<a class="row-demo" href="#fig-…" data-select="…">demo</a>` after its name, a small tag that
+   links to the demo and, with data-select (Post.astro), shows that row's choice in it. */
+.wrap .num-table .row-demo {
+  display: inline-block;
+  margin-left: 0.35em;
+  padding: 0 0.45em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 0.7em;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+  vertical-align: 0.1em;
+}
+
+/* <Info>: an (i) button after a label, with its note in a popover (bloggie/components/Info.astro). The button is sized
+   in em, so that it matches its label, and `middle`, raised a little, centres it between the label's lowercase
+   and capital letters. The note opens under the
+   button where the browser can anchor it, and in the middle of the window where it cannot. The ::after enlarges
+   the button's touch target to about 24 × 30 px, but not to the right, where it would widen a table's last column. */
+.info-button {
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  width: 1.45em;
+  height: 1.45em;
+  margin-left: 0.15em;
+  padding: 0;
+  vertical-align: middle;
+  top: -0.06em;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-muted);
+  font: italic 600 0.8em/1 var(--serif);
+  cursor: pointer;
+}
+
+.info-button::before { content: "i"; }
+.info-button::after { content: ""; position: absolute; inset: -0.45rem 0 -0.45rem -0.6rem; }
+
+.info-button:hover,
+.info-button:focus-visible {
+  color: var(--text-primary);
+}
+
+/* <Info term="…">: the words are the button, in the text's own font, underlined with dots. */
+.info-term {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  text-decoration: underline dotted 1px;
+  text-decoration-color: var(--text-muted);
+  text-underline-offset: 0.2em;
+  cursor: help;
+}
+
+.info-term:hover,
+.info-term:focus-visible {
+  text-decoration-color: currentColor;
+}
+
+.info-note {
+  width: min(21rem, calc(100vw - 2rem));
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--axis);
+  border-radius: 6px;
+  background: var(--surface-1);
+  color: var(--text-primary);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+  font: 400 0.84rem/1.5 var(--sans);
+  letter-spacing: normal;
+  text-align: left;
+  white-space: normal;
+  overflow: visible;
+}
+
+@supports (position-area: bottom) {
+  .info-note {
+    inset: auto;
+    margin: 0.4rem 0;
+    position-area: bottom span-left;
+    position-try-fallbacks: flip-inline, flip-block;
+  }
+
+  /* A term's note starts under the term's first letter, as a tooltip does. */
+  .info-term + .info-note {
+    position-area: bottom span-right;
+  }
+
+  /* With a mouse, the note also shows while the pointer is on the button or on the note. It is `position: fixed` like
+     any popover, so a table that scrolls sideways does not clip it. Until then it is not laid out at all: a hidden
+     note that is laid out keeps whatever side it was flipped to while it was off screen. Its ::before covers the gap
+     to the button, above or below it, so that the pointer can cross to the note without closing it (hence
+     `overflow: visible` on the note, which a popover otherwise clips). Not in a window as narrow as a phone's, where
+     the note spans the window and would cover the buttons under it. */
+  @media (hover: hover) and (min-width: 521px) {
+    .info:hover > .info-note:not(:popover-open) {
+      display: block;
+      z-index: 20;
+    }
+
+    .info-note::before {
+      content: "";
+      position: absolute;
+      inset: -0.5rem 0;
+      z-index: -1;
+    }
+  }
+}
+
+/* On a phone the note is as wide as the window allows, so it is centred in it, under the button. */
+@media (max-width: 520px) {
+  @supports (position-area: bottom) {
+    .info-note,
+    .info-term + .info-note {
+      position-area: bottom span-all;
+      justify-self: center;
+    }
+  }
+}
+
+@media (max-width: 520px) {
+  .wrap .num-table table { width: fit-content; }
+  .wrap .num-table thead { display: table-header-group; }
+  .wrap .num-table tbody { display: table-row-group; }
+  .wrap .num-table tr { display: table-row; }
+  .wrap .num-table td { display: table-cell; }
+  .wrap .num-table th,
+  .wrap .num-table td,
+  .wrap .num-table td:first-child {
+    padding-right: 0.6rem;
+    white-space: normal;
+  }
+  .wrap .num-table td:first-child {
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--rule);
+    font-weight: inherit;
+  }
+  /* A number may break where the post puts a plain space ("99.7" / "± 0.1%"); &nbsp; keeps the rest together. */
+  .wrap .num-table th:not(:first-child),
+  .wrap .num-table td:not(:first-child) {
+    white-space: normal;
+  }
+}
+
+.byline,
+.post-list time,
+.post-edited {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.byline {
+  margin: 0 0 1.5rem;
+}
+
+/* The key of the symbol colors under the byline (Post.astro): a swatch of each role the post's math uses, one per line. */
+.role-key {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  margin: -0.9rem 0 1.5rem;
+  font-family: var(--sans);
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.role-key-title { color: var(--text-muted); }
+
+.role-key-title b { font-weight: 600; color: var(--text-secondary); }
+
+.role-key-item { color: var(--text-secondary); white-space: nowrap; }
+
+.role-key-item b { font-weight: 600; color: var(--text-primary); }
+
+.role-key-item::before {
+  content: '';
+  display: inline-block;
+  width: 0.6em;
+  height: 0.6em;
+  margin-right: 0.35em;
+  border-radius: 50%;
+  background: var(--swatch);
+}
+
+.lede {
+  font-size: 1.22rem;
+  line-height: 1.65;
+  color: var(--text-primary);
+}
+
+blockquote {
+  margin: 1.5rem 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--axis);
+  color: var(--text-secondary);
+}
+
+/* A quotation the story leans on, set apart from the prose: <blockquote class="pullquote"> holds the words as a
+   paragraph and the source in a <footer>. Larger italic type in the text color, the source small below it. */
+blockquote.pullquote {
+  margin: 2rem 0;
+  padding: 0.2rem 0 0.2rem 1.25rem;
+  border-left: 3px solid var(--text-primary);
+  color: var(--text-primary);
+  font-size: 1.28rem;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.pullquote p {
+  margin: 0;
+}
+
+.pullquote footer {
+  margin-top: 0.6rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-style: normal;
+  color: var(--text-secondary);
+}
+
+.pullquote footer::before {
+  content: '— ';
+}
+
+.note {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--rule);
+  padding-top: 0.75rem;
+  margin-top: 2rem;
+}
+
+/* A key term at its definition, one the rest of the post depends on: <dfn>energy</dfn> in a post, where **bold** marks
+   every other defined term. Bold, with an amber marker under the lower part of the line; amber is no symbol role's
+   color (--role-*), so a marked word is never read as a colored symbol. */
+.wrap dfn {
+  font-style: normal;
+  font-weight: 700;
+  background: linear-gradient(transparent 60%, color-mix(in srgb, var(--series-4) 40%, transparent) 60%);
+  padding: 0 0.08em;
+}
+
+/* A line the argument turns on, set large and marked: <p class="standout">Are we ready?</p>. */
+.standout {
+  font: 600 clamp(1.7rem, 4.2vw, 2.2rem)/1.2 var(--serif);
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 2.5rem 0 1.5rem;
+  padding: 0.15rem 0 0.15rem 1rem;
+  border-left: 5px solid var(--series-1);
+}
+
+/* An addendum after the post, such as its related work: the same column in quieter, smaller type, below a rule.
+   <div class="addendum"> around the section (blank lines inside, so its Markdown still renders). */
+.addendum {
+  font-size: 0.93rem;
+  color: var(--text-secondary);
+  border-top: 1px solid var(--rule);
+  margin-top: 4rem;
+}
+
+.addendum :is(h2, h3) {
+  color: var(--text-secondary);
+}
+
+/* A faint aside in the prose, a detail the reader may skip: <p class="faint">…</p>. */
+.faint {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+/* --- table of contents (Post.astro's <nav data-toc>, bloggie/lib/toc.js) ------------------------------------------------
+   Wide (75rem and more): a list in the margin left of the text. Narrow: a bar at the top that comes in when the reader
+   scrolls up, and opens the list. */
+
+.toc {
+  font: 0.8rem/1.4 var(--sans);
+  color: var(--text-secondary);
+}
+
+.toc-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex: none;
+}
+
+.toc-action {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--text-muted);
+  border-radius: 0.2rem;
+  text-decoration: none;
+}
+
+.toc-action:hover,
+.toc-action:focus-visible {
+  color: var(--text-primary);
+  background: var(--grid);
+}
+
+.toc-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-muted);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.toc-toggle:hover {
+  color: var(--text-primary);
+}
+
+.toc-label {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.toc-chevron {
+  flex: none;
+  transition: transform 0.15s;
+}
+
+.toc-toggle[aria-expanded="true"] .toc-chevron {
+  transform: rotate(180deg);
+}
+
+.toc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.toc-list a {
+  display: block;
+  padding: 0.2rem 0 0.2rem 0.75rem;
+  border-left: 2px solid var(--grid);
+  color: inherit;
+  text-decoration: none;
+}
+
+.toc-list a:hover,
+.toc-list a[aria-current] {
+  color: var(--text-primary);
+}
+
+.toc-list a[aria-current] {
+  border-left-color: var(--text-primary);
+}
+
+/* A section's subsections are listed while it is the current one. */
+.toc-h3:not(.toc-in) {
+  display: none;
+}
+
+.toc-h3 a {
+  padding-left: 1.5rem;
+  font-size: 0.75rem;
+}
+
+@media (min-width: 75rem) {
+  .toc {
+    position: fixed;
+    z-index: 5;
+    top: 2.25rem;
+    right: calc(50% + 21rem + 2.5rem + var(--toc-offset, 0px));
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: min(15rem, calc(50% - 25rem));
+    max-height: calc(100vh - 4.5rem);
+    transition: opacity 0.15s, visibility 0.15s;
+  }
+
+  .toc-current {
+    display: none;
+  }
+
+  .toc-list {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .toc-folded .toc-list,
+  .toc-covered {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .toc-folded .toc-list {
+    display: none;
+  }
+}
+
+@media (max-width: 74.99rem) {
+  .toc {
+    position: fixed;
+    z-index: 15;
+    inset: 0 0 auto;
+    background: var(--page);
+    border-bottom: 1px solid var(--rule);
+    transform: translateY(-100%);
+    visibility: hidden;
+    transition: transform 0.2s, visibility 0.2s;
+  }
+
+  .toc-shown {
+    transform: none;
+    visibility: visible;
+  }
+
+  .toc-open {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  }
+
+  .toc-toolbar,
+  .toc-list {
+    max-width: calc(var(--content-width) + 3rem);
+    margin-inline: auto;
+    padding-inline: 1.5rem;
+  }
+
+  .toc-toggle {
+    padding-block: 0.6rem;
+  }
+
+  .toc-action {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .toc-current {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+  }
+
+  .toc-list {
+    max-height: 70vh;
+    padding-bottom: 0.75rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .toc:not(.toc-open) .toc-list {
+    display: none;
+  }
+
+  /* A link to a section lands below the bar. */
+  .wrap :is(h2, h3)[id] {
+    scroll-margin-top: 3.5rem;
+  }
+}
+
+@media (max-width: 34rem) {
+  .toc-toolbar,
+  .toc-list {
+    padding-inline: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toc,
+  .toc-chevron {
+    transition: none;
+  }
+}
+
+/* --- math ---------------------------------------------------------------- */
+
+.katex {
+  font-size: 1.04em;
+}
+
+.katex-display {
+  margin: 1.4rem 0;
+  padding: 0.1rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+/* --- post index ---------------------------------------------------------- */
+
+.post-list {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0 0;
+  max-width: var(--content-width);
+}
+
+.post-list li {
+  border-top: 1px solid var(--rule);
+  padding: 1.1rem 0;
+}
+
+.post-list h2 {
+  font-size: 1.1rem;
+  margin: 0.15rem 0 0.3rem;
+}
+
+.post-list p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.97rem;
+}
+
+/* After a post's title, each of its tags (index.astro): an icon, else its name in small capitals. */
+.post-icon {
+  margin-left: 0.4rem;
+  font-size: 0.95em;
+}
+
+.post-tag {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.35rem;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  vertical-align: 0.15em;
+}
+
+/* Above the list, a checkbox per tag in use: the reader shows or hides the posts that carry it. */
+.post-filter {
+  margin: 1.5rem 0 0;
+  padding: 0;
+  border: 0;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+}
+
+.post-filter legend {
+  float: left;
+  padding: 0;
+  margin-right: 0.9rem;
+  color: var(--text-muted);
+}
+
+.post-filter label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-right: 1.1rem;
+  cursor: pointer;
+}
+
+.post-filter .count {
+  color: var(--text-muted);
+}
+
+/* --- figures ------------------------------------------------------------- */
+
+figure {
+  margin: 2rem auto 0.75rem;
+}
+
+/* A heading's anchor (Post.astro): a faint # after its text, clearer on hover; "Copied" once clicked. */
+.heading-anchor {
+  position: relative;
+  color: var(--text-muted);
+  font-weight: 400;
+  text-decoration: none;
+  opacity: 0.35;
+  transition: opacity 0.15s;
+}
+:is(h2, h3, h4):hover > .heading-anchor,
+.heading-anchor:focus-visible {
+  opacity: 1;
+}
+.heading-anchor[data-copied]::after {
+  content: 'Copied';
+  position: absolute;
+  left: calc(100% + 0.5em);
+  bottom: 0.15em;
+  font: 400 0.75rem var(--sans);
+  white-space: nowrap;
+}
+
+/* A cross-reference link lands with some space above its target. */
+:where(h2, h3, figure, div)[id] {
+  scroll-margin-top: 1.5rem;
+}
+
+/* An equation reference, "(3)", never breaks across lines. */
+a.eqref {
+  white-space: nowrap;
+}
+
+figcaption {
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-top: 0.7rem;
+  max-width: var(--content-width);
+}
+
+.viz {
+  background: var(--surface-1);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 1rem;
+}
+
+figure video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+/* A picture in a post, such as a screenshot (How this blog works), framed so it stands off the page. */
+figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+}
+
+/* A text description of a video, for readers who cannot watch it and for the agent download. */
+.media-description {
+  max-width: var(--content-width);
+  margin-top: 0.4rem;
+  font: 0.85rem/1.5 var(--sans);
+  color: var(--text-secondary);
+}
+
+.media-description > summary {
+  cursor: pointer;
+  color: var(--text-muted);
+}
+
+.media-description > p {
+  margin: 0.4rem 0 0;
+}
+
+/* Scoped to .viz-plot, not .viz: every component's D3 chart mounts its svg
+   there directly, and a broader .viz svg also matched KaTeX's own internal
+   sqrt-glyph svg once static math started living inside .viz (the inspector
+   derivation text), forcing it to width:100% and destroying the radical. */
+.viz-plot svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.viz-panels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.viz-panels > * {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1.1rem;
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.7rem;
+}
+
+.controls label {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.controls input[type="range"] {
+  width: 8.5rem;
+  accent-color: var(--series-1);
+  vertical-align: middle;
+}
+
+.controls button {
+  font: inherit;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: var(--page);
+  border: 1px solid var(--axis);
+  border-radius: 5px;
+  padding: 0.25rem 0.7rem;
+  cursor: pointer;
+  min-height: 2.25rem;
+}
+
+.controls button:hover {
+  border-color: var(--text-muted);
+}
+
+.readout {
+  font-family: var(--sans);
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.2rem;
+}
+
+.readout b {
+  color: var(--text-primary);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Figure controls: a row of transport buttons (step, play, step), icon buttons and sliders, and a
+   small title above a panel. Shared by every figure. */
+.fig-controls {
+  row-gap: 0.4rem;
+  column-gap: 0.65rem;
+}
+.fig-controls label {
+  gap: 0.3rem;
+}
+.fig-controls input[type='range'] {
+  width: 5.5rem;
+}
+/* A dropdown in a figure's control row: the page's own chevron, hover and focus, in both themes. */
+.fig-controls select {
+  appearance: none;
+  -webkit-appearance: none;
+  font: 500 0.82rem var(--sans);
+  color: var(--text-primary);
+  background: var(--surface-1) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2352514e' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 0.6rem center / 0.62rem 0.4rem;
+  border: 1px solid var(--axis);
+  border-radius: 6px;
+  padding: 0.3rem 1.8rem 0.3rem 0.65rem;
+  min-height: 1.9rem;
+  max-width: 100%;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.fig-controls select:hover {
+  border-color: var(--text-muted);
+}
+.fig-controls select:focus-visible {
+  outline: none;
+  border-color: var(--series-1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--series-1) 25%, transparent);
+}
+.fig-controls select:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .fig-controls select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23c3c2b7' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  }
+}
+:root[data-theme="dark"] .fig-controls select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23c3c2b7' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.fig-transport {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+.fig-controls button {
+  min-height: 1.9rem;
+  padding: 0.2rem 0.55rem;
+  font-size: 0.85rem;
+}
+.fig-icon,
+.fig-play {
+  min-width: 1.9rem;
+}
+.fig-step {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-muted);
+  min-width: 1.6rem;
+  padding: 0.2rem 0.3rem;
+}
+.fig-step:hover {
+  color: var(--text-primary);
+  border-color: var(--axis);
+}
+.fig-title {
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+}
+
+.viz details {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  margin-top: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.viz summary {
+  cursor: pointer;
+}
+
+svg text.tick-label {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+svg text.axis-label,
+svg text.mark-label {
+  font-family: var(--sans);
+  font-size: 11px;
+}
+
+svg text.mark-label {
+  font-weight: 600;
+}
+
+/* Prose references to a plotted series carry the series color and its line style. */
+.series-word { font-weight: 600; text-decoration-line: underline; text-decoration-thickness: 2px; text-underline-offset: 0.15em; }
+.soft-word { color: var(--series-1); text-decoration-color: var(--series-1); }
+.discrete-word { color: var(--series-2); text-decoration-color: var(--series-2); text-decoration-style: dashed; }
+.soft-key::before, .discrete-key::before { content: ''; display: inline-block; width: 0.9rem; margin-right: 0.3rem; vertical-align: middle; border-top: 2px solid var(--series-1); }
+.discrete-key::before { border-top: 2px dashed var(--series-2); }
+
+.figure-source {
+  margin: 0 0 1.1rem;
+  text-align: left;
+  font: 0.85rem/1.5 var(--sans);
+  color: var(--text-secondary);
+}
+
+.figure-source > p {
+  margin: 0;
+}
+
+.figure-source:last-of-type {
+  margin-bottom: 2.25rem;
+}
+
+.byline span {
+  margin-inline: 0.5rem;
+  color: var(--axis);
+}
+
+.citation-group {
+  white-space: nowrap;
+}
+
+/* The byline's download control: the arrow downloads the interactive page, the chevron opens the options. */
+.byline .download {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  color: inherit;
+  vertical-align: middle;
+}
+
+.download-main,
+.download-menu > summary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.6rem;
+  color: var(--text-secondary);
+  border: 1px solid var(--rule);
+  cursor: pointer;
+}
+
+.download-main {
+  width: 1.8rem;
+  border-radius: 4px 0 0 4px;
+}
+
+.download-menu > summary {
+  width: 1.3rem;
+  border-left: 0;
+  border-radius: 0 4px 4px 0;
+  list-style: none;
+}
+
+.download-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.download-main:hover,
+.download-menu > summary:hover,
+.download-menu[open] > summary {
+  color: var(--text-primary);
+  background: var(--surface-1);
+}
+
+.download-options {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 4px);
+  left: 0;
+  width: min(17rem, calc(100vw - 32px));
+  padding: 0.3rem;
+  background: var(--surface-1);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.download-options a {
+  display: block;
+  padding: 0.45rem 0.6rem;
+  border-radius: 4px;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: 0;
+}
+
+.download-options a:hover,
+.download-options a:focus-visible {
+  background: var(--page);
+}
+
+.download-options small {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.citation {
+  display: inline;
+}
+
+.citation-marker {
+  display: inline-block;
+  vertical-align: baseline;
+  position: relative;
+  top: -0.15em;
+  border: 0;
+  background: none;
+  padding: 0 0.15em;
+  color: var(--series-1);
+  font: 500 0.7em/1.5 var(--sans);
+  cursor: pointer;
+}
+
+:where(a, button, input, summary):focus-visible {
+  outline: 2px solid var(--series-1);
+  outline-offset: 3px;
+}
+
+.citation-preview {
+  position: fixed;
+  z-index: 20;
+  display: block;
+  width: min(24rem, calc(100vw - 24px));
+  max-height: min(32rem, calc(100dvh - 24px));
+  overflow-y: auto;
+  padding: 1.25rem;
+  border: 1px solid var(--axis);
+  border-radius: 4px;
+  background: var(--surface-1);
+  box-shadow: 0 8px 30px rgb(0 0 0 / 12%);
+  color: var(--text-primary);
+  font: 0.82rem/1.55 var(--sans);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+
+.citation-preview[hidden] {
+  display: none;
+}
+
+.citation-close {
+  float: right;
+  margin: -0.6rem -0.6rem 0 0.4rem;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+  font: 1.35rem var(--sans);
+  cursor: pointer;
+}
+
+/* Several sources in one popup: a rule between them. */
+.citation-preview .reference-body + .reference-body {
+  border-top: 1px solid var(--rule);
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+}
+
+.references {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--axis);
+  font: 0.85rem/1.45 var(--sans);
+}
+
+.reference-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.reference-heading h2 {
+  margin: 0;
+}
+
+.reference-export {
+  font: 0.75rem var(--sans);
+  color: var(--text-secondary);
+  background: none;
+  border: 1px solid var(--axis);
+  border-radius: 3px;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+}
+
+/* The list: each entry is a title line and a details line, numbered in the margin. */
+.reference-list {
+  margin: 0;
+  padding-left: 1.9rem;
+}
+
+.reference-list li {
+  margin: 0 0 0.75rem;
+  padding: 0.1rem 0 0.1rem 0.3rem;
+  border-radius: 3px;
+  scroll-margin-top: 2rem;
+  overflow-wrap: anywhere;
+}
+
+.reference-list li:target {
+  background: color-mix(in srgb, var(--series-1) 8%, transparent);
+}
+
+.reference-list li::marker {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.reference-body,
+.reference-head,
+.reference-meta,
+.reference-note {
+  display: block;
+}
+
+/* The title is the link to the source, underlined faintly so that it reads as one. */
+.reference-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: underline 1px color-mix(in srgb, var(--text-primary) 14%, transparent);
+  text-underline-offset: 0.2em;
+}
+
+.reference-title:hover {
+  color: var(--series-1);
+  text-decoration-color: currentColor;
+}
+
+/* In a popup, the number before the title goes to the entry in the list. */
+.reference-number {
+  margin-right: 0.35rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+}
+
+.reference-number:hover {
+  color: var(--series-1);
+}
+
+/* A source besides the title's (code, a notebook, the arXiv page): a small symbol, named on hover. */
+.reference-sources {
+  display: inline-flex;
+  gap: 0.1rem;
+  margin-left: 0.3rem;
+  vertical-align: -0.2em;
+}
+
+.reference-source {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 3px;
+  color: var(--text-muted);
+}
+
+.reference-source:hover,
+.reference-source:focus-visible {
+  color: var(--series-1);
+  background: color-mix(in srgb, var(--series-1) 10%, transparent);
+}
+
+.reference-source svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Authors, venue and year on one line; a long author list shows its full names on hover. */
+.reference-meta {
+  margin-top: 0.1rem;
+  font-size: 0.94em;
+  color: var(--text-secondary);
+}
+
+.reference-authors[title] {
+  cursor: help;
+}
+
+.reference-note {
+  margin-top: 0.15rem;
+  font-size: 0.9em;
+  color: var(--text-muted);
+}
+
+.reference-backlinks {
+  white-space: nowrap;
+}
+
+.reference-backlinks a {
+  text-decoration: none;
+}
+
+.reference-backlinks a + a {
+  margin-left: 0.4rem;
+}
+
+@media print {
+  .toc,
+  .citation-preview,
+  .reference-export,
+  .reference-backlinks,
+  .controls {
+    display: none !important;
+  }
+  .wrap {
+    max-width: none;
+    padding: 0;
+  }
+  .viz,
+  .reference-list li {
+    break-inside: avoid;
+  }
+}
+
+@media (max-width: 34rem) {
+  .wrap {
+    padding: 2rem 1rem 4rem;
+  }
+  .site-nav {
+    margin-bottom: 2.5rem;
+  }
+  .controls label {
+    flex-wrap: wrap;
+  }
+  .viz {
+    padding: 0.75rem;
+  }
+  .viz details {
+    overflow-x: auto;
+  }
+}
+
+
+/* --- annotated equations -------------------------------------------------
+   An .eq-card holds one display equation and its legend. A symbol takes its role's color wherever it appears,
+   $\state{v}$ (bloggie/lib/roles.js); a label that points at a term is \underbrace{x}_{\note{...}}, and
+   \state{\note{...}} gives the label the state's color. */
+
+.role-state { color: var(--role-state); }
+.role-coupling { color: var(--role-coupling); }
+.role-given { color: var(--role-given); }
+.role-truth { color: var(--role-truth); }
+
+/* An equation card is static, so it has no box (a box means an interactive figure): the equation is centered,
+   and its legend is indented from both sides, in smaller type. */
+.eq-card {
+  max-width: var(--content-width);
+  margin: 1.6rem 0;
+}
+
+.eq-card > .eq-legend,
+.eq-card > .eq-inspect {
+  padding-inline: 1.5rem;
+}
+
+@media (max-width: 520px) {
+  .eq-card > .eq-legend,
+  .eq-card > .eq-inspect {
+    padding-inline: 0.5rem;
+  }
+}
+
+.eq-card .katex-display {
+  margin: 0.4rem 0;
+  padding-block: 0.9rem; /* room for labels set with \mathclap, which add no height */
+}
+
+.eq-note {
+  color: var(--text-muted);
+  font-family: var(--sans);
+}
+
+.role-state .eq-note { color: var(--role-state); }
+.role-coupling .eq-note { color: var(--role-coupling); }
+.role-given .eq-note { color: var(--role-given); }
+.role-truth .eq-note { color: var(--role-truth); }
+
+.eq-legend ul {
+  list-style: none;
+  padding: 0.2rem 0 0;
+  margin: 0;
+  font-family: var(--sans);
+  font-size: 0.86rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.eq-legend li {
+  margin: 0 0 0.35rem;
+}
+
+.eq-legend li > .katex:first-child {
+  margin-right: 0.15rem;
+}
+
+/* Two equation cards side by side, to compare two models term by term: `<div class="eq-pair figure-wider">` around
+   two .eq-card, each led by `<p class="eq-pair-title">` that names its model. One column on a narrow screen. */
+.eq-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 2.5rem;
+  margin-block: 1.6rem;
+}
+
+.eq-pair > .eq-card {
+  max-width: none;
+  margin: 0;
+}
+
+.eq-pair-title {
+  margin: 0;
+  font: 600 0.9rem var(--sans);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+@media (max-width: 52rem) {
+  .eq-pair {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.2rem;
+  }
+}
+
+/* On a phone an equation that is still wider than the card scrolls inside it (.katex-display). */
+@media (max-width: 560px) {
+  .eq-card { padding-inline: 0.6rem; }
+  .eq-card .katex-display { font-size: 0.86em; }
+}
+
+/* "inspect the weights" under an equation: the small matrices, written out. */
+.eq-inspect {
+  margin-top: 0.6rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.eq-inspect > summary {
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: var(--text-secondary);
+}
+
+.eq-inspect > summary:hover {
+  color: var(--text-primary);
+}
+
+.eq-inspect .katex-display {
+  font-size: 0.85em;
+}
+
+/* A small figure beside the text (a wrapfig): floats right in the text column on a wide screen, and sits in
+   the flow, centered, on a phone. Equation cards and wide figures start below it. */
+.wrap .figure-aside {
+  float: right;
+  width: 15rem;
+  margin: 0.3rem 0 1rem 1.5rem;
+}
+
+@media (max-width: 40rem) {
+  .wrap .figure-aside {
+    float: none;
+    width: auto;
+    max-width: 18rem;
+    margin: 1.2rem auto;
+  }
+}
+
+.eq-card,
+.wrap > .figure-wide,
+.wrap > .figure-wider,
+.wrap > details > .figure-wider,
+.wrap > h2,
+.wrap > h3 {
+  clear: both;
+}
+
+/* Numbered figures (bloggie/lib/equations.js numbers them the same way for [](#fig-id) references): an element whose
+   id starts with "fig-" is the next figure, and its caption starts with "Figure n." */
+.wrap {
+  counter-reset: figure;
+}
+
+.wrap [id^="fig-"] {
+  counter-increment: figure;
+}
+
+.wrap [id^="fig-"] figcaption::before {
+  content: "Figure " counter(figure) ". ";
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* A caption written in the post, Markdown inside <figcaption>, is a paragraph: it runs on after "Figure n." */
+.wrap [id^="fig-"] figcaption > p:first-child {
+  display: inline;
+}

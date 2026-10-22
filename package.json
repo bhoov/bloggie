@@ -1,0 +1,43 @@
+{
+  "name": "bloggie",
+  "description": "Write one story with your AI agent. Publish it as an interactive blog post, and as a talk when you need one.",
+  "license": "Apache-2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "node bloggie/scripts/check-kit.js && node bloggie/scripts/check-colors.js && astro build && node bloggie/scripts/export-posts.js && node bloggie/scripts/check-links.js",
+    "preview": "astro preview",
+    "test": "node --test && npm run e2e",
+    "e2e": "npm run build && node bloggie/e2e/run.js",
+    "reset": "node bloggie/scripts/reset.js",
+    "bloggie:push": "node bloggie/scripts/push.js",
+    "bloggie:pull": "node bloggie/scripts/pull.js"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.1",
+    "@astrojs/mdx": "^8.0.2",
+    "@astrojs/svelte": "^9.0.1",
+    "astro": "^7.3.4",
+    "d3": "^7.9.0",
+    "katex": "^0.18.9",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "shiki": "^4.4.3",
+    "svelte": "^5.57.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "hast-util-from-html": "^2.0.3",
+    "hast-util-to-html": "^9.0.5",
+    "hast-util-to-text": "^4.0.2",
+    "remark-gfm": "^4.0.1",
+    "remark-mdx": "^3.1.1",
+    "remark-parse": "^11.0.0",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0"
+  },
+  "overrides": {
+    "katex": "$katex"
+  }
+}

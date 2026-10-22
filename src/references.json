@@ -1,0 +1,30 @@
+{
+  "hrm2025": {
+    "type": "paper",
+    "title": "Hierarchical Reasoning Model",
+    "authors": [
+      "Guan Wang",
+      "Jin Li",
+      "Yuhao Sun",
+      "Xing Chen",
+      "Changling Liu",
+      "Yue Wu",
+      "Meng Lu",
+      "Sen Song",
+      "Yasin Abbasi Yadkori"
+    ],
+    "year": 2025,
+    "venue": "arXiv:2506.21734",
+    "url": "https://arxiv.org/abs/2506.21734"
+  },
+  "trm2025": {
+    "type": "paper",
+    "title": "Less is More: Recursive Reasoning with Tiny Networks",
+    "authors": [
+      "Alexia Jolicoeur-Martineau"
+    ],
+    "year": 2025,
+    "venue": "arXiv:2510.04871",
+    "url": "https://arxiv.org/abs/2510.04871"
+  }
+}

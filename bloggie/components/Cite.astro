@@ -1,0 +1,12 @@
+---
+// <Cite key="hrm2025">[HRM]</Cite> links to a source in src/references.json; on the page,
+// bloggie/lib/citations.js numbers it in order of first use, [1], shows the source on hover, and lists it
+// under References at the end of the post. Text in brackets is replaced by the number; other words stay,
+// with the number after them (<Cite key="brouard2020">Brouard et al.</Cite> learn ...). Several sources:
+// key="hrm2025,trm2025" renders [1, 2] (the link goes to the first). An unknown key fails the build.
+import catalog from '../../src/references.json'
+
+const keys = Astro.props.key.split(',').map((key) => key.trim())
+for (const key of keys) if (!catalog[key]) throw new Error(`<Cite>: unknown reference key "${key}"`)
+---
+<a data-cite={keys.join(',')} href={catalog[keys[0]].url}><slot /></a>

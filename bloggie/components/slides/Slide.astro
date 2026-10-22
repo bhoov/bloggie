@@ -1,0 +1,96 @@
+---
+// One slide of a deck (bloggie/lib/slides.js shows one at a time). The body is ordinary Markdown and
+// math; `kind` chooses the layout and styles the Markdown it contains (bloggie/styles/slides.css).
+// The `#`/`##` heading shorthand (bloggie/lib/slide-headings.js) produces this same component, with
+// the heading passed in the `title` slot; written by hand, give `title` as a prop.
+//
+//   <Slide kind="text" title="Reasoning Is a Loop">
+//
+//   - Understand the **constraints**
+//   - Examine the current state
+//
+//   <Notes>What to say.</Notes>
+//   </Slide>
+//
+// kind      title     the talk title (`title`, may hold <br />) and `byline`
+//           divider   one large centered phrase (`title`, at most two lines)
+//           text      a title and a short list, or one statement paragraph
+//           reasons   a list whose items start with a **bold main idea**, then its description
+//           equation  a title, one $$ display equation, and a legend list whose items start with
+//                     the $symbol$ they explain
+//           problem   a picture of the task (first child) beside a list of text anchors
+//           demo      an optional one-line title over a live figure; `note` slot: a slide-only
+//                     description placed over the figure's empty region (`noteTop`, from the top
+//                     of the figure area, in stage pixels; default 440px)
+//           table     a title over a table from the post: <PostTable id="tbl-…" /> (bloggie/lib/post-tables.js)
+//           video     only the video, full bleed, on `bg` (the video's own background color)
+// title     the slide's title, as HTML (a `title` slot, from a heading, may also hold Markdown math)
+// label     the name the speaker view shows for this slide; defaults to the title, untagged
+// zoom      demo: figure zoom so its labels read from the back of the room (default 1.6)
+// svgMax    demo: cap on the figure's SVG heights before zoom, e.g. "390px"
+// eqSize    equation: display-equation font size in px, for a long equation (default 58)
+// cols      reasons: the items side by side in this many columns, e.g. two methods that a demo compares
+// size      divider: the phrase's font size in px, for a long phrase (default 112); a paragraph under a
+//           divider's heading is a one-line subtitle
+// eyebrow   a small line over the title that names the part of the talk, e.g. "What's next"
+// titleStyle  CSS for the title, e.g. "font-size: 60px" (the slide editor writes it)
+// edit      set under `npm run dev` only: the slide's index, for the slide editor (bloggie/editor/)
+const { kind = 'text', title: titleProp = '', byline, label, zoom, svgMax, eqSize, size, noteTop, bg, titleStyle, edit, cols, eyebrow } = Astro.props
+const titleEdit = edit == null ? undefined : `${edit}/t`
+const title = Astro.slots.has('title') ? await Astro.slots.render('title') : titleProp
+
+const kindClass = { title: 'title-slide', divider: 'divider', text: 'text', reasons: 'text reasons', equation: 'equation', problem: 'problem', demo: 'demo-slide', table: 'table-slide', video: 'video-slide' }[kind]
+if (!kindClass) throw new Error(`Slide: unknown kind "${kind}"`)
+const plainTitle = label ?? title.replace(/<br\s*\/?>/g, ' ').replace(/<[^>]+>/g, '').replace(/\$/g, '')
+const style = [
+  zoom && `--demo-zoom: ${zoom}`,
+  svgMax && `--svg-max: ${svgMax}`,
+  eqSize && `--eq-size: ${eqSize}px`,
+  size && `--divider-size: ${size}px`,
+  bg && `--video-bg: ${bg}`,
+  cols && `--cols: ${cols}`,
+].filter(Boolean).join('; ') || undefined
+const hasNote = Astro.slots.has('note')
+
+// Body kinds render their Markdown here so a list item that *starts* with $math$ or **bold** can be
+// tagged: `sym` (an equation legend's symbol column) and `lead` (a reason's main idea). CSS alone
+// cannot tell "starts with" from "contains": :first-child ignores the text before an element.
+const bodyKinds = ['text', 'reasons', 'equation', 'problem', 'table']
+const body = bodyKinds.includes(kind) && Astro.slots.has('default')
+  ? (await Astro.slots.render('default'))
+      .replace(/<li>(\s*)<span class="katex">/g, '<li>$1<span class="katex sym">')
+      .replace(/<li>(\s*)<strong>/g, '<li>$1<strong class="lead">')
+  : ''
+---
+<section class={`slide ${kindClass}${cols ? ' cols' : ''}`} data-title={plainTitle} style={style} data-edit-slide={edit}>
+  {kind === 'title' && (
+    <>
+      <h1 set:html={title} style={titleStyle} data-edit={titleEdit} />
+      {byline && <p class="byline">{byline}</p>}
+      <slot />
+    </>
+  )}
+  {kind === 'divider' && (
+    <>
+      <h1 set:html={title} style={titleStyle} data-edit={titleEdit} />
+      <slot />
+    </>
+  )}
+  {kind === 'video' && <slot />}
+  {kind === 'demo' && (
+    <>
+      {eyebrow && <p class="slide-eyebrow">{eyebrow}</p>}
+      {title && <h2 class="demo-header" set:html={title} style={titleStyle} data-edit={titleEdit} />}
+      {/* The note is inside the figure's scrolling area, so it scrolls with the figure and cannot land on
+          text that scrolls under it (an opened inspector panel). */}
+      <div class="demo"><slot />{hasNote && <div class="demo-note" style={noteTop ? `--note-top: ${noteTop}` : undefined}><slot name="note" /></div>}</div>
+    </>
+  )}
+  {bodyKinds.includes(kind) && (
+    <>
+      {eyebrow && <p class="slide-eyebrow">{eyebrow}</p>}
+      {title && <h2 set:html={title} style={titleStyle} data-edit={titleEdit} />}
+      <div class="slide-body" set:html={body} />
+    </>
+  )}
+</section>

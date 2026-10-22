@@ -1,0 +1,697 @@
+/* The slide editor's chrome (client.js; `npm run dev` only): a toolbar over the stage, the slide
+   list on the left (panel.js), the selection box and its handles, the snap guides, and the
+   Markdown editor. Colors are the site's
+   tokens (site.css), so the chrome follows the theme. */
+
+.se-on .deck-viewport {
+  top: 44px;
+  left: 212px;
+}
+
+.se-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  height: 44px;
+  padding: 0 10px;
+  font: 13px/1 var(--sans);
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border-bottom: 1px solid var(--rule);
+  /* A narrow window scrolls the toolbar sideways rather than wrapping it over the stage. */
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.se-toolbar > * {
+  flex-shrink: 0;
+}
+
+@media (max-width: 1500px) {
+  .se-file {
+    display: none;
+  }
+}
+
+.se-on .se-toolbar {
+  display: flex;
+}
+
+.se-toolbar button {
+  font: inherit;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--axis);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.se-toolbar button:hover:not(:disabled) {
+  background: var(--page);
+}
+
+.se-toolbar button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.se-toolbar button.se-on {
+  color: var(--surface-1);
+  background: var(--series-1);
+  border-color: var(--series-1);
+}
+
+.se-toolbar button svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+}
+
+.se-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.se-file {
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.se-what {
+  min-width: 7em;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.se-size {
+  width: 3.2em;
+  height: 28px;
+  font: inherit;
+  text-align: center;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--axis);
+  border-radius: 5px;
+  /* a plain box: A− and A+ beside it step the size, so it has no spinner */
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.se-size::-webkit-inner-spin-button,
+.se-size::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* The font menu: quiet, like a label, until the pointer or the focus is on it. */
+.se-font {
+  height: 28px;
+  max-width: 9.5em;
+  padding: 0 2px;
+  font: inherit;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.se-font:hover,
+.se-font:focus-visible {
+  color: var(--text-primary);
+  border-color: var(--axis);
+}
+
+.se-toolbar:not(.se-has-block) .se-needs-block {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.se-status {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-muted);
+}
+
+.se-status[data-kind="error"] {
+  color: var(--series-2);
+  font-weight: 600;
+}
+
+.se-end {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.se-toolbar .se-done {
+  color: var(--surface-1);
+  background: var(--series-1);
+  border-color: var(--series-1);
+  font-weight: 600;
+}
+
+/* A deck the editor cannot match to its file: only the message and Done. */
+.se-blocked > :not(.se-status, .se-end) {
+  display: none;
+}
+
+.se-help {
+  position: fixed;
+  top: 48px;
+  right: 12px;
+  display: grid;
+  gap: 6px;
+  width: 22rem;
+  padding: 12px 14px;
+  line-height: 1.4;
+  background: var(--surface-1);
+  border: 1px solid var(--axis);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
+}
+
+.se-help[hidden] {
+  display: none;
+}
+
+.se-help div {
+  display: grid;
+  grid-template-columns: 9.5rem 1fr;
+  gap: 8px;
+}
+
+.se-help kbd {
+  font: 12px var(--mono);
+  color: var(--text-secondary);
+}
+
+.se-help p {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+}
+
+.deck-nav .se-toggle.se-active {
+  color: var(--surface-1);
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+}
+
+/* On the stage: no text selection while blocks are dragged. */
+.se-on .deck {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.se-on .deck .slide.active [data-edit] {
+  cursor: move;
+}
+
+/* A demo note lets the mouse through to the figure under it (slides.css); while editing it is a
+   block to select like any other. */
+.se-on .deck .slide.active .demo-note {
+  pointer-events: auto;
+}
+
+/* The selection layer is in window coordinates, over the stage; only its handles take the mouse. */
+.se-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.se-hover,
+.se-box {
+  position: fixed;
+  display: none;
+  box-sizing: border-box;
+}
+
+.se-hover {
+  outline: 1px dashed var(--series-1);
+  outline-offset: 2px;
+}
+
+.se-box {
+  outline: 2px solid var(--series-1);
+  outline-offset: 2px;
+}
+
+.se-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  margin: -7px 0 0 -7px;
+  background: var(--surface-1);
+  border: 2px solid var(--series-1);
+  border-radius: 2px;
+  pointer-events: auto;
+}
+
+.se-handle[data-handle="nw"] { left: -2px; top: -2px; cursor: nwse-resize; }
+.se-handle[data-handle="ne"] { left: calc(100% + 2px); top: -2px; cursor: nesw-resize; }
+.se-handle[data-handle="sw"] { left: -2px; top: calc(100% + 2px); cursor: nesw-resize; }
+.se-handle[data-handle="se"] { left: calc(100% + 2px); top: calc(100% + 2px); cursor: nwse-resize; }
+.se-handle[data-handle="w"] { left: -2px; top: 50%; cursor: ew-resize; border-radius: 50%; }
+.se-handle[data-handle="e"] { left: calc(100% + 2px); top: 50%; cursor: ew-resize; border-radius: 50%; }
+
+/* A figure has no text to scale: only its width handles. */
+.se-box.se-no-scale .se-handle:is([data-handle="nw"], [data-handle="ne"], [data-handle="sw"], [data-handle="se"]) {
+  display: none;
+}
+
+.se-guide {
+  position: fixed;
+  display: none;
+  background: var(--series-2);
+}
+
+.se-guide-v {
+  width: 1px;
+}
+
+.se-guide-h {
+  height: 1px;
+}
+
+/* The Markdown editor, in place over the block. */
+.se-source {
+  position: fixed;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--series-1);
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+
+.se-source textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 3.2em;
+  padding: 8px 10px;
+  font: 15px/1.5 var(--mono);
+  color: var(--text-primary);
+  background: var(--page);
+  border: 1px solid var(--axis);
+  border-radius: 5px;
+  resize: vertical;
+}
+
+.se-source-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font: 12px/1.3 var(--sans);
+  color: var(--text-muted);
+}
+
+.se-source-hint {
+  flex: 1;
+}
+
+.se-source-error {
+  color: var(--series-2);
+  font-weight: 600;
+}
+
+.se-source button {
+  font: 13px var(--sans);
+  height: 28px;
+  padding: 0 10px;
+  color: var(--text-primary);
+  background: transparent;
+  border: 1px solid var(--axis);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.se-source .se-primary {
+  color: var(--surface-1);
+  background: var(--series-1);
+  border-color: var(--series-1);
+}
+
+.se-source.se-busy {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.se-toolbar button svg .se-fill {
+  fill: currentColor;
+}
+
+/* Several blocks selected, or the block around a selected element inside it. */
+.se-outline {
+  position: fixed;
+  display: none;
+  box-sizing: border-box;
+  outline: 1.5px solid var(--series-1);
+  outline-offset: 2px;
+  pointer-events: none;
+}
+
+/* An element inside a block: an outline, no handles. */
+.se-box.se-inner {
+  outline-style: dashed;
+  outline-color: var(--series-2);
+}
+
+.se-box.se-inner .se-handle {
+  display: none;
+}
+
+.se-marquee {
+  position: fixed;
+  display: none;
+  background: color-mix(in srgb, var(--series-1) 12%, transparent);
+  border: 1px solid var(--series-1);
+}
+
+/* The slide list (panel.js): thumbnails in a column on the left, the shown slide marked. */
+.se-panel {
+  position: fixed;
+  top: 44px;
+  left: 0;
+  bottom: 36px;
+  z-index: 45;
+  width: 212px;
+  box-sizing: border-box;
+  overflow: hidden auto;
+  padding: 0 8px 10px 4px;
+  background: var(--page);
+  border-right: 1px solid var(--rule);
+  font: 12px/1 var(--sans);
+  color: var(--text-muted);
+}
+
+.se-slide {
+  position: relative;
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  padding: 5px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  outline: none;
+}
+
+.se-slide-n {
+  width: 16px;
+  padding-top: 2px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.se-slide-frame {
+  position: relative;
+  overflow: hidden;
+  flex: none;
+  border-radius: 3px;
+  box-shadow: 0 0 0 1px var(--rule);
+  background: var(--surface-1);
+}
+
+.se-slide-stage {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1600px;
+  height: 900px;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+/* A thumbnail's copy of its slide: shown, still, every build step visible. */
+.se-slide-stage > .slide {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: none;
+}
+
+.se-slide-stage .step {
+  opacity: 1;
+}
+
+.se-slide.se-current .se-slide-frame {
+  box-shadow: 0 0 0 2px var(--series-1);
+}
+
+.se-slide.se-current .se-slide-n {
+  color: var(--series-1);
+  font-weight: 700;
+}
+
+.se-slide:focus-visible .se-slide-frame,
+.se-slide:focus .se-slide-frame {
+  box-shadow: 0 0 0 2px var(--series-1), 0 0 0 4px color-mix(in srgb, var(--series-1) 30%, transparent);
+}
+
+.se-slide-tools {
+  position: absolute;
+  right: 8px;
+  top: 9px;
+  display: none;
+  gap: 3px;
+}
+
+.se-slide:hover .se-slide-tools,
+.se-slide:focus .se-slide-tools {
+  display: flex;
+}
+
+.se-slide-tools button {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font: 13px/1 var(--sans);
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--axis);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.se-panel-head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 2px 8px 8px;
+  margin-bottom: 2px;
+  background: var(--page);
+  font: 600 12px/1 var(--sans);
+  color: var(--text-secondary);
+}
+
+.se-panel-head span {
+  flex: 1;
+}
+
+.se-panel-head button {
+  height: 24px;
+  padding: 0 7px;
+  font: 12px var(--sans);
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--axis);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.se-toolbar button svg .se-paper {
+  fill: var(--surface-1);
+}
+
+/* The color button shows the color of what is selected; its palette opens under it. */
+.se-colors {
+  position: relative;
+}
+
+.se-color-now {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: auto;
+  border-radius: 50%;
+  border: 1px solid var(--axis);
+}
+
+.se-toolbar .se-colors > button {
+  min-width: 28px;
+  width: 28px;
+  padding: 0;
+}
+
+.se-palette {
+  position: fixed;
+  top: 44px;
+  z-index: 55;
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--axis);
+  border-radius: 8px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.14);
+}
+
+.se-palette[hidden] {
+  display: none;
+}
+
+.se-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  max-width: 260px;
+}
+
+.se-palette button {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  padding: 0;
+}
+
+.se-palette button span {
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin: auto;
+  border-radius: 50%;
+  border: 1px solid var(--axis);
+  /* the "default" swatch: a slash through an empty circle */
+  background: linear-gradient(135deg, transparent 45%, var(--text-muted) 45% 55%, transparent 55%);
+}
+
+.se-palette button.se-on {
+  border-color: var(--series-1);
+  box-shadow: 0 0 0 1px var(--series-1);
+}
+
+/* The color's opacity, under the swatches. */
+.se-opacity {
+  display: grid;
+  grid-template-columns: auto 1fr 3.2em;
+  align-items: center;
+  gap: 8px;
+  font: 11px/1.2 var(--sans);
+  color: var(--text-muted);
+}
+
+.se-opacity input {
+  width: 100%;
+  margin: 0;
+  accent-color: var(--series-1);
+}
+
+.se-opacity output {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.se-recent-label,
+.se-none {
+  font: 11px/1.2 var(--sans);
+  color: var(--text-muted);
+}
+
+/* Selecting words in a block: the pointer selects text there, as on any page. */
+.se-on .deck .slide.active [data-edit].se-words {
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+.se-on .deck .slide.active [data-edit].se-words * {
+  cursor: text;
+}
+
+/* The eyedropper (eyedropper.js): a layer over the whole window takes the pointer, so a click takes
+   a color and nothing under it reacts; the loupe shows the place under the pointer magnified. */
+.se-eyedrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: transparent;
+}
+
+.se-loupe {
+  position: fixed;
+  z-index: 91;
+  display: none;
+  pointer-events: none;
+}
+
+.se-loupe-view {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 3px solid var(--surface-1);
+  box-shadow: 0 0 0 1px var(--axis), 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.se-loupe-page {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+}
+
+/* The place the color is taken from: the loupe's center. */
+.se-loupe-aim {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -6px 0 0 -6px;
+  border: 1px solid #fff;
+  outline: 1px solid #000;
+}
+
+.se-loupe-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px auto 0;
+  width: max-content;
+  padding: 4px 8px;
+  font: 12px/1 var(--mono);
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--axis);
+  border-radius: 6px;
+}
+
+.se-loupe-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  border: 1px solid var(--axis);
+}
