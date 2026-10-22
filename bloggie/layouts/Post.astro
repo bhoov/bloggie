@@ -159,8 +159,8 @@ const keyRoles = roles.filter((role) => frontmatter.roles?.includes(role.name))
       if (import.meta.env.DEV) document.addEventListener('live:render', () => setTimeout(toc.rebuild))
     }
 
-    // A link with data-select that points at a figure (`<a href="#fig-…" data-select="rule">`, as the Sudoku table's
-    // "demo" tags) passes the choice to it: the figure's mount gets data-select, which the figure reads when it starts
+    // A link with data-select that points at a figure (`<a href="#fig-…" data-select="rule">`, as a results table's
+    // "demo" links) passes the choice to it: the figure's mount gets data-select, which the figure reads when it starts
     // (it may start only once the link has scrolled it into view), and a figure-select event, for a figure already running.
     document.addEventListener('click', (event) => {
       const link = event.target instanceof Element ? event.target.closest('a[data-select][href^="#"]') : null

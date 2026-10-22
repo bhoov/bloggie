@@ -192,7 +192,7 @@ export function initCitations({ catalog, root = document.querySelector('main'), 
       }
       close()
     })
-    // "[HRM]" is a placeholder that the number replaces; other words ("Brouard et al.") stay, with the number after them.
+    // "[Transformer]" is a placeholder that the number replaces; other words ("Brouard et al.") stay, with the number after them.
     const words = /^\[[^\]]*\]$/.test(original.textContent.trim()) ? [] : [...original.childNodes]
     original.replaceWith(...words, wrapper)
   })

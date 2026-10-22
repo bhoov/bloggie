@@ -16,7 +16,7 @@ import { capture } from './capture.js'
 const CLIENT = fileURLToPath(new URL('./client.js', import.meta.url))
 // The page as the server rendered it, before the page's scripts change it: the document is parsed
 // ("interactive") before any module script runs. The browser keeps a record of each module the page
-// loads (client.js reads it), by default of 250 fetches; a post loads up to 61 now (the maze post).
+// loads (client.js reads it), by default of 250 fetches; a post with many figures loads 60 or more.
 const SNAPSHOT = `performance.setResourceTimingBufferSize(100000)
 document.addEventListener('readystatechange', function snap() {
   if (document.readyState !== 'interactive') return

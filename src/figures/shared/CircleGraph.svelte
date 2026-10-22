@@ -1,6 +1,6 @@
 <!--
-  The pointer-chase graph drawn as nodes on a circle, shared by the pointer-chase, unrolling and
-  inpainting figures. The figure decides every style; this component only draws.
+  A graph drawn as nodes on a circle, each with one arrow out, shared by the figures that walk such a graph. The
+  figure decides every style; this component only draws. Nodes are labeled A, B, C…
 
   <CircleGraph {graph} nodes={(i) => ({ ... })} hops={[...]} onnodeclick={(i) => ...} />
 
@@ -13,8 +13,9 @@
   size, nodeR, inset, bend, loopReach, labelSize: geometry, in viewBox units.
 -->
 <script>
-  import { letterOf } from '../pointer-chase/pointer-chase.js'
   import { ink, series } from '../../../bloggie/lib/colors.js'
+
+  const letterOf = (i) => String.fromCharCode(65 + i)
 
   let {
     graph,

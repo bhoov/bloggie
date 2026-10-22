@@ -154,7 +154,7 @@ export async function interactivePage(html, { out = defaultDist, site, base, dec
         sideEffects.push(asset(p['before-hydration-url']))
         p['before-hydration-url'] = ''
       }
-      // A data file that a figure fetches only when the reader asks for it (DenseHopfield's checkpoint, on "Load
+      // A data file that a figure fetches only when the reader asks for it (a model checkpoint, on "Load
       // demo") is in its props as the file's URL: that becomes the file itself, a data: URL, which fetch() reads from
       // a page opened from disk too.
       if (p.props) p.props = p.props.replace(/"([^"]*_astro\/[^"]+)"/g, (all, url) => (asset(url) ? JSON.stringify(dataUri(asset(url))) : all))

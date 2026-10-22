@@ -9,6 +9,8 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { copyProject, startDev } from './editor.js'
 
+const SECOND_SOURCE = { type: 'paper', title: 'A second source', authors: ['A. Author'], year: 2026, venue: 'e2e', url: 'https://example.com/' }
+
 const LABEL = 'live update'
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 const lines = (n, word) => Array.from({ length: n }, (_, i) => `${word} paragraph ${i + 1}, long enough to fill most of one line of the text column.`).join('\n\n')
@@ -66,6 +68,9 @@ ${lines(3, 'Other')}
 
 export async function liveChecks({ check, launch, root }) {
   const copy = copyProject(root, 'live-update-e2e-')
+  // A second source for the check that citations are numbered again when a new one comes first.
+  const referencesPath = join(copy, 'src/references.json')
+  writeFileSync(referencesPath, JSON.stringify({ ...JSON.parse(readFileSync(referencesPath, 'utf8')), 'e2e-second': SECOND_SOURCE }, null, 2))
   const post = join(copy, 'src/pages/posts/e2e-live')
   const files = {
     post: join(post, 'index.mdx'),
@@ -128,7 +133,7 @@ export async function liveChecks({ check, launch, root }) {
       await sleep(300)
       const top = await ev(`document.getElementById('reader').getBoundingClientRect().top`)
       // Above the reader: a longer paragraph, a new heading, and a citation that comes before the transformer's.
-      writeFileSync(files.post, originals.post.replace('Top paragraph 2,', `Top paragraph 2 now cites BERT <Cite key="devlin2019">[BERT]</Cite>, and is long enough to wrap onto a second line of the text column, so that the page grows above the reader.\n\n<h2 id="added">Added heading</h2>\n\nTop paragraph 2,`))
+      writeFileSync(files.post, originals.post.replace('Top paragraph 2,', `Top paragraph 2 now cites a second source <Cite key="e2e-second">[Second]</Cite>, and is long enough to wrap onto a second line of the text column, so that the page grows above the reader.\n\n<h2 id="added">Added heading</h2>\n\nTop paragraph 2,`))
       await page.waitFor(`document.getElementById('added')`, { what: 'the new heading' })
       await sleep(300)
       await notReloaded()
@@ -136,7 +141,7 @@ export async function liveChecks({ check, launch, root }) {
       if (after.count !== 3) throw new Error(`the counter reads ${after.count}, not 3: the figure started again`)
       if (Math.abs(after.top - top) > 1) throw new Error(`the reader's heading moved from ${top} to ${after.top} px`)
       if (!after.anchor) throw new Error('the new heading has no # anchor')
-      if (after.markers.join() !== '[1],[2]' || after.references.join() !== 'ref-devlin2019,ref-vaswani2017') throw new Error(`citations ${after.markers.join()}, references ${after.references.join()}: BERT, now first, should be [1]`)
+      if (after.markers.join() !== '[1],[2]' || after.references.join() !== 'ref-e2e-second,ref-vaswani2017') throw new Error(`citations ${after.markers.join()}, references ${after.references.join()}: the second source, now first, should be [1]`)
       return { counter: after.count, readerMoved: +(after.top - top).toFixed(2), citations: after.markers, references: after.references }
     })
 

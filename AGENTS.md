@@ -14,8 +14,7 @@ inline code or a code block is an example, as in this file, not a note.
 ## Where things go
 
 ```
-src/pages/posts/<slug>/        one post: index.mdx, slides.mdx (its deck, optional), data/*.json, media/,
-                               _experiments/ (its Python, optional)
+src/pages/posts/<slug>/        one post: index.mdx, slides.mdx (its deck, optional), data/*.json, media/
 src/figures/<figure>/          one figure: <Figure>.svelte, <figure>.js (numerics), describe.js, e2e.js
 src/figures/shared/            components that several figures use
 src/references.json            every cited source, keyed by a stable id
@@ -58,7 +57,7 @@ that needs it, and in a shared file add the new export beside the old one before
   diff then shows which sentence changed.
 - Put a working example beside each idea the text introduces. Keep most paragraphs to two to five sentences; give a
   key idea its own short paragraph, list or `<p class="standout">`. Mark a key term with `<dfn>` where it is defined.
-- A figure is a tag: `<PointerChase client:visible={{ rootMargin: '600px' }} />`. Pass it only what its first frame
+- A figure is a tag: `<AttentionWalk client:visible={{ rootMargin: '600px' }} />`. Pass it only what its first frame
   needs; Astro writes every prop into the HTML.
 - Cite with `<Cite key="vaswani2017">[Transformer]</Cite>`; the key must be in `src/references.json`. Text in
   brackets becomes the number; other words stay before it.
@@ -93,10 +92,3 @@ that needs it, and in a shared file add the new export beside the old one before
   deck in headless Chromium; report in `bloggie/e2e/report/`). Write a unit test only for what the end-to-end run
   cannot see, such as a gradient against finite differences, and only when the author agrees.
 - A new check must fail on the bug it is for: plant the bug once and see it fail.
-
-## Experiments
-
-A post's Python lives in `src/pages/posts/<slug>/_experiments/` (Astro skips `_` folders), with its own
-`pyproject.toml`, written first. The root `pyproject.toml` is a uv workspace of every `_experiments/`; `uv sync`
-installs them all. Runs write to `runs/` (gitignored). A number the post shows is copied into `data/*.json`, and its
-import carries a comment that names the script and run. The build runs no Python.

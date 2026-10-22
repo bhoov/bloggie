@@ -105,7 +105,7 @@ body {
   margin-left: calc((100% - min(var(--wide-width), calc(100vw - 3rem))) / 2);
 }
 
-/* A table with many columns (the Sudoku results) needs more than a wide figure; the same center line. In a collapsed
+/* A table with many columns (a results table) needs more than a wide figure; the same center line. In a collapsed
    section (`<details>`), the table widens the same way. */
 .wrap > .figure-wider,
 .wrap > details > .figure-wider {
@@ -590,7 +590,7 @@ blockquote.pullquote {
   margin-top: 2rem;
 }
 
-/* A key term at its definition, one the rest of the post depends on: <dfn>energy</dfn> in a post, where **bold** marks
+/* A key term at its definition, one the rest of the post depends on: <dfn>attention</dfn> in a post, where **bold** marks
    every other defined term. Bold, with an amber marker under the lower part of the line; amber is no symbol role's
    color (--role-*), so a marked word is never read as a colored symbol. */
 .wrap dfn {

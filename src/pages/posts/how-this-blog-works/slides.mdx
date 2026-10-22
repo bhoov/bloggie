@@ -4,7 +4,7 @@ title: How This Blog Works (slides)
 description: The talk version of "How this blog works"; its source uses each way to write a slide.
 ---
 
-import PointerChase from '@/figures/pointer-chase/PointerChase.svelte'
+import AttentionWalk from '@/figures/attention-walk/AttentionWalk.svelte'
 import RoleKey from '@bloggie/components/RoleKey.astro'
 
 # How This Blog Works
@@ -38,7 +38,7 @@ cd my-blog && npm run dev
 
 ## [demo zoom=1.5 svgMax=390px noteTop=310px] A Post Is a Story You Can Play With
 
-<PointerChase client:visible model="transformer" inspect={false} />
+<AttentionWalk client:visible />
 
 <p slot="note">The same figure as in the post: it **waits for Play**.</p>
 

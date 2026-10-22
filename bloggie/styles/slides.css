@@ -543,8 +543,8 @@
   max-width: none;
 }
 
-/* A slide-only description over a demo's empty region (the pointer-chase figures leave the
-   space under their belief bars empty on a slide). It sits inside the figure's scrolling area, so
+/* A slide-only description over a demo's empty region (a figure may leave
+   space under its readouts empty on a slide). It sits inside the figure's scrolling area, so
    it scrolls with the figure; that area is scaled by --demo-zoom, so its sizes are divided by the
    zoom to stay in stage pixels. --note-top (the slide's noteTop) counts from the top of the area. */
 .slide .demo {

@@ -4,8 +4,8 @@
 // selector in a block's data-steps (e.g. a table's tr:has(.baseline)) are one step together.
 //
 // Keys: → / Space / PageDown next · ← / PageUp previous · Home / End · F fullscreen ·
-// N notes · P speaker view · Esc back to the post (from the speaker view: close it). Keys typed into a figure's controls (sliders, buttons, the
-// energy scrubber) stay with the figure. The position is in the URL hash (#3.2 = slide 3,
+// N notes · P speaker view · Esc back to the post (from the speaker view: close it). Keys typed into a figure's controls (sliders, buttons, a
+// scrubber) stay with the figure. The position is in the URL hash (#3.2 = slide 3,
 // two steps shown), so a reload or a shared link keeps it. A presenter window (?presenter)
 // shows the notes, the next slide's title and a clock, and follows the same position.
 

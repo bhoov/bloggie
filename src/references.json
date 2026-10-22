@@ -1,17 +1,4 @@
 {
-  "devlin2019": {
-    "type": "paper",
-    "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
-    "authors": [
-      "Jacob Devlin",
-      "Ming-Wei Chang",
-      "Kenton Lee",
-      "Kristina Toutanova"
-    ],
-    "year": 2019,
-    "venue": "Proceedings of NAACL-HLT 2019, Volume 1 (Long and Short Papers), 4171–4186",
-    "url": "https://doi.org/10.18653/v1/N19-1423"
-  },
   "vaswani2017": {
     "type": "paper",
     "title": "Attention Is All You Need",

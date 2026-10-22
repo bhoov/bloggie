@@ -163,7 +163,7 @@ its figure components the same way: the deck must run the post's real interactiv
     text anchors, each starting with `<Mark kind="…" />` to tie it to the picture (the kinds are listed in
     `bloggie/components/slides/Mark.astro`; add one there for a new picture).
   - `demo`: an optional one-line `title` over a figure tag copied from the post (for example
-    `<PointerChase client:visible model="transformer" />` in the example deck). `zoom`
+    `<AttentionWalk client:visible />` in the example deck). `zoom`
     sizes the figure so its labels read from the back of the room; `svgMax` caps its SVG heights
     before zoom. A slide-only description over the figure's empty region is
     `<p slot="note">…</p>`, placed with `noteTop=310px` (from the top of the figure area); one

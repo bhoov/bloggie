@@ -13,8 +13,7 @@
     "build": "node bloggie/scripts/check-kit.js && node bloggie/scripts/check-colors.js && astro build && node bloggie/scripts/export-posts.js && node bloggie/scripts/check-links.js",
     "preview": "astro preview",
     "test": "node --test && npm run e2e",
-    "e2e": "npm run build && node bloggie/e2e/run.js",
-    "reset": "node bloggie/scripts/reset.js"
+    "e2e": "npm run build && node bloggie/e2e/run.js"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",
