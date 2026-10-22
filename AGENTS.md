@@ -11,7 +11,12 @@ demo site (`.github/workflows/demo.yml`).
 - A change here reaches every blog that updates. Keep a blog's files (`src/`, its `astro.config.mjs`, `package.json`)
   working as they are: add before you remove, and say in the commit what a blog must change, if anything.
 - The engine's dependencies are in this folder's `package.json`; a blog lists this folder as an npm workspace.
-- Commit engine changes apart from a blog's changes. From a blog, `git subtree push --prefix=bloggie <remote> <branch>`
-  sends them to a branch of the engine's repository, for a pull request.
+- From a blog, `node bloggie/scripts/publish.js -m "…" --yes` publishes `bloggie/` to a branch of the engine's
+  repository as one new commit with that message, for a pull request (`--remote <fork>` for a fork, `--main` for main).
+  None of the blog's commits or messages go. Write that message for the public.
+- Git: this repository's history is public and holds only engine commits. Commit here directly in a clone of it, or
+  publish from a blog with `scripts/publish.js` (one commit per publish, its message written for the public). Never
+  `git subtree push` a blog's history here, never force-push main, and keep main buildable: the demo deploys from it.
+  A blog takes new commits with `npm run bloggie:update`.
 - Check a change in a blog: `npm run build` and `npm run e2e` there. For the starter blog, make one with
   `node scripts/create.js <folder> --copy-engine` and run the same.

@@ -32,8 +32,11 @@ bloggie/                       the engine, Bloggie: its own repository, kept her
 - `bloggie/` imports only itself, `src/site.js`, `src/references.json`, `src/roles.js` and npm packages; the build
   fails otherwise (`bloggie/scripts/check-kit.js`). Code for one post stays outside `bloggie/`. A feature that every
   post can use goes in `bloggie/` with no post's names in it; `bloggie/AGENTS.md` has the engine's rules.
-- Commit a change to `bloggie/` on its own, apart from changes to posts, so that it can go back to Bloggie as it is.
-  `npm run bloggie:update` merges the latest Bloggie into `bloggie/`.
+- `npm run bloggie:update` merges the latest Bloggie into `bloggie/` (a git subtree); commit first, and resolve a
+  conflict as any merge conflict. Never force-push, and never rewrite history that is already pushed.
+- To send an engine change to Bloggie, publish it to a branch of your fork as one commit with a public message:
+  `node bloggie/scripts/publish.js --remote <your fork> -m "…"` (add `--yes` once the listed change is right), then
+  open a pull request. It never sends your blog's own commits; do not use `git subtree push`.
 
 ## Working with the author
 
