@@ -8,6 +8,7 @@
               "twoSlot":     joint descent of E(p, q) on a current and a next belief, then the handoff p ← q.
   params      data/pointer-chase-params.json: { n, seed, flag, beta, maxSteps }.
   matricesId  optional id of the node-token matrix in the inspector, so prose can link to it.
+  inspect     false hides the inspector of weights and encoding (true by default).
 -->
 <script>
   import { onDestroy } from 'svelte'
@@ -20,15 +21,14 @@
     energyTrajectory, energyProjection, twoSlotTrajectory,
   } from './pointer-chase.js'
 
-  let { model = 'transformer', params = {}, matricesId = null, medium = 'blog' } = $props() // medium: 'slide' in a deck (bloggie/lib/slide-headings.js)
+  let { model = 'transformer', params = {}, matricesId = null, inspect = true, medium = 'blog' } = $props() // medium: 'slide' in a deck (bloggie/lib/slide-headings.js)
 
   const DEFAULTS = { n: 8, seed: 5, flag: 7, beta: 5, maxSteps: 9 }
 
   // Each model: a trajectory of beliefs over the graph, the weights shown in the inspector, and its text.
   const MODELS = {
     transformer: {
-      // t = 1, not 0: frame 0 is the one-hot start, which β does not change.
-      initialT: 1,
+      initialT: 0,
       trajectory: transformerTrajectory,
       updateDescription: 'It is replaced -- not blended -- each loop by attention over the other nodes.',
       caption:
@@ -264,6 +264,7 @@
     </div>
   </div>
 
+  {#if inspect}
   <details class="pc-inspect">
     <summary>inspect the weights and encoding</summary>
     <div class="pc-matrices">
@@ -290,6 +291,7 @@
       {/if}
     </div>
   </details>
+  {/if}
 
   <figcaption>{m.caption}</figcaption>
 </figure>

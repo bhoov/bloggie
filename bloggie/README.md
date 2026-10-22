@@ -17,40 +17,104 @@ from it that runs the same live figures. Every post downloads as a single HTML f
 ## Start
 
 ```sh
-npx github:bhoov/bloggie my-blog     # copies Bloggie into my-blog/, dates the example post today, installs
+npx github:bhoov/bloggie my-blog     # start a new blog in my-blog/ and install its packages
 cd my-blog && npm run dev            # http://localhost:4321/
 ```
 
-Or clone it: `git clone https://github.com/bhoov/bloggie.git my-blog && cd my-blog && npm install`.
-Use Node 22 or later. Set your title, name and site address in `src/site.js`, and copy
-`src/pages/posts/how-this-blog-works/` to `src/pages/posts/<slug>/` to start a post.
+To name the blog at the start, add `--title "My blog" --author "Ada Lovelace" --url "https://ada.github.io/notes/"`
+to the first command; otherwise set them later in `src/site.js`. Or clone it:
+`git clone https://github.com/bhoov/bloggie.git my-blog && cd my-blog && npm install`.
+
+Use Node 22 or later. The example post, "How this blog works", shows every feature; copy its folder,
+`src/pages/posts/how-this-blog-works/`, to `src/pages/posts/<slug>/` to start a post.
 
 ## Commands and keys
 
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Preview at http://localhost:4321/ while you write |
-| `npm run build` | Check symbol colors, links and citations, then build `dist/` and each post's downloads |
-| `npm test` | The unit tests, then the end-to-end checks in headless Chromium |
+| `npm run build` | Check links and citations, then build `dist/` and each post's downloads |
 
-Only under `npm run dev`: each save is drawn in the open page without a reload, E on a deck opens the slide editor,
-and a download is built when you click it.
+When developing with `npm run dev`, pressing `e` on a deck opens the slide editor, downloads are prepared on click,
+and each save is drawn in the open page without a reload.
 
-| Key | Where | What it does |
-| --- | --- | --- |
-| S | post | open its deck |
-| T | post | fold or open the table of contents |
-| → ← Space, Home End | deck | next and previous slide, first and last |
-| F, N, P | deck | full screen, speaker notes, speaker view in a second window |
-| Esc | deck | back to the post |
-| E | deck, `npm run dev` | the slide editor; its keys follow Figma's (listed at the top of `bloggie/editor/client.js`) |
+On a post, press `s` to open its deck, or `t` to fold or open the table of contents. On a deck:
 
-## How this blog works
+| Key | What it does |
+| --- | --- |
+| `→` `←` `space` | next, previous slide |
+| `home` `end` | first, last slide |
+| `f` | full screen |
+| `n` | speaker notes |
+| `p` | speaker view, in a second window |
+| `esc` | back to the post |
+| `e` | the slide editor (under `npm run dev`); its keys follow Figma's |
 
-This section is the example post, `src/pages/posts/how-this-blog-works/index.mdx`, converted to GitHub Markdown. Run
-`npm run dev` to see it with its live figure and its deck.
+## Everything is a plain text file
 
-<!-- how-this-blog-works -->
+A post is one folder, and every file in it is text you can open in any editor:
+
+```
+src/pages/posts/<slug>/
+  index.mdx       the post: Markdown, math and figure tags
+  slides.mdx      its deck (optional)
+  data/  media/   the numbers and pictures it shows
+```
+
+The home page lists every post, newest first. Write one sentence per line, so that a diff shows which sentence changed.
+You can write a post or its slides yourself, in Markdown and HTML, or ask an agent to.
+
+## A post is a story you can play with
+
+A post mixes prose, equations, results and live demos. A figure is a demo the reader drives in the page; it waits for
+Play, so the page stays still until the reader asks.
+
+<img src=".github/readme/fig-walk.png" width="560" alt="The example post's figure: a walker on a graph of eight nodes, with play controls above and its belief over the nodes beside it.">
+
+Equations are typeset when the site builds, numbered and linked as in Quarto, with braces that name their terms and a
+legend that names their symbols.
+
+<img src=".github/readme/equation.png" width="560" alt="The self-attention equation from the example post, with braces under the attention weights and the values, and a legend of its symbols.">
+
+Citations are managed for you. Add a source once to `src/references.json` and cite it by its key; the post numbers
+each citation in order of first use, shows the source on hover, and lists every source at the end.
+
+## One story as blog and slides
+
+A post can have a deck, a talk version in a `slides.mdx` file beside it, which runs the same live figures. Ask an
+agent for it: the `blog-to-slides` skill ships with the blog, makes one idea per slide with text large enough for the
+back of the room, and checks every slide in a browser. Then fine-tune it with the mouse in the slide editor. Each
+change goes into `slides.mdx`, so your edits and an agent's mix freely. When the post changes, ask the agent to
+"update the deck for the changes to the post"; it keeps your layout.
+
+<img src="src/pages/posts/how-this-blog-works/media/slide-editor.png" width="720" alt="The slide editor on the example deck: a toolbar of font, size, color and alignment buttons above the slide, and a column of slide thumbnails on the left.">
+
+## One style, written down for your agent
+
+`AGENTS.md` is the blog's style guide and the manual for any coding agent (Claude Code and Codex both read it). Add
+your own rules, and every agent follows them in every post and deck. You write the argument; the agent builds and
+checks what it needs. For example:
+
+> Draft a post in `src/pages/posts/<slug>/` from these notes: …
+>
+> Build a figure for the post that shows …
+>
+> Read the post as a first-time reader in a browser, use every control, and list what is unclear.
+>
+> Make slides for the post with the blog-to-slides skill.
+
+Leave a note for the agent anywhere in a file as `((…))`, and it addresses the note and removes it.
+
+## Download for offline distribution
+
+The <img src=".github/readme/download.svg" height="14" alt="download"> in each post's byline downloads the post as
+one HTML file, with its styles, figures and deck inside. It opens from disk with no internet, so you can present from
+a laptop offline or send the post by email. The menu beside it also offers the post as text for an AI agent.
+
+## Publish
+
+Push to `main`, and GitHub Actions builds the site and publishes it to GitHub Pages. Once, in the repository's
+Settings → Pages, set the source to GitHub Actions.
 
 ## Contributing
 

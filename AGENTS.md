@@ -15,7 +15,7 @@ a correction. Address each one, then remove it, and say what you did for each. L
 ```
 src/pages/posts/<slug>/        one post: index.mdx, slides.mdx (its deck, optional), data/*.json, media/,
                                _experiments/ (its Python, optional)
-src/figures/<figure>/          one figure: <Figure>.svelte, <figure>.js (numerics), *.test.js, describe.js, e2e.js
+src/figures/<figure>/          one figure: <Figure>.svelte, <figure>.js (numerics), describe.js, e2e.js
 src/figures/shared/            components that several figures use
 src/references.json            every cited source, keyed by a stable id
 src/roles.js                   the symbol roles and their colors
@@ -44,7 +44,7 @@ the author to look:
 4. Review: read the post in a browser as a first-time reader, use every control, and list each problem with a fix.
    Do not change the author's prose without saying where.
 5. Deck: `slides.mdx`, with the `blog-to-slides` skill.
-6. Check: `node --test` and `npm run build` pass before a commit. Run `npm run e2e` when asked, or after a change to
+6. Check: `npm run build` passes before a commit. Run `npm run e2e` when asked, or after a change to
    several figures.
 
 The author keeps `npm run dev` open, so every save must leave every page compiling: write a file before the import
@@ -52,7 +52,8 @@ that needs it, and in a shared file add the new export beside the old one before
 
 ## Writing posts
 
-- One sentence per line; no hard wrap.
+- When writing posts and slides, prefer one sentence per line, and do not hard-wrap: editors wrap long lines, and a
+  diff then shows which sentence changed.
 - Put a working example beside each idea the text introduces. Keep most paragraphs to two to five sentences; give a
   key idea its own short paragraph, list or `<p class="standout">`. Mark a key term with `<dfn>` where it is defined.
 - A figure is a tag: `<PointerChase client:visible={{ rootMargin: '600px' }} />`. Pass it only what its first frame
@@ -86,9 +87,9 @@ that needs it, and in a shared file add the new export beside the old one before
 
 ## Testing
 
-- Prefer end-to-end checks (`npm run e2e`: every page, figure, download and deck in headless Chromium; report in
-  `bloggie/e2e/report/`). Keep a unit test only for what the end-to-end run cannot see, such as a gradient against
-  finite differences.
+- Keep unit tests to a minimum. Check a figure through its `e2e.js` (`npm run e2e`: every page, figure, download and
+  deck in headless Chromium; report in `bloggie/e2e/report/`). Write a unit test only for what the end-to-end run
+  cannot see, such as a gradient against finite differences, and only when the author agrees.
 - A new check must fail on the bug it is for: plant the bug once and see it fail.
 
 ## Experiments

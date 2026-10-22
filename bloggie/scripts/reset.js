@@ -81,6 +81,9 @@ const holdsBloggie = (dir) => bloggie.some((d) => d.startsWith(dir + '/'))
 const dropSlides = dropSlideComponents.filter((name) => !inBloggie(join(slideComponents, name)))
 const dropPosts = readdirSync(posts).filter((name) => !KEEP.includes(name) && statSync(join(posts, name)).isDirectory())
 const dropFigures = readdirSync(figures).filter((name) => !used.has(name) && !holdsBloggie(join(figures, name)) && statSync(join(figures, name)).isDirectory())
+// A kept figure's unit tests go too: a new blog keeps unit tests to a minimum, and the figure's e2e.js checks what the
+// example post shows.
+const dropTests = [...used].filter((name) => name !== 'shared').flatMap((name) => files(join(figures, name))).filter((f) => f.endsWith('.test.js') && !inBloggie(f))
 const dropShared = used.has('shared') || holdsBloggie(shared) ? readdirSync(shared).filter((name) => !usedShared.has(name) && !inBloggie(join(shared, name))) : []
 const dropReferences = Object.keys(references).filter((key) => !cited.has(key))
 
@@ -90,6 +93,7 @@ console.log(`  keep the example post: ${KEEP.map((p) => rel(join(posts, p))).joi
 console.log(`  delete ${dropPosts.length} post(s): ${dropPosts.join(', ') || 'none'}`)
 console.log(`  keep figure(s) the example uses: ${[...used].join(', ') || 'none'}`)
 console.log(`  delete ${dropFigures.length} figure(s): ${dropFigures.join(', ') || 'none'}`)
+console.log(`  delete ${dropTests.length} unit test(s) of the kept figures: ${dropTests.map(rel).join(', ') || 'none'}`)
 console.log(`  delete ${dropShared.length} unused file(s) in src/figures/shared: ${dropShared.join(', ') || 'none'}`)
 console.log(`  delete ${dropSlides.length} unused slide picture(s) in src/components/slides: ${dropSlides.join(', ') || 'none'}`)
 console.log(`  keep ${cited.size} reference(s), delete ${dropReferences.length}`)
@@ -102,6 +106,7 @@ if (!opts.yes) process.exit(0)
 
 for (const name of dropPosts) rmSync(join(posts, name), { recursive: true })
 for (const name of dropFigures) rmSync(join(figures, name), { recursive: true })
+for (const file of dropTests) rmSync(file)
 for (const name of dropShared) rmSync(join(shared, name))
 for (const name of dropSlides) rmSync(join(slideComponents, name))
 for (const key of dropReferences) delete references[key]

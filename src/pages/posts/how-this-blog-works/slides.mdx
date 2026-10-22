@@ -20,20 +20,20 @@ npx github:bhoov/bloggie my-blog
 cd my-blog && npm run dev
 ```
 
-<Notes>A static site built with Astro: no server, no database, no account. It redraws on every save. Then set your title and name in src/site.js, and copy this post's folder to start your own.</Notes>
+<Notes>A static site built with Astro: no server, no database, no account. It redraws on every save. Add --title, --author and --url to the first command to name the blog, or set them later in src/site.js. Copy this post's folder to start your own.</Notes>
 
 ## [demo zoom=1.5 svgMax=390px noteTop=310px] A Post Is a Story You Can Play With
 
-<PointerChase client:visible model="transformer" />
+<PointerChase client:visible model="transformer" inspect={false} />
 
 <p slot="note">The same figure as in the post: it **waits for Play**.</p>
 
-<Notes>A figure is a demo the reader drives. Describe what it should show, and an agent builds it, tests its numbers and checks it in a browser. A slow demo waits behind a Load demo button.</Notes>
+<Notes>A figure is a demo the reader drives, an ordinary web component. Write it yourself, or describe what it should show and an agent builds it and checks it in a browser. A slow demo waits behind a Load demo button.</Notes>
 
 ## [equation eqSize=54] Equations Explain Themselves
 
 $$
-\state{Y} = \underbrace{\operatorname{softmax}\!\left(\frac{\given{X}\coupling{W_Q}\,(\given{X}\coupling{W_K})^\top}{\sqrt{d}}\right)}_{\mathclap{\note{who attends to whom}}}\;\underbrace{\given{X}\coupling{W_V}}_{\mathclap{\note{what each token sends}}}
+\state{Y} = \underbrace{\operatorname{softmax}\!\left(\frac{\given{X}\coupling{W_Q}\,(\given{X}\coupling{W_K})^\top}{\sqrt{d}}\right)}_{\mathclap{\note{attention weights}}}\;\underbrace{\given{X}\coupling{W_V}}_{\note{values}}
 $$
 
 - $\given{X} \in \mathbb{R}^{N \times D}$ the tokens
@@ -43,11 +43,21 @@ $$
 
 <Notes>Typeset when the site builds, numbered and linked as in Quarto. Braces name the terms; the legend names the symbols.</Notes>
 
-## Learn the Colors Once, Read Every Equation
+## Citations Number Themselves
+
+```mdx
+<Cite key="vaswani2017">[1]</Cite>
+```
+
+Add a source once to **references.json**; the post numbers it and lists it at the end.
+
+<Notes>The number follows the order of first use, the source shows on hover or tap, and the build fails on a key that is not in src/references.json.</Notes>
+
+## Optional: One Color per Role
 
 <RoleKey />
 
-<Notes>A role has the same color in every post and deck, so the color says what a symbol does before the legend says what it is. Each blog names its roles in src/roles.js, and each post opens with a key of the roles it uses. The build checks that a symbol keeps its color everywhere.</Notes>
+<Notes>A stylistic choice, not a requirement. Name the roles and their colors in src/roles.js; a post that uses them opens with a key of its roles, and the build checks that a symbol keeps its color everywhere. A post that does not use them looks like any other.</Notes>
 
 # One Story as Blog and Slides
 
@@ -75,7 +85,7 @@ Change the post, then ask the agent to **update the deck**. Your layout stays.
 - One sentence per line, an example beside each idea
 - Add your own rules in plain English
 
-<Notes>Claude Code and Codex both read AGENTS.md. The build enforces the mechanical rules: a broken link, an unknown citation, or a symbol without its color stops npm run build.</Notes>
+<Notes>Claude Code and Codex both read AGENTS.md. The build enforces the mechanical rules: a broken link or an unknown citation stops npm run build.</Notes>
 
 ## [reasons] Download for Offline Distribution
 
@@ -89,13 +99,14 @@ Change the post, then ask the agent to **update the deck**. Your layout stays.
 - **index.mdx** the post
 - **slides.mdx** its deck
 - **data/** and **media/** what it shows
-- **_experiments/** the Python behind its numbers
 
-<Notes>The folder is src/pages/posts/ and a slug. Copy a folder to start a new post. One Python environment for the whole blog, managed by uv.</Notes>
+<Notes>The folder is src/pages/posts/ and a slug. Copy a folder to start a new post. One sentence per line, so a diff shows which sentence changed.</Notes>
 
 ## [table] Most Edits Are One Line
 
 <PostTable id="tbl-edits" />
+
+<Notes>You can write a post or its slides yourself, in Markdown and HTML in its .mdx file, or ask an agent to.</Notes>
 
 <Slide kind="text" title="Push to Publish">
 

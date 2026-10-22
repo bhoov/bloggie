@@ -29,10 +29,11 @@ cd my-blog && npm run dev        # http://localhost:4321/
 
 The site opens in your browser and redraws each time you save a file.
 It is a static site built with Astro—no server, no database, no account.
-You need Node 22 and git, and Python only for a post that runs experiments.
+You need Node 22 and git.
 The first command copies Bloggie into `my-blog/`, dates this post today, and installs its packages.
+Add `--title "My blog" --author "Ada Lovelace" --url "https://ada.github.io/notes/"` to it to name the blog, or set these later in `src/site.js`.
 
-To make the blog yours, set its title, your name and its address in `src/site.js`, and copy this post's folder to start your first post.
+To start your first post, copy this post's folder.
 Push the result to GitHub, and each push [publishes the site](#publish).
 
 <h2 id="story">A post is a story you can play with</h2>
@@ -41,9 +42,9 @@ A post mixes prose, equations, results and live demos.
 A **figure** is a demo the reader drives in the page.
 It waits for Play, so the page stays still until the reader asks; [](#fig-walk) is one.
 
-<div id="fig-walk"><PointerChase client:visible={{ rootMargin: '600px' }} model="transformer" /></div>
+<div id="fig-walk"><PointerChase client:visible={{ rootMargin: '600px' }} model="transformer" inspect={false} /></div>
 
-Describe what a figure should show, and an agent builds it, tests its numbers, and checks it in a browser.
+A figure is an ordinary web component: write it yourself, or describe what it should show and an agent builds it and checks it in a browser.
 A demo that needs seconds of work waits behind a *Load demo* button, so a page never stalls.
 
 Equations are typeset when the site builds, so they appear at once, and they are numbered and linked as in Quarto.
@@ -53,7 +54,7 @@ Each one can have braces that name its terms and a legend that names its symbols
 
 $$
 \label{eq-attention}
-\state{Y} = \underbrace{\operatorname{softmax}\!\left(\frac{\given{X}\coupling{W_Q}\,(\given{X}\coupling{W_K})^\top}{\sqrt{d}}\right)}_{\mathclap{\note{who attends to whom}}}\;\underbrace{\given{X}\coupling{W_V}}_{\mathclap{\note{what each token sends}}}
+\state{Y} = \underbrace{\operatorname{softmax}\!\left(\frac{\given{X}\coupling{W_Q}\,(\given{X}\coupling{W_K})^\top}{\sqrt{d}}\right)}_{\mathclap{\note{attention weights}}}\;\underbrace{\given{X}\coupling{W_V}}_{\note{values}}
 $$
 
 <div class="eq-legend">
@@ -67,23 +68,24 @@ $$
 </div>
 </div>
 
-A citation is a number in order of first use: hover over <Cite key="vaswani2017">[Transformer]</Cite>, or tap it, for its source.
-The post ends with the numbered References, and the build fails on a key that is not in `src/references.json`.
+Citations are managed for you.
+Add a source once to `src/references.json`, and cite it by its key.
+The post numbers each citation in order of first use, shows the source when the reader hovers over or taps the number, as <Cite key="vaswani2017">[Transformer]</Cite> does, and lists every source in the References at the end.
+The build fails on a key that is not in the file.
 
 Every section heading has a faint # that copies a link to it, so a reader can point a colleague at one paragraph.
 The sections are listed in the margin of a wide window, with the one you are reading marked; in a narrow window, scroll up a little and a bar at the top names it and opens the list.
 Press T to fold the list away or open it.
 
-<h3 id="symbol-colors">Symbol colors</h3>
+<h3 id="symbol-colors">Symbol colors (optional)</h3>
 
-Every post colors a math symbol by its role, and a role has the same color in every post and every deck.
-Each blog names its own roles and their colors in `src/roles.js`; this blog's are:
+If you like, color each math symbol by its role, as the equation above does, and keep that color in every post and deck.
+The roles and their colors are yours to name in `src/roles.js`; this blog's are:
 
 <RoleKey />
 
-The color says what a symbol does before its legend says what it is, so a reader who learns the colors once reads every equation on the blog faster.
-Each post opens with a key under its byline that names the roles the post uses, as this page's does.
-A role's name is its TeX macro, `$\given{X}$`, and the build checks that a symbol keeps its color wherever the post and its deck write it, in prose too.
+A post that uses them opens with a key of its roles under the byline, and the build checks that a symbol keeps its color everywhere.
+A post that does not use them looks like any other.
 
 <h2 id="slides">One Story as Blog and Slides</h2>
 
@@ -118,12 +120,12 @@ It keeps the layout you set with the editor.
 
 `AGENTS.md`, at the top of the repository, is the blog's style guide and the manual for any coding agent (Claude Code and Codex both read it).
 It says how a post is written, how a figure is built and tested, and how a deck looks.
-Some of its rules are one sentence per line, an example beside each idea, legends that read like slides, and one color per role.
+Some of its rules are one sentence per line, an example beside each idea, and legends that read like slides.
 Add your own rules, and every agent follows them in every post and deck.
-The build enforces the mechanical ones—a broken link within a page, an unknown citation, or a symbol without its color stops `npm run build`.
+The build enforces the mechanical ones: a broken link within a page or an unknown citation stops `npm run build`.
 
 You write the argument; the agent builds and checks what it needs.
-Prompts that work:
+For example:
 
 > Draft a post in `src/pages/posts/<slug>/` from these notes: …
 >
@@ -135,7 +137,7 @@ Prompts that work:
 
 <h2 id="downloads">Download for Offline Distribution</h2>
 
-The arrow in each post's byline downloads the post as one file, and its menu offers two kinds:
+The <svg viewBox="0 0 16 16" width="15" height="15" aria-label="download" style="vertical-align: -2px"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg> in each post's byline downloads the post as one file, and the menu beside it offers two kinds:
 
 - **Interactive page.** Styles, fonts, images, video, figures and the deck, all inside one HTML file. It opens from disk with a double click and needs no internet, so you can present from a laptop offline, or send the post by email.
 - **For agents.** The post as text for a language model, with math as MathML and its TeX source. Each figure becomes a description with traces from its own numbers, and the figures' source code is appended. Give it to another agent as reading material.
@@ -149,20 +151,14 @@ src/pages/posts/<slug>/
   index.mdx       the post: Markdown, math and figure tags
   slides.mdx      its deck
   data/  media/   the numbers and pictures it shows
-  _experiments/   the Python behind its numbers (optional)
 ```
 
 Copy this post's folder to start a new one; the home page lists every post, newest first.
 Front matter `tags: [wip]` marks a post in progress on the home page, and `tags: [archived]` hides it until the reader asks for it.
 Write one sentence per line, so that a diff shows which sentence changed.
 
-**Experiments live with the post.**
-A post's Python—its data generators, training runs and tests—sits in its `_experiments/` folder, beside the sentences that report its numbers.
-The whole blog shares one Python environment, managed by uv.
-A number the post shows is copied into `data/`, with a comment that names the run behind it.
-A figure can even run the post's own Python in the reader's browser, through MicroPython.
-
 **Edit by hand.**
+You can also write a post or its slides yourself, in Markdown and HTML in its `.mdx` file.
 Most edits are a line or two, as [the table below](#tbl-edits) shows.
 
 <figure id="tbl-edits">
@@ -177,7 +173,7 @@ Most edits are a line or two, as [the table below](#tbl-edits) shows.
 | Section | `<h2 id="setup">Setup</h2>` |
 | Equation | `$$ … $$`, with `\label{eq-name}` to number it |
 | Link to it | `[](#eq-name)`, shown as "Eq. (1)" |
-| Symbol color | `$\given{X}$`, one macro per role in `src/roles.js` |
+| Symbol color (optional) | `$\given{X}$`, one macro per role in `src/roles.js` |
 | Citation | `<Cite key="vaswani2017">[Transformer]</Cite>` |
 | Figure | its tag, such as `<PointerChase client:visible />` |
 | Slide | `## Title` in `slides.mdx` |
