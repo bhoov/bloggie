@@ -3,7 +3,8 @@
 // from it; it copies Bloggie into the folder, dates the example post today, makes the folder a git repository and runs
 // `npm install` there. The new blog gets a README of its own, its package is named after its title (or its folder),
 // and only bloggie/LICENSE stays: the root LICENSE is Bloggie's, and the blog's posts are the author's.
-// Options: --title "…", --author "…" and --url "https://…/" set the site's title, author and address in src/site.js (through bloggie/scripts/reset.js, which writes them); --no-install skips the install.
+// Options: --title "…" and --author "…" set the site's title and author in src/site.js, and --url "https://…/" its
+// address for a host other than GitHub Pages (through bloggie/scripts/reset.js, which writes them); --no-install skips the install.
 //
 // npm leaves .gitignore out of what it fetches, so the copy gets the list below when it has none, and it may leave out
 // the link .claude/skills/bloggie-slides (to .agents/skills/bloggie-slides, for Claude Code), which the copy gets again.
@@ -32,7 +33,7 @@ npm run dev      # http://localhost:4321/
 The page redraws each time you save a file.
 The example post, \`src/pages/posts/how-this-blog-works/\`, shows every feature.
 Copy its folder to start a post.
-Set the title, author and address in \`src/site.js\`.
+Set the title and author in \`src/site.js\`.
 
 ## Publish
 

@@ -29,7 +29,7 @@ cd my-blog && npm run dev        # http://localhost:4321/
 
 The first command copies Bloggie into `my-blog/`, dates this post today, and installs its packages.
 `--allow-git=root` lets npm 12 and later fetch Bloggie from GitHub.
-Add `--title "My blog" --author "Ada Lovelace" --url "https://ada.github.io/notes/"` to it to name the blog, or set these later in `src/site.js`.
+Add `--title "My blog" --author "Ada Lovelace"` to it to name the blog, or set these later in `src/site.js`.
 You need Node 22 or later and git.
 
 The second command opens the blog in your browser, and the page redraws each time you save a file.
@@ -217,4 +217,4 @@ The <svg viewBox="0 0 16 16" width="15" height="15" aria-label="download" style=
 
 Push the blog to a GitHub repository; each push to `main` builds the site and publishes it to GitHub Pages.
 Once, in the repository's Settings → Pages, set the source to GitHub Actions.
-Set the site's address in `src/site.js` (or with `--url` at the start), so that a downloaded post links back to it.
+The site's address comes from GitHub Pages when it builds, so a downloaded post links back to it.

@@ -3,6 +3,8 @@
 > Write one story with your AI agent.
 > Publish it as an interactive blog post that ports to slides when you need them.
 
+**Live demo:** the example post, https://bhoov.github.io/bloggie/posts/how-this-blog-works/, and its deck, https://bhoov.github.io/bloggie/posts/how-this-blog-works/slides/.
+
 Bloggie turns one plain-text story into an interactive blog post.
 When you are ready, an AI agent makes a talk deck from it that runs the same live figures.
 Every post downloads as a single HTML file that works offline.
@@ -27,7 +29,7 @@ Every post downloads as a single HTML file that works offline.
 
 ```sh
 npx --allow-git=root github:bhoov/bloggie my-blog     # start a new blog in my-blog/ and install its packages
-# npx --allow-git=root github:bhoov/bloggie my-blog --title "My blog" --author "Ada Lovelace" --url "https://ada.github.io/notes/"
+# npx --allow-git=root github:bhoov/bloggie my-blog --title "My blog" --author "Ada Lovelace"
 # OR add metadata later to `src/site.js`
 cd my-blog && npm run dev            # http://localhost:4321/
 ```

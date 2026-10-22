@@ -1,5 +1,5 @@
 // Reset the blog to a clean template for new content: `npm run reset` prints what it would do,
-// `npm run reset -- --yes` does it. Options: --title "…" --author "…" --url "https://…/".
+// `npm run reset -- --yes` does it. Options: --title "…" --author "…" --url "https://…/" (a host other than GitHub Pages).
 //
 // It keeps nothing custom. It keeps the example post (src/pages/posts/how-this-blog-works/) and deletes
 // every other post, every figure the kept post does not use (followed through the figures' own imports;
@@ -27,7 +27,7 @@ const { values: opts } = parseArgs({
     yes: { type: 'boolean', default: false },
     title: { type: 'string', default: 'My blog' },
     author: { type: 'string', default: 'Your Name' },
-    url: { type: 'string', default: 'https://example.github.io/my-blog/' },
+    url: { type: 'string', default: '' }, // blank: the address GitHub Pages gives the site (bloggie/lib/site-url.js)
   },
 })
 
@@ -125,7 +125,7 @@ for (const [key, value] of Object.entries({
   lede: 'Interactive essays with live figures, and a talk deck for each.',
 })) site = site.replace(new RegExp(`^(\\s*${key}: )'(?:[^'\\\\]|\\\\.)*'`, 'm'), `$1${quote(value)}`)
 // The comment above `url` describes this blog's own hosting; a new blog gets the general one.
-site = site.replace(/^(\s*)\/\/ The deployed site\.[^\n]*(?:\n\s*\/\/[^\n]*)*(?=\n\s*url: )/m, "$1// The deployed site. A downloaded copy of a post links back here (bloggie/scripts/export/common.js), and a heading's\n$1// # copies a link here.")
+site = site.replace(/^(\s*)\/\/ The deployed site\.[^\n]*(?:\n\s*\/\/[^\n]*)*(?=\n\s*url: )/m, "$1// The deployed site's address, for a host other than GitHub Pages; leave it blank, and the deploy workflow\n$1// gives the GitHub Pages address (bloggie/lib/site-url.js).")
 writeFileSync(sitePath, site)
 for (const [from, to] of resetFiles) renameSync(join(root, from), join(root, to))
 if (existsSync(lockPath)) rmSync(lockPath)

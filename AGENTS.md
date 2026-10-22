@@ -19,7 +19,7 @@ src/figures/<figure>/          one figure: <Figure>.svelte, <figure>.js (numeric
 src/figures/shared/            components that several figures use
 src/references.json            every cited source, keyed by a stable id
 src/roles.js                   the symbol roles and their colors
-src/site.js                    site title, author, URL
+src/site.js                    site title and author (and URL, for a host other than GitHub Pages)
 bloggie/                       the engine: layouts, components, slide kit and editor, styles, checks, e2e runner
 ```
 

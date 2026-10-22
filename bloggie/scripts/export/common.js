@@ -4,9 +4,7 @@ import { readFileSync } from 'node:fs'
 import { extname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { visit, SKIP } from 'unist-util-visit'
-import { site as siteConfig } from '../../../src/site.js'
-
-const siteUrl = siteConfig.url
+import { siteUrl } from '../../lib/site-url.js'
 
 export const root = fileURLToPath(new URL('../../../', import.meta.url))
 export const dist = join(root, 'dist')

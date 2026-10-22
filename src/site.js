@@ -1,9 +1,9 @@
 // Site-wide constants used by the layouts and the home page.
 export const site = {
   title: 'My blog',
-  // The deployed site. A downloaded copy of a post links back here (bloggie/scripts/export/common.js), and a heading's
-  // # copies a link here.
-  url: 'https://example.github.io/my-blog/',
+  // The deployed site's address, for a host other than GitHub Pages; leave it blank, and the deploy workflow
+  // gives the GitHub Pages address (bloggie/lib/site-url.js).
+  url: '',
   author: 'Your Name',
   description: 'Interactive essays by Your Name.',
   lede: 'Interactive essays with live figures, and a talk deck for each.',
