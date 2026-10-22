@@ -71,4 +71,5 @@ if (opts['copy-engine']) {
   run('git', ['subtree', 'add', '--prefix=bloggie', opts.engine, opts.ref, '-m', 'Add Bloggie, the engine, as bloggie/'], { stdio: 'inherit' })
 }
 if (!opts['no-install']) run('npm', ['install', '--no-audit', '--no-fund'], { stdio: 'inherit' })
-console.log(`\nbloggie: a new blog in ${to}\n  cd ${relative(process.cwd(), to) || '.'} && npm run dev`)
+const near = relative(process.cwd(), to) // the folder as typed, unless that path climbs out of here
+console.log(`\nbloggie: a new blog in ${to}\n  cd ${near.startsWith('..') ? to : near || '.'} && npm run dev`)
