@@ -28,7 +28,7 @@ jobs:
       - id: pages
         uses: actions/configure-pages@v5
       - name: Make the demo blog
-        run: node scripts/create.js "$RUNNER_TEMP/demo" --copy-engine --no-install
+        run: node scripts/create.js "$RUNNER_TEMP/demo" --copy-engine --no-install --title "Bloggie"
       - name: Build it
         working-directory: ${{ runner.temp }}/demo
         run: npm install --no-audit --no-fund && npm run build
