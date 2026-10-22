@@ -36,6 +36,8 @@ const files = (dir) => readdirSync(dir).flatMap((name) => {
   return statSync(path).isDirectory() ? files(path) : [path]
 })
 const read = (path) => readFileSync(path, 'utf8')
+// A folder's entries, or none when a blog has no such folder (a blog made by reset has no slide pictures).
+const list = (dir) => (existsSync(dir) ? readdirSync(dir) : [])
 
 // Figures the kept posts use: `@/figures/<name>/` in a post, then `../<name>/` inside a figure. A figure
 // is its whole folder; src/figures/shared/ holds single files, so only the files imported from it stay.
@@ -62,7 +64,7 @@ if (usedShared.size) used.add('shared')
 
 // Slide pictures the kept files use (a tag or an import in a kept post, or the slide engine's own Slide and Notes).
 const keptText = [...queue, ...files(join(root, 'bloggie/lib')), ...files(join(root, 'bloggie/layouts'))].map(read).join('\n')
-const dropSlideComponents = readdirSync(slideComponents).filter((name) => {
+const dropSlideComponents = list(slideComponents).filter((name) => {
   const component = name.replace(/\.astro$/, '')
   return !new RegExp(`<${component}\\b|/${component}\\.astro`).test(keptText)
 })
@@ -80,11 +82,11 @@ const inBloggie = (path) => bloggie.some((d) => path === d || path.startsWith(d 
 const holdsBloggie = (dir) => bloggie.some((d) => d.startsWith(dir + '/'))
 const dropSlides = dropSlideComponents.filter((name) => !inBloggie(join(slideComponents, name)))
 const dropPosts = readdirSync(posts).filter((name) => !KEEP.includes(name) && statSync(join(posts, name)).isDirectory())
-const dropFigures = readdirSync(figures).filter((name) => !used.has(name) && !holdsBloggie(join(figures, name)) && statSync(join(figures, name)).isDirectory())
+const dropFigures = list(figures).filter((name) => !used.has(name) && !holdsBloggie(join(figures, name)) && statSync(join(figures, name)).isDirectory())
 // A kept figure's unit tests go too: a new blog keeps unit tests to a minimum, and the figure's e2e.js checks what the
 // example post shows.
 const dropTests = [...used].filter((name) => name !== 'shared').flatMap((name) => files(join(figures, name))).filter((f) => f.endsWith('.test.js') && !inBloggie(f))
-const dropShared = used.has('shared') || holdsBloggie(shared) ? readdirSync(shared).filter((name) => !usedShared.has(name) && !inBloggie(join(shared, name))) : []
+const dropShared = used.has('shared') || holdsBloggie(shared) ? list(shared).filter((name) => !usedShared.has(name) && !inBloggie(join(shared, name))) : []
 const dropReferences = Object.keys(references).filter((key) => !cited.has(key))
 
 const rel = (path) => relative(root, path)
