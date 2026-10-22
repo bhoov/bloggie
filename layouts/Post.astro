@@ -9,7 +9,7 @@ import { existsSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { createMarkdownProcessor } from '@astrojs/markdown-remark'
 import Base from './Base.astro'
-import { site, longDate, isoDate } from '../../src/site.js'
+import { site, longDate, isoDate } from '@/site.js'
 import { siteUrl } from '../lib/site-url.js'
 import { roles } from '../lib/roles.js'
 
@@ -102,7 +102,7 @@ const keyRoles = roles.filter((role) => frontmatter.roles?.includes(role.name))
     </nav>
   )}
   <script>
-    import catalog from '../../src/references.json'
+    import catalog from '@/references.json'
     import { initCitations } from '../lib/citations.js'
     import { initToc } from '../lib/toc.js'
 

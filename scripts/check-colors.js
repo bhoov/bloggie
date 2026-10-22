@@ -8,10 +8,9 @@
 // `node bloggie/scripts/check-colors.js --fix` wraps each spelling without its role in the role's macro, and says where.
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { roles } from '../lib/roles.js'
 
-const root = fileURLToPath(new URL('../..', import.meta.url))
+const root = process.cwd() // the blog (lib/blog.js)
 const postsDir = join(root, 'src/pages/posts')
 const fix = process.argv.includes('--fix')
 

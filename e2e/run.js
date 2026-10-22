@@ -23,9 +23,9 @@ import { editorChecks } from './editor.js'
 import { liveChecks } from './live.js'
 import { tocList, tocUse, tocSpace } from './toc.js'
 
-const root = fileURLToPath(new URL('../../', import.meta.url))
+const root = process.cwd() // the blog (lib/blog.js)
 const dist = join(root, 'dist')
-const reportDir = join(root, 'bloggie/e2e/report')
+const reportDir = fileURLToPath(new URL('report/', import.meta.url))
 const started = Date.now()
 if (!existsSync(join(dist, 'index.html'))) throw new Error('e2e: dist/ is empty; run `npm run e2e`, which builds first')
 rmSync(reportDir, { recursive: true, force: true })
@@ -61,7 +61,7 @@ const htmlPages = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((en
 })
 
 const hasDeck = (post) => existsSync(join(dist, 'posts', post, 'slides', 'index.html'))
-const siteUrl = (await import('../../src/site.js')).site.url
+const siteUrl = (await import('../lib/blog.js')).site.url
 
 const browser = await launch()
 const page = await browser.newPage()

@@ -1,6 +1,6 @@
 // The attention walk: at loop 0 the walker is on its start, and after the last loop it is on the flag.
 // Run by bloggie/e2e/run.js (bloggie/e2e/figures.js loads it); see bloggie/e2e/figures.js for what a check file exports.
-import { $island, setRange, readout, expect } from '../../../bloggie/e2e/helpers.js'
+import { $island, setRange, readout, expect } from 'bloggie/e2e/helpers.js'
 
 async function attentionWalk(page, i) {
   // The start and the flag, from the node titles the graph draws ("F (start) -- …", "… H (flag)").

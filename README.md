@@ -28,14 +28,14 @@ Every post downloads as a single HTML file that works offline.
 ## Start
 
 ```sh
-npx --allow-git=root github:bhoov/bloggie my-blog     # start a new blog in my-blog/ and install its packages
-# npx --allow-git=root github:bhoov/bloggie my-blog --title "My blog" --author "Ada Lovelace"
+npm create bloggie my-blog           # start a new blog in my-blog/ and install its packages
+# npm create bloggie my-blog -- --title "My blog" --author "Ada Lovelace"
 # OR add metadata later to `src/site.js`
 cd my-blog && npm run dev            # http://localhost:4321/
 ```
 
-`--allow-git=root` lets npm 12 and later fetch Bloggie from GitHub; older npm ignores it.
-The new blog is your own git repository; Bloggie, the engine, is its `bloggie/` folder, and `npm run bloggie:update` brings in later versions.
+The new blog is your own git repository; Bloggie, the engine, is an npm package, and `npm run bloggie:update` installs its latest version.
+To change the engine and send pull requests, start with `npm create bloggie my-blog -- --git` instead: the engine is then your blog's `bloggie/` folder, a git subtree (see Contributing).
 
 Use Node 22 or later.
 See the example post, "How this blog works", for features.
@@ -132,8 +132,8 @@ Once, in the repository's Settings → Pages, set the source to GitHub Actions.
 
 ## Contributing
 
-This repository is the engine, and `template/` is the starter blog that `npx` copies and the demo site shows.
-In a blog, the engine is the `bloggie/` folder, kept as a git subtree.
+This repository is the engine, and `template/` is the starter blog that `npm create bloggie` copies and the demo site shows.
+In a blog made with `--git`, the engine is the `bloggie/` folder, kept as a git subtree.
 To change it, edit `bloggie/` in your blog and commit, then run `npm run bloggie:push -- -m "What changed" --body "Why" --yes`.
 With the GitHub CLI (`gh`) logged in, it makes your fork if needed, pushes the change to a branch of it and opens a pull request here.
 Without `gh`, fork this repository, add `--remote <your fork's URL>`, and open the pull request from the link it prints.

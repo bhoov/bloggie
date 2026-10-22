@@ -1,0 +1,19 @@
+{
+  "name": "create-bloggie",
+  "version": "0.3.0",
+  "description": "Start a Bloggie blog: npm create bloggie my-blog",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhoov/bloggie.git",
+    "directory": "create"
+  },
+  "homepage": "https://github.com/bhoov/bloggie",
+  "type": "module",
+  "bin": {
+    "create-bloggie": "index.js"
+  },
+  "files": [
+    "index.js"
+  ]
+}

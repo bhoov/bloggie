@@ -3,7 +3,7 @@
 // traces computed by the figure's own numerics; the numerics source is appended. No scripts or media.
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { fromHtml } from 'hast-util-from-html'
 import { toHtml } from 'hast-util-to-html'
 import { toText } from 'hast-util-to-text'
@@ -11,6 +11,11 @@ import { visit, SKIP } from 'unist-util-visit'
 import { esc } from '../../lib/describe.js'
 import { roles } from '../../lib/roles.js'
 import { dist, distAsset, hasClass, islandProps, root, siteLinks } from './common.js'
+
+// A file a describe.js names in `sources`, from the blog's folder; `bloggie/…` is the engine's file wherever it is
+// installed (node_modules/bloggie/, or the blog's bloggie/ folder).
+const engine = fileURLToPath(new URL('../../', import.meta.url))
+const sourcePath = (file) => existsSync(join(root, file)) ? join(root, file) : join(engine, file.replace(/^bloggie\//, ''))
 
 // Component name -> its folder's describe.js, for every figure in src/figures/.
 async function describers() {
@@ -135,7 +140,7 @@ export async function agentPage(html, { references, out = dist, site, base }) {
     if (!r) throw new Error(`export: reference ${key} is not in src/references.json`)
     return `<li id="ref-${key}">${esc(r.authors?.join(', ') ?? '')} (${r.year}). ${esc(r.title)}. ${esc(r.venue ?? '')}. <span class="url">${esc(r.url)}</span></li>`
   })
-  const code = sources.map((file) => `<section><h3>${esc(file)}</h3><pre><code>${esc(readFileSync(join(root, file), 'utf8'))}</code></pre></section>`)
+  const code = sources.map((file) => `<section><h3>${esc(file)}</h3><pre><code>${esc(readFileSync(sourcePath(file), 'utf8'))}</code></pre></section>`)
   const body = toHtml(main.children, { allowDangerousHtml: true })
 
   return `<!doctype html>

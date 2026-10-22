@@ -20,25 +20,32 @@ src/figures/shared/            components that several figures use
 src/references.json            every cited source, keyed by a stable id
 src/roles.js                   the symbol roles and their colors
 src/site.js                    site title and author (and URL, for a host other than GitHub Pages)
-bloggie/                       the engine, Bloggie: its own repository, kept here as a git subtree (see below)
+node_modules/bloggie/          the engine, Bloggie, an npm package (in a blog made with --git, a link to bloggie/)
 ```
 
 - A post's slug is stable and has no date; the date is front matter. The home page lists posts newest first.
   Front matter `tags: [wip]` marks a draft and `tags: [archived]` hides a post; add a tag only when the author asks.
   Set `edited:` to the day you change a post's text, results or figures.
-- Site-wide CSS is `bloggie/styles/site.css` (color tokens, the figure kit `.viz`, `.controls`, `.readout`). A
+- Site-wide CSS is `node_modules/bloggie/styles/site.css` (color tokens, the figure kit `.viz`, `.controls`, `.readout`). A
   figure's own CSS stays in its `.svelte` file.
 - Dependencies come from npm through `package.json`; no CDN script tags.
-- `bloggie/` imports only itself, `src/site.js`, `src/references.json`, `src/roles.js` and npm packages; the build
-  fails otherwise (`bloggie/scripts/check-kit.js`). Code for one post stays outside `bloggie/`. A feature that every
-  post can use goes in `bloggie/` with no post's names in it; `bloggie/AGENTS.md` has the engine's rules.
-- `npm run bloggie:update` merges the latest Bloggie into `bloggie/` (a git subtree); commit first, and resolve a
-  conflict as any merge conflict. Never force-push, and never rewrite history that is already pushed.
+- Import the engine's code as `bloggie/…` (`import { series } from 'bloggie/lib/colors.js'`) and its components and
+  layouts as `@bloggie/…`. Code for one post or figure stays in `src/`. Never edit `node_modules/bloggie/`: npm
+  replaces it. `node_modules/bloggie/AGENTS.md` has the engine's rules.
+- `npm run bloggie:update` installs the latest Bloggie. Never force-push, and never rewrite history that is already
+  pushed.
 
 ### Suggesting a change to Bloggie
 
-When you fix a bug in `bloggie/`, or add a feature that any blog could use, offer the author to send it to Bloggie as a
+When you find a bug in Bloggie, or a feature that any blog could use, offer the author to send a fix to Bloggie as a
 pull request. Send it only once the author agrees: the commit message, the description and the code are public.
+
+In a blog that uses Bloggie as an npm package (`package.json` lists `bloggie` as a dependency), make the change in a
+clone of Bloggie: `gh repo fork bhoov/bloggie --clone`, change it there, check it in a starter blog made from the clone
+(`node scripts/create.js ../check --copy-engine`, then `npm run build` in `../check`), and open the pull request with
+`gh pr create`. The steps below are for a blog made with `--git`, whose engine is its own `bloggie/` folder
+(`package.json` lists `bloggie` under `workspaces`); there `npm run bloggie:update` merges Bloggie's main into
+`bloggie/` (commit first, and resolve a conflict as any merge conflict).
 
 1. Keep the change general: no post's names, data, unpublished results or private paths (`bloggie/AGENTS.md`).
 2. `npm run bloggie:update`, then commit the change to `bloggie/` in this blog. Everything in `bloggie/` that differs
@@ -83,7 +90,7 @@ that needs it, and in a shared file add the new export beside the old one before
   equation, an id that starts with `fig-` numbers a figure, and `[](#eq-id)` / `[](#fig-id)` render "Eq. (n)" /
   "Fig. n". An equation must not scroll sideways.
 - Color each symbol by its role with the macros of `src/roles.js` (`\given{X}`), everywhere the post and its deck
-  write it. `npm run build` fails on a colored symbol written without its role; `node bloggie/scripts/check-colors.js
+  write it. `npm run build` fails on a colored symbol written without its role; `node node_modules/bloggie/scripts/check-colors.js
   --fix` adds it, and `\plain{…}` keeps one appearance plain. Add or change roles in `src/roles.js`.
 - Give each section an id, `<h2 id="setup">…</h2>`, and make every "the figure below" or "the previous section" a
   link. The build fails on an in-page link without a target. `<h2>` and `<h3>` with ids form the table of contents.
@@ -107,6 +114,6 @@ that needs it, and in a shared file add the new export beside the old one before
 ## Testing
 
 - Keep unit tests to a minimum. Check a figure through its `e2e.js` (`npm run e2e`: every page, figure, download and
-  deck in headless Chromium; report in `bloggie/e2e/report/`). Write a unit test only for what the end-to-end run
+  deck in headless Chromium; report in `node_modules/bloggie/e2e/report/`). Write a unit test only for what the end-to-end run
   cannot see, such as a gradient against finite differences, and only when the author agrees.
 - A new check must fail on the bug it is for: plant the bug once and see it fail.
