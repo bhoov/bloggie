@@ -1,6 +1,5 @@
 // What each figure must do when a reader uses it, checked through its controls and readouts only. Each figure's
-// checks are in its own folder, src/figures/<figure>/e2e.js, so that they go with the figure (npm run reset deletes
-// both). A check file exports
+// checks are in its own folder, src/figures/<figure>/e2e.js, so that they go with the figure (a figure's folder holds both). A check file exports
 //   checks: { <Component>: (page, i, shared) => observed }. Each runs against the i-th astro-island of a page that
 //     uses <Component>, returns the observed values for the report, and throws when the figure does not do what the
 //     post says. `shared` is one object for all the checks on a page (the walking figures put their paths there).

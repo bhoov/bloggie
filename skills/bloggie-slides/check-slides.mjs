@@ -4,7 +4,7 @@
 //   node .agents/skills/bloggie-slides/check-slides.mjs http://localhost:4321/posts/<slug>/slides/ <screenshot-dir>
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { launch } from '../../../bloggie/e2e/browser.js'
+import { launch } from '../../e2e/browser.js'
 
 const [url, out = 'slide-shots'] = process.argv.slice(2)
 if (!url) throw new Error('usage: node check-slides.mjs <deck URL> [screenshot-dir]')

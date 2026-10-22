@@ -2,7 +2,7 @@
 // draws its change in the open page without a reload. The checks save files, so they run on a copy of the
 // project with its own dev server, as the slide editor's do (bloggie/e2e/editor.js). The copy gets a post of its own
 // (a counter figure, citations, a reader's place below the fold) and a second post, so that the checks do not
-// depend on any post the blog has, and still run after `npm run reset`. Each check saves a file as an editor
+// depend on any post the blog has, and still run in a new blog. Each check saves a file as an editor
 // would, waits for the page to show the save, and reads the page through the DevTools protocol. A second page
 // shows the other post, as when an agent works on one post while the author reads another.
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'

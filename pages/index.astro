@@ -1,14 +1,15 @@
 ---
-// The home page: every post under src/pages/posts/<slug>/index.mdx, newest first. A folder whose
+// The home page: every post under the blog's src/pages/posts/<slug>/index.mdx, newest first. The engine adds it as
+// the route / (astro.config.js), unless the blog has a src/pages/index.astro of its own. A folder whose
 // name starts with "_" is not a page (Astro skips it), so it is not listed either.
 // A post with no tags is part of the main story. Front matter `tags: [wip]` or `tags: [archived]` sets a post apart:
 // the reader shows or hides each tag with a checkbox above the list, and a post shows when none of its tags is off.
 // Front matter `edited:` is the date of the post's last edit. When the reader checks "Last edited", the list shows it
 // after the publication date (for a post edited after the day it was published) and orders the posts by it, most
 // recently edited first; a post with no `edited:` counts as last edited on its publication date.
-import Base from '../../bloggie/layouts/Base.astro'
+import Base from '../layouts/Base.astro'
 import { parseFrontmatter } from '@astrojs/markdown-remark'
-import { site, longDate, isoDate } from '../site.js'
+import { site, longDate, isoDate } from '../../src/site.js'
 
 // Each tag's name, its mark after a post's title (an icon, else the name), and whether it starts hidden.
 // A tag not listed here is shown, with its own word as its name.
@@ -20,8 +21,8 @@ const tag = (id) => TAGS[id] ?? { name: id }
 
 // Each post is read as text, for its front matter only. Importing it would compile the post and every figure it uses,
 // so one post that does not compile (an agent in the middle of an edit) would take this page down with it.
-const posts = Object.entries(import.meta.glob(['./posts/*/index.mdx', '!./posts/_*/index.mdx'], { query: '?raw', import: 'default', eager: true }))
-  .map(([path, text]) => ({ ...parseFrontmatter(text).frontmatter, url: import.meta.env.BASE_URL + path.slice(2, -'index.mdx'.length) }))
+const posts = Object.entries(import.meta.glob(['/src/pages/posts/*/index.mdx', '!/src/pages/posts/_*/index.mdx'], { query: '?raw', import: 'default', eager: true }))
+  .map(([path, text]) => ({ ...parseFrontmatter(text).frontmatter, url: import.meta.env.BASE_URL + path.slice('/src/pages/'.length, -'index.mdx'.length) }))
   .map((post) => ({ ...post, tags: [post.tags ?? []].flat().map(String) }))
   .sort((a, b) => new Date(b.date) - new Date(a.date))
 

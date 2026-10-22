@@ -1,7 +1,9 @@
-// Build configuration. Posts and slides are MDX pages under src/pages; figures are Svelte components
-// under src/figures. Math is typeset at build time by KaTeX; bloggie/lib/equations.js numbers labelled
-// equations and resolves [](#eq-id) references.
+// Bloggie's build configuration. A blog's astro.config.mjs is one line, `export { default } from './astro.config.js'`,
+// and this file, in the engine (the blog's bloggie/ folder), holds the rest. Posts and slides are MDX pages under the
+// blog's src/pages; figures are Svelte components under its src/figures. Math is typeset at build time by KaTeX;
+// lib/equations.js numbers labelled equations and resolves [](#eq-id) references.
 import { fileURLToPath } from 'node:url'
+import { existsSync } from 'node:fs'
 import { relative } from 'node:path'
 import { defineConfig } from 'astro/config'
 import mdx from '@astrojs/mdx'
@@ -9,17 +11,17 @@ import svelte from '@astrojs/svelte'
 import { unified } from '@astrojs/markdown-remark'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
-import remarkEquations from './bloggie/lib/equations.js'
-import { katexMacros, remarkRoles } from './bloggie/lib/roles.js'
-import remarkPostTables from './bloggie/lib/post-tables.js'
-import remarkSlideHeadings, { rehypeSlideBoxes } from './bloggie/lib/slide-headings.js'
-import postDownloads from './bloggie/scripts/export/dev.js'
-import slideEditor from './bloggie/editor/integration.js'
-import liveUpdate from './bloggie/live/integration.js'
+import remarkEquations from './lib/equations.js'
+import { katexMacros, remarkRoles } from './lib/roles.js'
+import remarkPostTables from './lib/post-tables.js'
+import remarkSlideHeadings, { rehypeSlideBoxes } from './lib/slide-headings.js'
+import postDownloads from './scripts/export/dev.js'
+import slideEditor from './editor/integration.js'
+import liveUpdate from './live/integration.js'
 import tsx from 'shiki/langs/tsx.mjs'
 import latex from 'shiki/langs/latex.mjs'
 import markdownLang from 'shiki/langs/markdown.mjs'
-import { mdxGrammar } from './bloggie/lib/shiki-mdx.js'
+import { mdxGrammar } from './lib/shiki-mdx.js'
 
 // Dev only. Astro links each server-rendered Svelte component's CSS module, and the browser may ask for it before the
 // client has compiled the component (a client:visible island that has not hydrated). vite-plugin-svelte then finds no
@@ -49,24 +51,42 @@ function svelteCssInDev() {
   }
 }
 
+// The blog is the folder that holds the engine; `@/` is its src/.
+const blog = new URL('../', import.meta.url)
+const engine = new URL('./', import.meta.url)
+
+// The home page (pages/index.astro): every post, newest first. A blog with its own src/pages/index.astro uses that.
+function homePage() {
+  return {
+    name: 'bloggie-home-page',
+    hooks: {
+      'astro:config:setup': ({ injectRoute }) => {
+        if (existsSync(new URL('src/pages/index.astro', blog))) return
+        injectRoute({ pattern: '/', entrypoint: fileURLToPath(new URL('pages/index.astro', engine)) })
+      },
+    },
+  }
+}
+
 export default defineConfig({
+  root: fileURLToPath(blog),
   // GitHub Pages serves a project site under /<repo>/; the deploy workflow sets BASE_PATH.
   base: process.env.BASE_PATH || '/',
   // postDownloads: the download links under `npm run dev`; liveUpdate: a save of a post draws its change in the
-  // open page, without a reload (bloggie/live/); slideEditor: edit a deck with the mouse and keyboard under
-  // `npm run dev`, written to its slides.mdx (bloggie/editor/). liveUpdate goes before slideEditor (bloggie/live/integration.js).
+  // open page, without a reload (live/); slideEditor: edit a deck with the mouse and keyboard under
+  // `npm run dev`, written to its slides.mdx (editor/). liveUpdate goes before slideEditor (live/integration.js).
   // hmr: false: a change to a figure's .svelte or .js reloads the page, so every figure starts over,
   // instead of a hot swap that keeps the figure's state and leaves its old animation loops running.
   // optimize: MDX compiles the static parts of a page to HTML strings; the page is the same, and the
   // dev server compiles a deck again after a slide editor edit in about half the time. A <style> or
   // <script> stays an element (a Box's inner rules are a <style>): in an HTML string, Astro drops its text.
-  integrations: [mdx({ optimize: { ignoreElementNames: ['style', 'script'] } }), svelte({ compilerOptions: { hmr: false } }), postDownloads(), liveUpdate(), slideEditor()],
+  integrations: [mdx({ optimize: { ignoreElementNames: ['style', 'script'] } }), svelte({ compilerOptions: { hmr: false } }), postDownloads(), liveUpdate(), slideEditor(), homePage()],
   devToolbar: { enabled: false }, // no Astro toolbar over the page under `npm run dev`
-  // `@/` is src/, so posts import `@/figures/pointer-chase/PointerChase.svelte` instead of ../../../ paths; `@bloggie/` is
+  // `@/` is src/, so posts import `@/figures/attention-walk/AttentionWalk.svelte` instead of ../../../ paths; `@bloggie/` is
   // bloggie/, the engine (`@bloggie/components/Cite.astro`, a post's `layout: '@bloggie/layouts/Post.astro'`).
   vite: {
     plugins: [svelteCssInDev()],
-    resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)), '@bloggie': fileURLToPath(new URL('./bloggie', import.meta.url)) } },
+    resolve: { alias: { '@': fileURLToPath(new URL('src', blog)), '@bloggie': fileURLToPath(engine).replace(/\/$/, '') } },
     build: { assetsInlineLimit: 0 }, // keep imported files (e.g. a figure's JSON parameters) as real, linkable files
     // Pre-bundle the figures' dependencies at dev-server start. Found later, at a figure's first
     // import, they make Vite re-optimize and answer the open page with "504 Outdated Optimize Dep".
@@ -75,12 +95,12 @@ export default defineConfig({
     server: { watch: { ignored: ['**/.venv/**', '**/__pycache__/**', '**/_experiments/runs/**', '**/_experiments/logs/**'] } },
   },
   markdown: {
-    // `mdx` code blocks: imports and component tags as TSX, math as LaTeX (bloggie/lib/shiki-mdx.js).
+    // `mdx` code blocks: imports and component tags as TSX, math as LaTeX (lib/shiki-mdx.js).
     shikiConfig: { langs: [...tsx, ...latex, ...markdownLang, mdxGrammar] },
     processor: unified({
       remarkPlugins: [remarkMath, remarkPostTables, remarkEquations, remarkRoles, remarkSlideHeadings], // roles: the post's color key; slide-headings: # / ## shorthand in slides.mdx
       rehypePlugins: [[rehypeKatex, {
-        // \state{v} and the other role macros (bloggie/lib/roles.js) color a symbol with \htmlClass; nothing else is trusted.
+        // \state{v} and the other role macros (lib/roles.js) color a symbol with \htmlClass; nothing else is trusted.
         macros: katexMacros,
         trust: (context) => context.command === '\\htmlClass',
         strict: (code) => (code === 'htmlExtension' ? 'ignore' : 'warn'),

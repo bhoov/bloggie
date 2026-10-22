@@ -1,5 +1,2 @@
 /node_modules/
-/dist/
-/.astro/
-/bloggie/e2e/report/
-/logs/
+/e2e/report/

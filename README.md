@@ -35,7 +35,7 @@ cd my-blog && npm run dev            # http://localhost:4321/
 ```
 
 `--allow-git=root` lets npm 12 and later fetch Bloggie from GitHub; older npm ignores it.
-Or clone it: `git clone https://github.com/bhoov/bloggie.git my-blog && cd my-blog && npm install`.
+The new blog is your own git repository; Bloggie, the engine, is its `bloggie/` folder, and `npm run bloggie:update` brings in later versions.
 
 Use Node 22 or later.
 See the example post, "How this blog works", for features.
@@ -86,7 +86,7 @@ Then fine-tune it with the mouse in the slide editor.
 Each change goes into `slides.mdx`, so your edits and an agent's mix freely.
 When the post changes, ask the agent to "update the deck for the changes to the post"; it keeps your layout.
 
-<img src="src/pages/posts/how-this-blog-works/media/slide-editor.png" width="720" alt="The slide editor on the example deck: a toolbar of font, size, color and alignment buttons above the slide, and a column of slide thumbnails on the left.">
+<img src="template/src/pages/posts/how-this-blog-works/media/slide-editor.png" width="720" alt="The slide editor on the example deck: a toolbar of font, size, color and alignment buttons above the slide, and a column of slide thumbnails on the left.">
 
 ## Everything is a plain text file
 
@@ -132,8 +132,11 @@ Once, in the repository's Settings → Pages, set the source to GitHub Actions.
 
 ## Contributing
 
-Bloggie is developed inside a working blog and copied here.
-To change the engine, open a pull request against `bloggie/` in this repository.
+This repository is the engine, and `template/` is the starter blog that `npx` copies and the demo site shows.
+In a blog, the engine is the `bloggie/` folder, kept as a git subtree.
+To change it, edit `bloggie/` in your blog, commit that change on its own, and send it to a branch of your fork with `git subtree push --prefix=bloggie <your fork> <branch>`; then open a pull request here.
+To check a change in the starter blog, make one with `node scripts/create.js ../demo --copy-engine` and run `npm run build` there.
+`AGENTS.md` has the engine's rules.
 
 ## License
 

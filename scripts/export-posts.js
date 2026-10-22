@@ -10,7 +10,7 @@ import { downloadNames, exportPost } from './export/index.js'
 
 const kb = (text) => `${Math.round(Buffer.byteLength(text) / 1024)} KB`
 
-// A blog with no visible post (e.g. after npm run reset, with the example hidden) has no dist/posts.
+// A blog with no visible post (e.g. a new blog with the example hidden) has no dist/posts.
 const built = existsSync(join(dist, 'posts')) ? readdirSync(join(dist, 'posts')) : []
 for (const slug of built) {
   if (!existsSync(join(dist, 'posts', slug, 'index.html'))) continue
