@@ -11,9 +11,10 @@ demo site (`.github/workflows/demo.yml`).
 - A change here reaches every blog that updates. Keep a blog's files (`src/`, its `astro.config.mjs`, `package.json`)
   working as they are: add before you remove, and say in the commit what a blog must change, if anything.
 - The engine's dependencies are in this folder's `package.json`; a blog lists this folder as an npm workspace.
-- From a blog, `node bloggie/scripts/publish.js -m "…" --yes` publishes `bloggie/` to a branch of the engine's
-  repository as one new commit with that message, for a pull request (`--remote <fork>` for a fork, `--main` for main).
-  None of the blog's commits or messages go. Write that message for the public.
+- From a blog, `npm run bloggie:push -- -m "…" --yes` (`scripts/publish.js`) publishes `bloggie/` as one new commit on
+  top of the engine's main and opens a pull request: to a branch of the engine's repository if you may push there,
+  else of your fork (`gh` makes it; without `gh`, `--remote <fork>`). `--main` pushes to main. None of the blog's
+  commits or messages go. Write that message for the public.
 - Git: this repository's history is public and holds only engine commits. Commit here directly in a clone of it, or
   publish from a blog with `scripts/publish.js` (one commit per publish, its message written for the public). Never
   `git subtree push` a blog's history here, never force-push main, and keep main buildable: the demo deploys from it.

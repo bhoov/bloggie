@@ -134,8 +134,11 @@ Once, in the repository's Settings → Pages, set the source to GitHub Actions.
 
 This repository is the engine, and `template/` is the starter blog that `npx` copies and the demo site shows.
 In a blog, the engine is the `bloggie/` folder, kept as a git subtree.
-To change it, edit `bloggie/` in your blog and commit, then publish it to a branch of your fork with `node bloggie/scripts/publish.js --remote <your fork> -m "What changed" --yes`, and open a pull request here.
-Only the folder's content goes, as one commit with that message; none of your blog's commits do.
+To change it, edit `bloggie/` in your blog and commit, then run `npm run bloggie:push -- -m "What changed" --body "Why" --yes`.
+With the GitHub CLI (`gh`) logged in, it makes your fork if needed, pushes the change to a branch of it and opens a pull request here.
+Without `gh`, fork this repository, add `--remote <your fork's URL>`, and open the pull request from the link it prints.
+Only the folder's content goes, as one commit on top of this repository's main; none of your blog's commits do.
+In a blog made before this script was added to its `package.json`, run `node bloggie/scripts/publish.js` instead.
 To check a change in the starter blog, make one with `node scripts/create.js ../demo --copy-engine` and run `npm run build` there.
 `AGENTS.md` has the engine's rules.
 

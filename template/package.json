@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "test": "node --test && npm run e2e",
     "e2e": "npm run build && node bloggie/e2e/run.js",
-    "bloggie:update": "git subtree pull --prefix=bloggie https://github.com/bhoov/bloggie.git main -m 'Update Bloggie'"
+    "bloggie:update": "git subtree pull --prefix=bloggie https://github.com/bhoov/bloggie.git main -m 'Update Bloggie'",
+    "bloggie:push": "node bloggie/scripts/publish.js"
   },
   "dependencies": {
     "d3": "^7.9.0"
