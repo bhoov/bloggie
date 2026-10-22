@@ -23,20 +23,6 @@ cd my-blog && npm run dev
 
 <Notes>A static site built with Astro: no server, no database, no account. It redraws on every save. Add --title and --author to the first command to name the blog, or set them later in src/site.js. Copy this post's folder to start your own.</Notes>
 
-## Everything Is Plain Text
-
-- **index.mdx** the post
-- **slides.mdx** its deck
-- **data/** and **media/** what it shows
-
-<Notes>The folder is src/pages/posts/ and a slug. Copy this post's folder to start a new post; rename it to _how-this-blog-works to take the example off the site. One sentence per line, so a diff shows which sentence changed.</Notes>
-
-## [table size=36] Most Edits Are One Line
-
-<PostTable id="tbl-edits" />
-
-<Notes>You can write a post or its slides yourself, in Markdown and HTML in its .mdx file, or ask an agent to.</Notes>
-
 ## [demo zoom=1.5 svgMax=390px noteTop=310px] A Post Is a Story You Can Play With
 
 <AttentionWalk client:visible />
@@ -84,7 +70,7 @@ Add a source once to **references.json**; the post numbers it and lists it at th
 
 ## An Agent Writes the Deck
 
-Ask for **slides for this post** with the bloggie-slides skill, which ships with the blog.
+Happy with the story? Ask an agent to **generate the deck** with the bloggie-slides skill.
 
 <Notes>It lives in .agents/skills/bloggie-slides/, so any coding agent can read it. It makes one idea per slide, text for the back of the room and full-slide demos, checks every slide in a browser, and then says where the post's story was hard to follow.</Notes>
 
@@ -99,6 +85,20 @@ Ask for **slides for this post** with the bloggie-slides skill, which ships with
 ## Keep Post and Deck in Step
 
 Change the post, then ask the agent to **update the deck**. Your layout stays.
+
+## Everything Is Plain Text
+
+- **index.mdx** the post
+- **slides.mdx** its deck
+- **data/** and **media/** what it shows
+
+<Notes>The folder is src/pages/posts/ and a slug. Copy this post's folder to start a new post; rename it to _how-this-blog-works to take the example off the site. One sentence per line, so a diff shows which sentence changed.</Notes>
+
+## [table size=36] Most Edits Are One Line
+
+<PostTable id="tbl-edits" />
+
+<Notes>You can write a post or its slides yourself, in Markdown and HTML in its .mdx file, or ask an agent to.</Notes>
 
 ## One Style, Written Down
 

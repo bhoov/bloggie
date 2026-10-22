@@ -63,20 +63,6 @@ On a deck:
 | `esc` | back to the post |
 | `e` | the slide editor (under `npm run dev`); its keys follow Figma's |
 
-## Everything is a plain text file
-
-A post is one folder, and every file in it is text you can open in any editor:
-
-```
-src/pages/posts/<slug>/
-  index.mdx       the post: Markdown, math and figure tags
-  slides.mdx      its deck (optional)
-  data/  media/   the numbers and pictures it shows
-```
-
-The blog's home page is an index that lists every post, newest first.
-You can ask an agent to write a post or its slides, or edit it yourself in Markdown and HTML.
-
 ## A post is a story you can play with
 
 A post mixes prose, equations, results and live demos.
@@ -93,13 +79,28 @@ Add a source once to `src/references.json` and cite it by its key; the post numb
 
 ## One story as blog and slides
 
-A post can have a deck, a talk version in a `slides.mdx` file beside it, which runs the same live figures.
-Ask an agent for it: the `bloggie-slides` skill ships with the blog, makes one idea per slide with text large enough for the back of the room, and checks every slide in a browser.
+A post can have a slide deck, a talk version in a `slides.mdx` file beside it, which runs the same live figures.
+Once you are happy with the story of your post, ask an AI agent to generate the deck for you.
+The `bloggie-slides` skill ships with the blog, so the agent makes one idea per slide with text large enough for the back of the room, and checks every slide in a browser.
 Then fine-tune it with the mouse in the slide editor.
 Each change goes into `slides.mdx`, so your edits and an agent's mix freely.
 When the post changes, ask the agent to "update the deck for the changes to the post"; it keeps your layout.
 
 <img src="src/pages/posts/how-this-blog-works/media/slide-editor.png" width="720" alt="The slide editor on the example deck: a toolbar of font, size, color and alignment buttons above the slide, and a column of slide thumbnails on the left.">
+
+## Everything is a plain text file
+
+A post is one folder, and every file in it is text you can open in any editor:
+
+```
+src/pages/posts/<slug>/
+  index.mdx       the post: Markdown, math and figure tags
+  slides.mdx      its deck (optional)
+  data/  media/   the numbers and pictures it shows
+```
+
+The blog's home page is an index that lists every post, newest first.
+You can ask an agent to write a post or its slides, or edit it yourself in Markdown and HTML.
 
 ## One style, written down for your agent
 

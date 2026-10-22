@@ -36,46 +36,6 @@ The second command opens the blog in your browser, and the page redraws each tim
 It is a static site built with Astro: no server, no database, no account.
 While `npm run dev` runs, you also get the slide editor and downloads made on click; `npm run build` checks every link and citation and builds the finished site into `dist/`.
 
-<h2 id="files">Everything is a plain text file</h2>
-
-A post is one folder, and every file in it is text you can open in any editor:
-
-```
-src/pages/posts/<slug>/
-  index.mdx       the post: Markdown, math and figure tags
-  slides.mdx      its deck (optional)
-  data/  media/   the numbers and pictures it shows
-```
-
-To start a post, copy this post's folder to `src/pages/posts/<slug>/` and change its title and date at the top of `index.mdx`; the home page lists every post, newest first.
-To take this example off your site, rename its folder to `_how-this-blog-works`: a folder whose name starts with `_` is not published.
-Front matter `tags: [wip]` marks a post in progress on the home page, and `tags: [archived]` hides it until the reader asks for it.
-
-Write one sentence per line.
-Your editor wraps long lines, and a diff then shows which sentence changed.
-Most edits are a line or two, as [the table below](#tbl-edits) shows.
-
-<figure id="tbl-edits">
-<figcaption>
-
-**What to write for each element of a post and its deck.**
-
-</figcaption>
-
-| To add | Write |
-| --- | --- |
-| Section | `<h2 id="setup">Setup</h2>` |
-| Equation | `$$ … $$`, with `\label{eq-name}` to number it |
-| Link to it | `[](#eq-name)`, shown as "Eq. (1)" |
-| Symbol color (optional) | `$\given{X}$`, one macro per role in `src/roles.js` |
-| Citation | `<Cite key="vaswani2017">[Transformer]</Cite>` |
-| Figure | its tag, such as `<AttentionWalk client:visible />` |
-| Slide | `## Title` in `slides.mdx` |
-| Demo slide | `## [demo] Title`, then a figure's tag |
-| Equation slide | `## [equation] Title`, then the equation and its symbols |
-
-</figure>
-
 <h2 id="story">A post is a story you can play with</h2>
 
 A post mixes prose, equations, results and live demos.
@@ -129,8 +89,9 @@ A post that does not use them looks like any other.
 
 <h2 id="slides">One story as blog and slides</h2>
 
-A post can have a **deck**, a talk version of the post in a `slides.mdx` file beside it.
+A post can have a slide **deck**, a talk version of the post in a `slides.mdx` file beside it.
 The deck runs the same live figures, so a demo you build once works on the page and on the projector.
+Once you are happy with the story of your post, ask an AI agent to generate the deck for you.
 Press `s` on a post to open its deck, as on [this post's deck](slides/).
 
 <figure id="tbl-deck-keys">
@@ -181,6 +142,46 @@ It keeps the layout you set with the editor.
 <Code code={deckSource} lang="mdx" wrap />
 
 </details>
+
+<h2 id="files">Everything is a plain text file</h2>
+
+A post is one folder, and every file in it is text you can open in any editor:
+
+```
+src/pages/posts/<slug>/
+  index.mdx       the post: Markdown, math and figure tags
+  slides.mdx      its deck (optional)
+  data/  media/   the numbers and pictures it shows
+```
+
+To start a post, copy this post's folder to `src/pages/posts/<slug>/` and change its title and date at the top of `index.mdx`; the home page lists every post, newest first.
+To take this example off your site, rename its folder to `_how-this-blog-works`: a folder whose name starts with `_` is not published.
+Front matter `tags: [wip]` marks a post in progress on the home page, and `tags: [archived]` hides it until the reader asks for it.
+
+Write one sentence per line.
+Your editor wraps long lines, and a diff then shows which sentence changed.
+Most edits are a line or two, as [the table below](#tbl-edits) shows.
+
+<figure id="tbl-edits">
+<figcaption>
+
+**What to write for each element of a post and its deck.**
+
+</figcaption>
+
+| To add | Write |
+| --- | --- |
+| Section | `<h2 id="setup">Setup</h2>` |
+| Equation | `$$ … $$`, with `\label{eq-name}` to number it |
+| Link to it | `[](#eq-name)`, shown as "Eq. (1)" |
+| Symbol color (optional) | `$\given{X}$`, one macro per role in `src/roles.js` |
+| Citation | `<Cite key="vaswani2017">[Transformer]</Cite>` |
+| Figure | its tag, such as `<AttentionWalk client:visible />` |
+| Slide | `## Title` in `slides.mdx` |
+| Demo slide | `## [demo] Title`, then a figure's tag |
+| Equation slide | `## [equation] Title`, then the equation and its symbols |
+
+</figure>
 
 <h2 id="style">One style, written down for your agent</h2>
 
