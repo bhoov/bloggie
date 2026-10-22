@@ -18,14 +18,14 @@ from it that runs the same live figures. Every post downloads as a single HTML f
 
 ```sh
 npx github:bhoov/bloggie my-blog     # start a new blog in my-blog/ and install its packages
+# npx github:bhoov/bloggie my-blog --title "My blog" --author "Ada Lovelace" --url "https://ada.github.io/notes/"
+# Or add later to `src/site.js`
 cd my-blog && npm run dev            # http://localhost:4321/
 ```
-
-To name the blog at the start, add `--title "My blog" --author "Ada Lovelace" --url "https://ada.github.io/notes/"`
-to the first command; otherwise set them later in `src/site.js`. Or clone it:
+Or clone it:
 `git clone https://github.com/bhoov/bloggie.git my-blog && cd my-blog && npm install`.
 
-Use Node 22 or later. The example post, "How this blog works", shows every feature; copy its folder,
+Use Node 22 or later. See the example post, "How this blog works", for features. You can copy that post's folder,
 `src/pages/posts/how-this-blog-works/`, to `src/pages/posts/<slug>/` to start a post.
 
 ## Commands and keys
@@ -103,7 +103,7 @@ checks what it needs. For example:
 >
 > Make slides for the post with the bloggie-slides skill.
 
-Leave a note for the agent anywhere in a file as `((…))`, and it addresses the note and removes it.
+A note written as `((…))` anywhere in a file asks the agent to address it and remove it (`AGENTS.md` has the rule).
 
 ## Download for offline distribution
 

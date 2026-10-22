@@ -159,7 +159,7 @@ its figure components the same way: the deck must run the post's real interactiv
     `$symbol$` they explain (it takes a symbol column); an item that starts with words is a plain
     line. `[equation eqSize=46]` shrinks a long equation. Color a symbol by its role, as the post does, with the role
     macros the blog lists in `src/roles.js` (`\given{X}` for a role named `given`); `npm run build` fails where the deck writes a colored symbol without its role.
-  - `problem`: a picture of the task first (a component of your own in `src/components/slides/`), then a list of
+  - `problem`: a picture of the task first (a component of your own; make the folder `src/components/slides/` for it), then a list of
     text anchors, each starting with `<Mark kind="…" />` to tie it to the picture (the kinds are listed in
     `bloggie/components/slides/Mark.astro`; add one there for a new picture).
   - `demo`: an optional one-line `title` over a figure tag copied from the post (for example
