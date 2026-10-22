@@ -1,4 +1,4 @@
-// Run by `npm run build`: the boundary of Bloggie, the blog's engine, which is the blog's bloggie/ folder. An engine
+// Run by `npm run build`: the boundary of Bloggie, the blog's engine (node_modules/bloggie/, or the blog's bloggie/ folder). An engine
 // file may import other engine files, the site data below and npm packages, never a post, a post's figure or a slide
 // picture. This prints every import that leaves the engine, and exits 1. The engine's template/ (the starter blog) is
 // a blog, not the engine, so it is not checked.
@@ -9,11 +9,12 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { dirname, join, relative, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const root = fileURLToPath(new URL('../..', import.meta.url))
-const kit = ['bloggie']
-const site = ['src/site.js', 'src/references.json', 'src/roles.js'] // the site data that the engine reads
-const exclude = ['bloggie/template', 'bloggie/e2e/report', 'bloggie/node_modules']
-const inside = (path, list) => list.some((p) => path === join(root, p) || path.startsWith(join(root, p) + '/'))
+const root = process.cwd() // the blog (lib/blog.js)
+const engine = fileURLToPath(new URL('..', import.meta.url)).replace(/\/$/, '')
+const kit = [engine]
+const site = ['src/site.js', 'src/references.json', 'src/roles.js'].map((p) => join(root, p)) // the site data that the engine reads
+const exclude = ['template', 'create', 'e2e/report', 'node_modules'].map((p) => join(engine, p))
+const inside = (path, list) => list.some((p) => path === p || path.startsWith(p + '/'))
 
 const problems = []
 const files = (path) => {
@@ -21,7 +22,7 @@ const files = (path) => {
   if (!statSync(path).isDirectory()) return [path]
   return readdirSync(path).flatMap((name) => files(join(path, name)))
 }
-const kitFiles = kit.flatMap((p) => files(join(root, p))).filter((f) => /\.(m?js|astro|svelte|css)$/.test(f))
+const kitFiles = kit.flatMap((p) => files(p)).filter((f) => /\.(m?js|astro|svelte|css)$/.test(f))
 
 // `from '…'`, a side-effect `import '…'`, a dynamic `import('…')` and a CSS `@import '…'` or `@import url(…)`.
 const IMPORT = /(?:\bfrom\s*|\bimport\s*\(?\s*|@import\s+(?:url\()?)['"]([^'"\n]+)['"]/g

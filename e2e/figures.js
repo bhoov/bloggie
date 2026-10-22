@@ -6,8 +6,10 @@
 //   afterPage (optional): { <check name>: (shared) => observed }, run on every page after all of its figures.
 // The helpers the checks share are in bloggie/e2e/helpers.js.
 import { existsSync, readdirSync } from 'node:fs'
+import { join } from 'node:path'
+import { pathToFileURL } from 'node:url'
 
-const figures = new URL('../../src/figures/', import.meta.url)
+const figures = pathToFileURL(join(process.cwd(), 'src/figures/'))
 export const checks = {}
 export const afterPage = {}
 for (const folder of readdirSync(figures).sort()) {

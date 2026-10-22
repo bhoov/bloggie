@@ -2,9 +2,8 @@
 // must point to an element with that id on the same page. A renamed heading or figure id fails the build.
 import { readdir, readFile } from 'node:fs/promises'
 import { join, relative } from 'node:path'
-import { fileURLToPath } from 'node:url'
 
-const dist = fileURLToPath(new URL('../../dist/', import.meta.url))
+const dist = join(process.cwd(), 'dist/')
 
 async function* htmlFiles(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {

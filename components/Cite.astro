@@ -4,7 +4,7 @@
 // under References at the end of the post. Text in brackets is replaced by the number; other words stay,
 // with the number after them (<Cite key="brouard2020">Brouard et al.</Cite> learn ...). Several sources:
 // key="smith2020,lee2021" renders [1, 2] (the link goes to the first). An unknown key fails the build.
-import catalog from '../../src/references.json'
+import catalog from '@/references.json'
 
 const keys = Astro.props.key.split(',').map((key) => key.trim())
 for (const key of keys) if (!catalog[key]) throw new Error(`<Cite>: unknown reference key "${key}"`)

@@ -2,11 +2,11 @@
 // reading an Astro island's props, and removing the parts of a page that only work on the site.
 import { readFileSync } from 'node:fs'
 import { extname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { visit, SKIP } from 'unist-util-visit'
+import { root } from '../../lib/blog.js'
 import { siteUrl } from '../../lib/site-url.js'
 
-export const root = fileURLToPath(new URL('../../../', import.meta.url))
+export { root }
 export const dist = join(root, 'dist')
 
 // A built asset URL, with or without the deploy's base path, as a file in <out>/_astro/; null for any

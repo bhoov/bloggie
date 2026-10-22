@@ -4,7 +4,7 @@
 // to. The walker is a belief over nodes in the id half, [b; 0]. One loop is one attention step: the query keeps the
 // walker's id half, every key is the full token, and every value moves the token's next half into the id half. So
 // each loop replaces the belief with the next pointer of the node it matches, and the walker follows one arrow.
-import { dot, mulberry32, onehot, softmax } from '../../../bloggie/lib/math.js'
+import { dot, mulberry32, onehot, softmax } from 'bloggie/lib/math.js'
 
 // Nodes are named A, B, C…: a letter reads as a name, where 0, 1, 2… invite reading the arrows as a numbering.
 export const letterOf = (i) => String.fromCharCode(65 + i)

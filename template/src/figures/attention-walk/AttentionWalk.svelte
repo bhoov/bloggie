@@ -8,8 +8,8 @@
 <script>
   import { onDestroy } from 'svelte'
   import CircleGraph from '../shared/CircleGraph.svelte'
-  import { series, fmt } from '../../../bloggie/lib/colors.js'
-  import { argmax } from '../../../bloggie/lib/math.js'
+  import { series, fmt } from 'bloggie/lib/colors.js'
+  import { argmax } from 'bloggie/lib/math.js'
   import { letterOf, trajectory, walkGraph } from './attention-walk.js'
 
   let { params = {}, medium = 'blog' } = $props() // medium: 'slide' in a deck (bloggie/lib/slide-headings.js)

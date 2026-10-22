@@ -13,7 +13,7 @@
   size, nodeR, inset, bend, loopReach, labelSize: geometry, in viewBox units.
 -->
 <script>
-  import { ink, series } from '../../../bloggie/lib/colors.js'
+  import { ink, series } from 'bloggie/lib/colors.js'
 
   const letterOf = (i) => String.fromCharCode(65 + i)
 

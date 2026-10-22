@@ -1,6 +1,6 @@
 // Text for the agent download: what AttentionWalk.svelte shows, with a trace from its own numerics.
-import { argmax } from '../../../bloggie/lib/math.js'
-import { table, vec } from '../../../bloggie/lib/describe.js'
+import { argmax } from 'bloggie/lib/math.js'
+import { table, vec } from 'bloggie/lib/describe.js'
 import { letterOf as L, trajectory, walkGraph } from './attention-walk.js'
 
 export const sources = ['bloggie/lib/math.js', 'src/figures/attention-walk/attention-walk.js']

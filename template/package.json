@@ -2,19 +2,16 @@
   "name": "my-blog",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "bloggie"
-  ],
   "scripts": {
     "dev": "astro dev",
-    "build": "node bloggie/scripts/check-kit.js && node bloggie/scripts/check-colors.js && astro build && node bloggie/scripts/export-posts.js && node bloggie/scripts/check-links.js",
+    "build": "node node_modules/bloggie/scripts/check-kit.js && node node_modules/bloggie/scripts/check-colors.js && astro build && node node_modules/bloggie/scripts/export-posts.js && node node_modules/bloggie/scripts/check-links.js",
     "preview": "astro preview",
     "test": "node --test && npm run e2e",
-    "e2e": "npm run build && node bloggie/e2e/run.js",
-    "bloggie:update": "git subtree pull --prefix=bloggie https://github.com/bhoov/bloggie.git main -m 'Update Bloggie'",
-    "bloggie:push": "node bloggie/scripts/publish.js"
+    "e2e": "npm run build && node node_modules/bloggie/e2e/run.js",
+    "bloggie:update": "npm install bloggie@latest"
   },
   "dependencies": {
+    "bloggie": "^0.3.0",
     "d3": "^7.9.0"
   },
   "overrides": {

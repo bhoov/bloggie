@@ -1,8 +1,8 @@
-// Bloggie's build configuration. A blog's astro.config.mjs is one line, `export { default } from './astro.config.js'`,
-// and this file, in the engine (the blog's bloggie/ folder), holds the rest. Posts and slides are MDX pages under the
+// Bloggie's build configuration. A blog's astro.config.mjs is one line, `export { default } from 'bloggie/astro.config.js'`,
+// and this file, in the engine (node_modules/bloggie/, or the blog's bloggie/ folder), holds the rest. Posts and slides are MDX pages under the
 // blog's src/pages; figures are Svelte components under its src/figures. Math is typeset at build time by KaTeX;
 // lib/equations.js numbers labelled equations and resolves [](#eq-id) references.
-import { fileURLToPath } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 import { existsSync } from 'node:fs'
 import { relative } from 'node:path'
 import { defineConfig } from 'astro/config'
@@ -12,6 +12,7 @@ import { unified } from '@astrojs/markdown-remark'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import remarkEquations from './lib/equations.js'
+import { root } from './lib/blog.js'
 import { katexMacros, remarkRoles } from './lib/roles.js'
 import remarkPostTables from './lib/post-tables.js'
 import remarkSlideHeadings, { rehypeSlideBoxes } from './lib/slide-headings.js'
@@ -51,8 +52,23 @@ function svelteCssInDev() {
   }
 }
 
-// The blog is the folder that holds the engine; `@/` is its src/.
-const blog = new URL('../', import.meta.url)
+// Under Vite (pages, figures, the browser), lib/blog.js is lib/blog-vite.js: the same site data, through `@/`.
+function blogInVite() {
+  const node = fileURLToPath(new URL('./lib/blog.js', import.meta.url))
+  const vite = fileURLToPath(new URL('./lib/blog-vite.js', import.meta.url))
+  return {
+    name: 'bloggie-blog',
+    enforce: 'pre',
+    async resolveId(source, importer, options) {
+      if (!source.endsWith('blog.js')) return null
+      const resolved = await this.resolve(source, importer, { ...options, skipSelf: true })
+      return resolved?.id === node ? vite : null
+    },
+  }
+}
+
+// The blog is the folder Astro runs in (lib/blog.js); `@/` is its src/.
+const blog = pathToFileURL(root + '/')
 const engine = new URL('./', import.meta.url)
 
 // The home page (pages/index.astro): every post, newest first. A blog with its own src/pages/index.astro uses that.
@@ -85,12 +101,15 @@ export default defineConfig({
   // `@/` is src/, so posts import `@/figures/attention-walk/AttentionWalk.svelte` instead of ../../../ paths; `@bloggie/` is
   // bloggie/, the engine (`@bloggie/components/Cite.astro`, a post's `layout: '@bloggie/layouts/Post.astro'`).
   vite: {
-    plugins: [svelteCssInDev()],
+    plugins: [svelteCssInDev(), blogInVite()],
     resolve: { alias: { '@': fileURLToPath(new URL('src', blog)), '@bloggie': fileURLToPath(engine).replace(/\/$/, '') } },
     build: { assetsInlineLimit: 0 }, // keep imported files (e.g. a figure's JSON parameters) as real, linkable files
     // Pre-bundle the figures' dependencies at dev-server start. Found later, at a figure's first
     // import, they make Vite re-optimize and answer the open page with "504 Outdated Optimize Dep".
-    optimizeDeps: { include: ['d3', 'katex'] },
+    // The engine as an npm package (node_modules/bloggie/) is source, not a dependency to pre-bundle or leave to Node:
+    // Vite compiles its .astro and .svelte files, applies `@/` in them, and keeps one copy of each module.
+    optimizeDeps: { include: ['d3', 'katex'], exclude: ['bloggie'] },
+    ssr: { noExternal: ['bloggie'] },
     // The dev server watches the whole project: not the Python environment, or what a post's runs write.
     server: { watch: { ignored: ['**/.venv/**', '**/__pycache__/**', '**/_experiments/runs/**', '**/_experiments/logs/**'] } },
   },

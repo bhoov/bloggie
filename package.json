@@ -1,31 +1,49 @@
 {
   "name": "bloggie",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Write one story with your AI agent. Publish it as an interactive blog post that ports to slides when you need them.",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhoov/bloggie.git"
+  },
+  "homepage": "https://github.com/bhoov/bloggie",
   "type": "module",
   "bin": {
     "bloggie": "scripts/create.js"
   },
+  "files": [
+    "astro.config.js",
+    "components",
+    "e2e/*.js",
+    "editor",
+    "layouts",
+    "lib",
+    "live",
+    "pages",
+    "scripts",
+    "skills",
+    "styles",
+    "template",
+    "AGENTS.md"
+  ],
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.1",
     "@astrojs/mdx": "^8.0.2",
     "@astrojs/svelte": "^9.0.1",
     "astro": "^7.3.4",
-    "katex": "^0.18.9",
-    "rehype-katex": "^7.0.1",
-    "remark-math": "^6.0.0",
-    "shiki": "^4.4.3",
-    "svelte": "^5.57.1"
-  },
-  "devDependencies": {
     "esbuild": "^0.28.2",
     "hast-util-from-html": "^2.0.3",
     "hast-util-to-html": "^9.0.5",
     "hast-util-to-text": "^4.0.2",
+    "katex": "^0.18.9",
+    "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0",
     "remark-mdx": "^3.1.1",
     "remark-parse": "^11.0.0",
+    "shiki": "^4.4.3",
+    "svelte": "^5.57.1",
     "unified": "^11.0.5",
     "unist-util-visit": "^5.1.0"
   }
