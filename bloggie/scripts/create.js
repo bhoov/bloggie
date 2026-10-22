@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// `npx github:bhoov/bloggie <folder>`: a new blog in <folder> (default my-blog). npm fetches Bloggie and runs this file
+// `npx --allow-git=root github:bhoov/bloggie <folder>`: a new blog in <folder> (default my-blog). npm fetches Bloggie and runs this file
 // from it; it copies Bloggie into the folder, dates the example post today, makes the folder a git repository and runs
 // `npm install` there. The new blog gets a README of its own, its package is named after its title (or its folder),
 // and only bloggie/LICENSE stays: the root LICENSE is Bloggie's, and the blog's posts are the author's.

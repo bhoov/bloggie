@@ -26,11 +26,13 @@ Every post downloads as a single HTML file that works offline.
 ## Start
 
 ```sh
-npx github:bhoov/bloggie my-blog     # start a new blog in my-blog/ and install its packages
-# npx github:bhoov/bloggie my-blog --title "My blog" --author "Ada Lovelace" --url "https://ada.github.io/notes/"
+npx --allow-git=root github:bhoov/bloggie my-blog     # start a new blog in my-blog/ and install its packages
+# npx --allow-git=root github:bhoov/bloggie my-blog --title "My blog" --author "Ada Lovelace" --url "https://ada.github.io/notes/"
 # OR add metadata later to `src/site.js`
 cd my-blog && npm run dev            # http://localhost:4321/
 ```
+
+`--allow-git=root` lets npm 12 and later fetch Bloggie from GitHub; older npm ignores it.
 Or clone it: `git clone https://github.com/bhoov/bloggie.git my-blog && cd my-blog && npm install`.
 
 Use Node 22 or later.
