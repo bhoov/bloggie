@@ -3,7 +3,7 @@
 > Write one story with your AI agent.
 > Publish it as an interactive blog post that ports to slides when you need them.
 
-**Live demo:** the example post, https://bhoov.github.io/bloggie/posts/how-this-blog-works/, and its deck, https://bhoov.github.io/bloggie/posts/how-this-blog-works/slides/.
+**Live demo:** the example post, https://bhoov.com/bloggie/posts/how-this-blog-works/, and its deck, https://bhoov.com/bloggie/posts/how-this-blog-works/slides/.
 
 Bloggie turns one plain-text story into an interactive blog post.
 When you are ready, an AI agent makes a talk deck from it that runs the same live figures.
