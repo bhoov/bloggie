@@ -31,7 +31,8 @@
 // eqSize    equation: display-equation font size in px, for a long equation (default 58)
 // cols      reasons: the items side by side in this many columns, e.g. two methods that a demo compares
 // size      divider: the phrase's font size in px, for a long phrase (default 112); a paragraph under a
-//           divider's heading is a one-line subtitle
+//           divider's heading is a one-line subtitle; table: the table's font size in px for a short table (default
+//           34, with headers at 0.8 of it); with a size, the headers take the same size
 // eyebrow   a small line over the title that names the part of the talk, e.g. "What's next"
 // titleStyle  CSS for the title, e.g. "font-size: 60px" (the slide editor writes it)
 // edit      set under `npm run dev` only: the slide's index, for the slide editor (bloggie/editor/)
@@ -46,7 +47,7 @@ const style = [
   zoom && `--demo-zoom: ${zoom}`,
   svgMax && `--svg-max: ${svgMax}`,
   eqSize && `--eq-size: ${eqSize}px`,
-  size && `--divider-size: ${size}px`,
+  size && (kind === 'table' ? `--table-size: ${size}px` : `--divider-size: ${size}px`),
   bg && `--video-bg: ${bg}`,
   cols && `--cols: ${cols}`,
 ].filter(Boolean).join('; ') || undefined

@@ -291,11 +291,17 @@
    In a num-table the numbers are right-aligned; a baseline row is grey, as in the post. */
 .slide.table-slide .slide-body { display: flex; justify-content: center; align-items: flex-start; }
 .slide.table-slide .num-table, .slide.table-slide figure { margin: 0 auto; max-width: none; width: fit-content; }
-.slide.table-slide table { width: auto; border-collapse: collapse; font-size: 34px; line-height: 1.12; }
+.slide.table-slide table { width: auto; border-collapse: collapse; font-size: var(--table-size, 34px); line-height: 1.12; }
 /* The table is the slide's statement, so its headline is smaller than a slide title. */
 .slide.table-slide h2 { font-size: 56px; margin-bottom: 0.25em; }
 /* A results table is dense: 30px, and the first column wraps, so that the whole table fits one slide. */
 .slide.table-slide td, .slide.table-slide th { white-space: nowrap; }
+/* [table size=…]: a short table at room size. Its headers take the body's size and its code is at least 36px, so that no line is
+   below 36px, and a
+   long last cell wraps rather than leave the stage. */
+.slide.table-slide[style*='--table-size'] th { font-size: 1em; }
+.slide.table-slide[style*='--table-size'] code { font-size: max(0.85em, 36px); }
+.slide.table-slide[style*='--table-size'] td:last-child { white-space: normal; }
 .slide.table-slide td:first-child { white-space: normal; min-width: 8em; max-width: 13em; } /* at 34px, a five-column table fits the slide with its first column wrapped */
 .slide.table-slide th, .slide.table-slide td { padding: 0.16em 0.45em; border-bottom: 1px solid var(--grid); text-align: left; vertical-align: bottom; }
 .slide.table-slide th { font-family: var(--sans); font-size: 0.8em; font-weight: 700; color: var(--text-secondary); }

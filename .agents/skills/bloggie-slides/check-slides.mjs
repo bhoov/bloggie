@@ -37,10 +37,18 @@ for (let i = 1; i <= n; i++) {
     // Rule 17: a code block needs at least two token colors; inline code outside a block is not allowed.
     const code = [...s.querySelectorAll('pre')].filter((pre) => !pre.closest('.demo')).map((pre) => ({ colors: new Set([...pre.querySelectorAll('span[style*="color"]')].map((t) => t.style.color)).size, wide: pre.scrollWidth > pre.clientWidth + 2 }))
     const inline = [...s.querySelectorAll('code')].filter((c) => !c.closest('pre, .demo, aside, table')).length // a post's table (PostTable) keeps its code
-    return { title: s.dataset.title, lines, slide: [s.scrollHeight, s.clientHeight], demo: demo ? [demo.scrollHeight, demo.clientHeight] : null, min, minText, code, inline }
+    // Content wider than the stage: an element whose right edge passes the slide's.
+    const right = s.getBoundingClientRect().right
+    const wide = [...s.querySelectorAll('table, pre, img, svg, .slide-body > *')].some((e) => !e.closest('.demo') && e.getBoundingClientRect().right > right + 2)
+    // The body drawn over the title: its first element starts above the title's bottom edge.
+    const body = s.querySelector('.slide-body')
+    const overlap = !!(heading && body && body.firstElementChild && body.firstElementChild.getBoundingClientRect().top < heading.getBoundingClientRect().bottom - 2)
+    return { title: s.dataset.title, lines, wide, overlap, slide: [s.scrollHeight, s.clientHeight], demo: demo ? [demo.scrollHeight, demo.clientHeight] : null, min, minText, code, inline }
   })()`)
   const problems = [
     r.slide[0] > 900 && 'overflows the stage',
+    r.wide && 'wider than the stage',
+    r.overlap && 'the body overlaps the title',
     r.demo && r.demo[0] > r.demo[1] + 2 && 'demo overflows',
     r.min < 36 && `text at ${r.min}px ("${r.minText}")`,
     r.lines > 2 && `title on ${r.lines} lines`,

@@ -219,7 +219,7 @@ picks another) through `bloggie/e2e/browser.js`, as `npm run e2e` does. Keep `<o
 It renders each slide at 1600×936 (the stage at scale 1) with every build shown, screenshots
 it, and flags a slide that fails these checks:
 
-- no element overflows the stage (`scrollHeight > clientHeight` on the slide or a `.demo`);
+- no element overflows the stage (`scrollHeight > clientHeight` on the slide or a `.demo`, or content wider than the slide), and the body does not overlap the title;
 - the smallest computed `font-size` of text outside `.demo` is at least 36px;
 - no title or divider heading takes more than two lines;
 - a demo's controls and labels are legible in the screenshot;
