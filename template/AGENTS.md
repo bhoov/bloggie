@@ -34,9 +34,22 @@ bloggie/                       the engine, Bloggie: its own repository, kept her
   post can use goes in `bloggie/` with no post's names in it; `bloggie/AGENTS.md` has the engine's rules.
 - `npm run bloggie:update` merges the latest Bloggie into `bloggie/` (a git subtree); commit first, and resolve a
   conflict as any merge conflict. Never force-push, and never rewrite history that is already pushed.
-- To send an engine change to Bloggie, publish it to a branch of your fork as one commit with a public message:
-  `node bloggie/scripts/publish.js --remote <your fork> -m "…"` (add `--yes` once the listed change is right), then
-  open a pull request. It never sends your blog's own commits; do not use `git subtree push`.
+
+### Suggesting a change to Bloggie
+
+When you fix a bug in `bloggie/`, or add a feature that any blog could use, offer the author to send it to Bloggie as a
+pull request. Send it only once the author agrees: the commit message, the description and the code are public.
+
+1. Keep the change general: no post's names, data, unpublished results or private paths (`bloggie/AGENTS.md`).
+2. `npm run bloggie:update`, then commit the change to `bloggie/` in this blog. Everything in `bloggie/` that differs
+   from Bloggie's main goes into the pull request, so check `git diff` against it in step 3.
+3. `npm run bloggie:push -- -m "Title" --body "What it does, why, and how you checked it"`: it lists the files that
+   would change and sends nothing. Show the list to the author.
+4. Add `--yes`. With the GitHub CLI (`gh`, logged in) it makes the author's fork if needed, pushes one commit to a new
+   branch of it and opens the pull request; it prints the link. Without `gh`, fork `github.com/bhoov/bloggie`, add
+   `--remote <the fork's URL>`, and open the pull request from the link it prints.
+
+It sends only the content of `bloggie/`, never this blog's commits. Do not use `git subtree push`.
 
 ## Working with the author
 
