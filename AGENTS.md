@@ -28,5 +28,8 @@ and figures. `template/` is the starter blog that `scripts/create.js` copies (`n
   `git subtree push` a blog's history here, never force-push main, and keep main buildable: the demo deploys from it.
   A blog takes new commits with `npm run bloggie:update` (`scripts/update.js`). It and `publish.js --main` merge with
   `scripts/subtree.js`, which changes only `bloggie/` and needs only it committed, not `git subtree merge`.
+- Styles: `styles/site.css` and `styles/slides.css` make posts and decks work and look good with no other CSS. A
+  blog's own look goes in its `src/styles/*.css`, which loads after them; the template's holds a few writing styles.
+  Put a convention that only some blogs use (a callout, a table variant) in the template, not here.
 - Check a change in a blog: `npm run build` and `npm run e2e` there. For the starter blog, make one with
   `node scripts/create.js <folder> --copy-engine` and run the same.

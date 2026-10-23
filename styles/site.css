@@ -301,47 +301,6 @@ pre.astro-code code {
   margin-top: 0.4rem;
 }
 
-/* A small dropdown under a row's name (the learned weights of that row's model), in tabular digits. Its text
-   wraps, so that an open one widens its column only up to the table's width. */
-.wrap .num-table td > details {
-  margin-top: 0.15rem;
-  font: 0.78rem/1.45 var(--sans);
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-  white-space: normal;
-}
-
-.wrap .num-table td > details > summary {
-  width: fit-content;
-  cursor: pointer;
-  color: var(--text-muted);
-}
-
-.wrap .num-table td > details > summary:hover,
-.wrap .num-table td > details[open] > summary {
-  color: var(--text-primary);
-}
-
-/* A review of an earlier post, collapsed until the reader opens it: `<details class="review">` with a `<summary>`. */
-.wrap details.review {
-  margin: 1.6rem 0;
-  padding: 0.7rem 1.1rem;
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  background: var(--surface-1);
-}
-
-.wrap details.review > summary {
-  cursor: pointer;
-  font: 600 0.95rem var(--sans);
-  color: var(--text-secondary);
-}
-
-.wrap details.review[open] > summary {
-  margin-bottom: 0.6rem;
-  color: var(--text-primary);
-}
-
 /* A baseline row, a check rather than a contender: `<span class="baseline">` around its name greys the whole row. */
 .wrap .num-table tr:has(.baseline) {
   color: var(--text-muted);
@@ -554,60 +513,12 @@ blockquote {
   color: var(--text-secondary);
 }
 
-/* A quotation the story leans on, set apart from the prose: <blockquote class="pullquote"> holds the words as a
-   paragraph and the source in a <footer>. Larger italic type in the text color, the source small below it. */
-blockquote.pullquote {
-  margin: 2rem 0;
-  padding: 0.2rem 0 0.2rem 1.25rem;
-  border-left: 3px solid var(--text-primary);
-  color: var(--text-primary);
-  font-size: 1.28rem;
-  line-height: 1.5;
-  font-style: italic;
-}
-
-.pullquote p {
-  margin: 0;
-}
-
-.pullquote footer {
-  margin-top: 0.6rem;
-  font-family: var(--sans);
-  font-size: 0.85rem;
-  font-style: normal;
-  color: var(--text-secondary);
-}
-
-.pullquote footer::before {
-  content: '— ';
-}
-
 .note {
   font-size: 0.95rem;
   color: var(--text-secondary);
   border-top: 1px solid var(--rule);
   padding-top: 0.75rem;
   margin-top: 2rem;
-}
-
-/* A key term at its definition, one the rest of the post depends on: <dfn>attention</dfn> in a post, where **bold** marks
-   every other defined term. Bold, with an amber marker under the lower part of the line; amber is no symbol role's
-   color (--role-*), so a marked word is never read as a colored symbol. */
-.wrap dfn {
-  font-style: normal;
-  font-weight: 700;
-  background: linear-gradient(transparent 60%, color-mix(in srgb, var(--series-4) 40%, transparent) 60%);
-  padding: 0 0.08em;
-}
-
-/* A line the argument turns on, set large and marked: <p class="standout">Are we ready?</p>. */
-.standout {
-  font: 600 clamp(1.7rem, 4.2vw, 2.2rem)/1.2 var(--serif);
-  letter-spacing: -0.02em;
-  color: var(--text-primary);
-  margin: 2.5rem 0 1.5rem;
-  padding: 0.15rem 0 0.15rem 1rem;
-  border-left: 5px solid var(--series-1);
 }
 
 /* An addendum after the post, such as its related work: the same column in quieter, smaller type, below a rule.
@@ -621,12 +532,6 @@ blockquote.pullquote {
 
 .addendum :is(h2, h3) {
   color: var(--text-secondary);
-}
-
-/* A faint aside in the prose, a detail the reader may skip: <p class="faint">…</p>. */
-.faint {
-  font-size: 0.9rem;
-  color: var(--text-muted);
 }
 
 /* --- table of contents (Post.astro's <nav data-toc>, bloggie/lib/toc.js) ------------------------------------------------
@@ -1197,13 +1102,6 @@ svg text.mark-label {
   font-weight: 600;
 }
 
-/* Prose references to a plotted series carry the series color and its line style. */
-.series-word { font-weight: 600; text-decoration-line: underline; text-decoration-thickness: 2px; text-underline-offset: 0.15em; }
-.soft-word { color: var(--series-1); text-decoration-color: var(--series-1); }
-.discrete-word { color: var(--series-2); text-decoration-color: var(--series-2); text-decoration-style: dashed; }
-.soft-key::before, .discrete-key::before { content: ''; display: inline-block; width: 0.9rem; margin-right: 0.3rem; vertical-align: middle; border-top: 2px solid var(--series-1); }
-.discrete-key::before { border-top: 2px dashed var(--series-2); }
-
 .figure-source {
   margin: 0 0 1.1rem;
   text-align: left;
@@ -1607,34 +1505,6 @@ svg text.mark-label {
   margin-right: 0.15rem;
 }
 
-/* Two equation cards side by side, to compare two models term by term: `<div class="eq-pair figure-wider">` around
-   two .eq-card, each led by `<p class="eq-pair-title">` that names its model. One column on a narrow screen. */
-.eq-pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 2.5rem;
-  margin-block: 1.6rem;
-}
-
-.eq-pair > .eq-card {
-  max-width: none;
-  margin: 0;
-}
-
-.eq-pair-title {
-  margin: 0;
-  font: 600 0.9rem var(--sans);
-  color: var(--text-secondary);
-  text-align: center;
-}
-
-@media (max-width: 52rem) {
-  .eq-pair {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 1.2rem;
-  }
-}
-
 /* On a phone an equation that is still wider than the card scrolls inside it (.katex-display). */
 @media (max-width: 560px) {
   .eq-card { padding-inline: 0.6rem; }
@@ -1663,23 +1533,6 @@ svg text.mark-label {
 
 .eq-inspect .katex-display {
   font-size: 0.85em;
-}
-
-/* A small figure beside the text (a wrapfig): floats right in the text column on a wide screen, and sits in
-   the flow, centered, on a phone. Equation cards and wide figures start below it. */
-.wrap .figure-aside {
-  float: right;
-  width: 15rem;
-  margin: 0.3rem 0 1rem 1.5rem;
-}
-
-@media (max-width: 40rem) {
-  .wrap .figure-aside {
-    float: none;
-    width: auto;
-    max-width: 18rem;
-    margin: 1.2rem auto;
-  }
 }
 
 .eq-card,

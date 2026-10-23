@@ -26,8 +26,9 @@ node_modules/bloggie/          the engine, Bloggie, an npm package (in a blog ma
 - A post's slug is stable and has no date; the date is front matter. The home page lists posts newest first.
   Front matter `tags: [wip]` marks a draft and `tags: [archived]` hides a post; add a tag only when the author asks.
   Set `edited:` to the day you change a post's text, results or figures.
-- Site-wide CSS is `node_modules/bloggie/styles/site.css` (color tokens, the figure kit `.viz`, `.controls`, `.readout`). A
-  figure's own CSS stays in its `.svelte` file.
+- Bloggie's CSS (`node_modules/bloggie/styles/site.css`: color tokens, the figure kit `.viz`, `.controls`, `.readout`)
+  gives every page its base look. This blog's own styles go in `src/styles/site.css`, which loads after it and wins.
+  A figure's own CSS stays in its `.svelte` file.
 - Dependencies come from npm through `package.json`; no CDN script tags.
 - Import the engine's code as `bloggie/…` (`import { series } from 'bloggie/lib/colors.js'`) and its components and
   layouts as `@bloggie/…`. Code for one post or figure stays in `src/`. Never edit `node_modules/bloggie/`: npm

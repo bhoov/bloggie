@@ -1,0 +1,58 @@
+/* This blog's own styles, loaded after Bloggie's (bloggie/styles/site.css), so a rule here wins over the engine's.
+   Every .css file in src/styles/ is loaded on every page; change or delete these to suit the blog. */
+
+/* Writing styles that AGENTS.md suggests: <dfn>, <p class="standout">, a pull quote and a faint aside. */
+
+/* A quotation the story leans on, set apart from the prose: <blockquote class="pullquote"> holds the words as a
+   paragraph and the source in a <footer>. Larger italic type in the text color, the source small below it. */
+blockquote.pullquote {
+  margin: 2rem 0;
+  padding: 0.2rem 0 0.2rem 1.25rem;
+  border-left: 3px solid var(--text-primary);
+  color: var(--text-primary);
+  font-size: 1.28rem;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+.pullquote p {
+  margin: 0;
+}
+
+.pullquote footer {
+  margin-top: 0.6rem;
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  font-style: normal;
+  color: var(--text-secondary);
+}
+
+.pullquote footer::before {
+  content: '— ';
+}
+
+/* A key term at its definition, one the rest of the post depends on: <dfn>attention</dfn> in a post, where **bold** marks
+   every other defined term. Bold, with an amber marker under the lower part of the line; amber is no symbol role's
+   color (--role-*), so a marked word is never read as a colored symbol. */
+.wrap dfn {
+  font-style: normal;
+  font-weight: 700;
+  background: linear-gradient(transparent 60%, color-mix(in srgb, var(--series-4) 40%, transparent) 60%);
+  padding: 0 0.08em;
+}
+
+/* A line the argument turns on, set large and marked: <p class="standout">Are we ready?</p>. */
+.standout {
+  font: 600 clamp(1.7rem, 4.2vw, 2.2rem)/1.2 var(--serif);
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  margin: 2.5rem 0 1.5rem;
+  padding: 0.15rem 0 0.15rem 1rem;
+  border-left: 5px solid var(--series-1);
+}
+
+/* A faint aside in the prose, a detail the reader may skip: <p class="faint">…</p>. */
+.faint {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}

@@ -1,8 +1,10 @@
 ---
 // The HTML shell of every page: head, site styles, KaTeX's styles and the blog's symbol colors (src/roles.js). Pages
-// pass a title and description.
+// pass a title and description. Bloggie's styles (styles/site.css) make a blog work and look plain and clean on their
+// own; every .css file in the blog's src/styles/ loads after them, so the blog's own rules win.
 import 'katex/dist/katex.min.css'
 import '../styles/site.css'
+import '../styles/blog.js'
 import { site } from '@/site.js'
 import { roleCss } from '../lib/roles.js'
 
