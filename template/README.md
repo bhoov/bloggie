@@ -23,4 +23,4 @@ Once, in the repository's Settings → Pages, set the source to GitHub Actions.
 ## Update Bloggie
 
 The engine is the npm package `bloggie`, and `npm run bloggie:update` installs its latest version.
-In a blog made with `npm create bloggie <folder> -- --git`, the engine is the `bloggie/` folder instead, and `npm run bloggie:update` merges its latest version from GitHub; commit your own changes first.
+In a blog made with `npm create bloggie <folder> -- --git`, the engine is the `bloggie/` folder instead, and `npm run bloggie:update` merges its latest version from GitHub; commit your changes to `bloggie/` first.

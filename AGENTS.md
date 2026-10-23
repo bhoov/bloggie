@@ -25,6 +25,7 @@ and figures. `template/` is the starter blog that `scripts/create.js` copies (`n
 - Git: this repository's history is public and holds only engine commits. Commit here directly in a clone of it, or
   publish from a blog with `scripts/publish.js` (one commit per publish, its message written for the public). Never
   `git subtree push` a blog's history here, never force-push main, and keep main buildable: the demo deploys from it.
-  A blog takes new commits with `npm run bloggie:update`.
+  A blog takes new commits with `npm run bloggie:update` (`scripts/update.js`). It and `publish.js --main` merge with
+  `scripts/subtree.js`, which changes only `bloggie/` and needs only it committed, not `git subtree merge`.
 - Check a change in a blog: `npm run build` and `npm run e2e` there. For the starter blog, make one with
   `node scripts/create.js <folder> --copy-engine` and run the same.

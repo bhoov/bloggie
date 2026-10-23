@@ -45,7 +45,8 @@ clone of Bloggie: `gh repo fork bhoov/bloggie --clone`, change it there, check i
 (`node scripts/create.js ../check --copy-engine`, then `npm run build` in `../check`), and open the pull request with
 `gh pr create`. The steps below are for a blog made with `--git`, whose engine is its own `bloggie/` folder
 (`package.json` lists `bloggie` under `workspaces`); there `npm run bloggie:update` merges Bloggie's main into
-`bloggie/` (commit first, and resolve a conflict as any merge conflict).
+`bloggie/`. Commit `bloggie/` first; work elsewhere in the blog may stay uncommitted. On a conflict it changes nothing
+and prints the command that merges by hand.
 
 1. Keep the change general: no post's names, data, unpublished results or private paths (`bloggie/AGENTS.md`).
 2. Commit the change to `bloggie/` in this blog, then run `npm run bloggie:update` (it refuses while `bloggie/` has
