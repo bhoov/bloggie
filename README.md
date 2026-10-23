@@ -49,6 +49,7 @@ You can copy that post's folder, `src/pages/posts/how-this-blog-works/`, to `src
 | `npm run build` | Check links and citations, then build `dist/` and each post's downloads |
 
 When developing with `npm run dev`, pressing `e` on a deck opens the slide editor that saves without page reloads, and downloads are prepared on click.
+Cmd+Shift+click (Ctrl+Shift+click) on any text, formula or figure of a post or deck opens its source in VS Code at that line, also when the dev server runs on a machine that VS Code reaches over SSH.
 
 On a post, press `s` to open its deck, or `t` to fold or open the table of contents.
 On a deck:

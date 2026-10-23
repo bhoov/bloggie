@@ -19,6 +19,8 @@ import remarkSlideHeadings, { rehypeSlideBoxes } from './lib/slide-headings.js'
 import postDownloads from './scripts/export/dev.js'
 import slideEditor from './editor/integration.js'
 import liveUpdate from './live/integration.js'
+import jumpToSource from './jump/integration.js'
+import { rehypeSourcePositions, withMathPositions } from './jump/annotate.js'
 import tsx from 'shiki/langs/tsx.mjs'
 import latex from 'shiki/langs/latex.mjs'
 import markdownLang from 'shiki/langs/markdown.mjs'
@@ -91,12 +93,13 @@ export default defineConfig({
   // postDownloads: the download links under `npm run dev`; liveUpdate: a save of a post draws its change in the
   // open page, without a reload (live/); slideEditor: edit a deck with the mouse and keyboard under
   // `npm run dev`, written to its slides.mdx (editor/). liveUpdate goes before slideEditor (live/integration.js).
+  // jumpToSource: under `npm run dev`, Cmd+Shift+click opens the source of what is clicked in VS Code (jump/).
   // hmr: false: a change to a figure's .svelte or .js reloads the page, so every figure starts over,
   // instead of a hot swap that keeps the figure's state and leaves its old animation loops running.
   // optimize: MDX compiles the static parts of a page to HTML strings; the page is the same, and the
   // dev server compiles a deck again after a slide editor edit in about half the time. A <style> or
   // <script> stays an element (a Box's inner rules are a <style>): in an HTML string, Astro drops its text.
-  integrations: [mdx({ optimize: { ignoreElementNames: ['style', 'script'] } }), svelte({ compilerOptions: { hmr: false } }), postDownloads(), liveUpdate(), slideEditor(), homePage()],
+  integrations: [mdx({ optimize: { ignoreElementNames: ['style', 'script'] } }), svelte({ compilerOptions: { hmr: false } }), postDownloads(), liveUpdate(), slideEditor(), jumpToSource(), homePage()],
   devToolbar: { enabled: false }, // no Astro toolbar over the page under `npm run dev`
   // `@/` is src/, so posts import `@/figures/attention-walk/AttentionWalk.svelte` instead of ../../../ paths; `@bloggie/` is
   // bloggie/, the engine (`@bloggie/components/Cite.astro`, a post's `layout: '@bloggie/layouts/Post.astro'`).
@@ -118,12 +121,12 @@ export default defineConfig({
     shikiConfig: { langs: [...tsx, ...latex, ...markdownLang, mdxGrammar] },
     processor: unified({
       remarkPlugins: [remarkMath, remarkPostTables, remarkEquations, remarkRoles, remarkSlideHeadings], // roles: the post's color key; slide-headings: # / ## shorthand in slides.mdx
-      rehypePlugins: [[rehypeKatex, {
+      rehypePlugins: [[withMathPositions(rehypeKatex), {
         // \state{v} and the other role macros (lib/roles.js) color a symbol with \htmlClass; nothing else is trusted.
         macros: katexMacros,
         trust: (context) => context.command === '\\htmlClass',
         strict: (code) => (code === 'htmlExtension' ? 'ignore' : 'warn'),
-      }], rehypeSlideBoxes], // slide-boxes: a <Box style> in slides.mdx styles the element it holds
+      }], rehypeSlideBoxes, rehypeSourcePositions], // slide-boxes: a <Box style> in slides.mdx styles the element it holds; source-positions: dev only, last (jump/annotate.js)
     }),
   },
 })

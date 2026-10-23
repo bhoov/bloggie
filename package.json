@@ -1,6 +1,6 @@
 {
   "name": "bloggie",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Write one story with your AI agent. Publish it as an interactive blog post that ports to slides when you need them.",
   "license": "Apache-2.0",
   "repository": {
@@ -17,6 +17,7 @@
     "components",
     "e2e/*.js",
     "editor",
+    "jump",
     "layouts",
     "lib",
     "live",

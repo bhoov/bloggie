@@ -42,11 +42,11 @@ export function copyProject(from, prefix = 'slide-editor-e2e-') {
   return to
 }
 
-export async function startDev(root) {
+export async function startDev(root, env = {}) {
   const port = 5000 + Math.floor(Math.random() * 900)
   // --ignore-lock keeps the server in this process: run by an agent, `astro dev` otherwise moves to the
   // background, and kill() would not stop it.
-  const dev = spawn(process.execPath, [join(root, 'node_modules/astro/bin/astro.mjs'), 'dev', '--ignore-lock', '--host', '127.0.0.1', '--port', String(port)], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'] })
+  const dev = spawn(process.execPath, [join(root, 'node_modules/astro/bin/astro.mjs'), 'dev', '--ignore-lock', '--host', '127.0.0.1', '--port', String(port)], { cwd: root, env: { ...process.env, ...env }, stdio: ['ignore', 'pipe', 'pipe'] })
   let output = ''
   for (const stream of [dev.stdout, dev.stderr]) stream.on('data', (chunk) => { output += chunk })
   const origin = `http://127.0.0.1:${port}`
@@ -390,7 +390,8 @@ export async function editorChecks({ check, launch, root }) {
       const value = await ev(`document.querySelector('.se-source textarea').value`)
       if (value !== 'Edited **in place**.') throw new Error(`⌘B made "${value}"`)
       await drawn(() => key('Enter', ['meta']))
-      const shown = await ev(`document.querySelector(${JSON.stringify(paragraph)}).innerHTML`)
+      // without the source positions that jump to source (bloggie/jump/) writes under `npm run dev`
+      const shown = (await ev(`document.querySelector(${JSON.stringify(paragraph)}).innerHTML`)).replace(/ data-src(-[a-z]+)?="[^"]*"/g, '')
       if (!shown.includes('<strong>in place</strong>') || !read().includes('Edited **in place**.')) throw new Error(`the page shows "${shown}"`)
       await drawn(() => key('z', ['meta']))
       if (read() !== original) throw new Error('undo did not bring slides.mdx back')

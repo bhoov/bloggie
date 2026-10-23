@@ -4,8 +4,10 @@
 // and checks it the same way, and reads each post's agent download. Each post's table of contents lists its sections,
 // and on the example post it is used at a narrow and a wide width (bloggie/e2e/toc.js). Last, it uses the slide editor on a
 // copy of the project (bloggie/e2e/editor.js), and saves files under a copy's dev server to see each drawn without a reload
-// (the live update, bloggie/e2e/live.js). It fails on any page error, figure that does not hydrate, figure that does not do
-// what the post says, editor change that does not reach slides.mdx as it should, or save the page does not show as it should.
+// (the live update, bloggie/e2e/live.js), and Cmd+Shift+clicks posts and a deck there to open their source (jump to
+// source, bloggie/e2e/jump.js). It fails on any page error, figure that does not hydrate, figure that does not do what
+// the post says, editor change that does not reach slides.mdx as it should, save the page does not show as it should, or
+// click that does not open the line that wrote what was clicked.
 //
 // Artifact: bloggie/e2e/report/report.json lists every check with what it observed, the browser, the commit,
 // and a SHA-256 of each download; bloggie/e2e/report/*.png shows each figure after its check. The checks and
@@ -21,6 +23,7 @@ import { launch } from './browser.js'
 import { checks, afterPage } from './figures.js'
 import { editorChecks } from './editor.js'
 import { liveChecks } from './live.js'
+import { jumpChecks } from './jump.js'
 import { tocList, tocUse, tocSpace } from './toc.js'
 
 const root = process.cwd() // the blog (lib/blog.js)
@@ -392,6 +395,7 @@ await check('npm run dev', 'the download links return both files', async () => {
 // The slide editor under `npm run dev`, on a copy of the project with its own dev server (bloggie/e2e/editor.js).
 await editorChecks({ check, launch, root })
 await liveChecks({ check, launch, root })
+await jumpChecks({ check, launch, root })
 
 // --- the artifact ------------------------------------------------------------
 const git = (cmd) => { try { return execSync(`git ${cmd}`, { cwd: root, encoding: 'utf8' }).trim() } catch { return null } }

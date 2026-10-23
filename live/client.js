@@ -49,9 +49,10 @@ function loaded(path) {
 }
 
 // An island is its component and props; Astro's own inline scripts and styles, which a page needs once,
-// are left out.
+// are left out, and so are the source positions of jump to source (bloggie/jump/), which a line added above changes.
 const ISLAND = ['component-url', 'component-export', 'props', 'opts', 'client']
 function key(html) {
+  html = html.replace(/ data-src(?:-text|-file|-version)?="[^"]*"/g, '')
   if (!html.includes('<astro-island') && !html.includes('<script')) return html
   return html
     .replace(/<script>([\s\S]*?)<\/script>/g, (whole, code) => (/self\.Astro|astro-island/.test(code) ? '' : whole))

@@ -110,7 +110,9 @@ async function openPage(browser, { width = 1280, height = 16000, dark = false } 
   const { targetId } = await browser.send('Target.createTarget', { url: 'about:blank' })
   const { sessionId } = await browser.send('Target.attachToTarget', { targetId, flatten: true })
   const problems = [] // exceptions, console errors, failed loads
+  const navigations = [] // the URL of each navigation the page asks for, such as a vscode:// link, which a headless browser does not follow
   let onEvent = (m) => {
+    if (m.method === 'Page.frameRequestedNavigation') navigations.push(m.params.url)
     if (m.method === 'Runtime.exceptionThrown') problems.push(`exception: ${m.params.exceptionDetails.exception?.description ?? m.params.exceptionDetails.text}`)
     if (m.method === 'Runtime.consoleAPICalled' && m.params.type === 'error') problems.push(`console.error: ${m.params.args.map((a) => a.value ?? a.description).join(' ')}`)
     // Chrome asks for /favicon.ico by itself; the site has none, and on Pages that path is outside the site.
@@ -128,9 +130,11 @@ async function openPage(browser, { width = 1280, height = 16000, dark = false } 
   if (dark) await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-color-scheme', value: 'dark' }] })
   return {
     problems,
+    navigations,
     evaluate,
     async goto(url) {
       problems.length = 0
+      navigations.length = 0
       const loaded = new Promise((resolve) => { const on = onEvent; onEvent = (m) => { on(m); if (m.method === 'Page.loadEventFired') { onEvent = on; resolve() } } })
       const { loaderId } = await send('Page.navigate', { url })
       // To the page already open with another #hash (or the same), Chrome only moves to the hash: no loaderId and no
