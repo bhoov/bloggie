@@ -1,7 +1,7 @@
 {
   "name": "create-bloggie",
   "version": "0.3.0",
-  "description": "Start a Bloggie blog: npm create bloggie my-blog",
+  "description": "Start a Bloggie blog. The documented command is npx bloggie my-blog; npm create bloggie my-blog runs the same thing.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
