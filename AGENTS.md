@@ -3,7 +3,7 @@
 This folder is Bloggie: the layouts, components, slide kit and editor, styles, checks and e2e runner that a blog builds
 with. In a blog it is the npm package `bloggie` (`node_modules/bloggie/`), or, in a blog made with `--git`, the
 `bloggie/` folder, kept as a git subtree of https://github.com/bhoov/bloggie; the blog's own `AGENTS.md` covers posts
-and figures. `template/` is the starter blog that `scripts/create.js` copies (`npm create bloggie`), and the demo site
+and figures. `template/` is the starter blog that `scripts/create.js` copies (`npx bloggie`), and the demo site
 (`.github/workflows/demo.yml`). `create/` is the npm package `create-bloggie`, which runs `scripts/create.js`.
 
 - An engine file imports only engine files, the blog's site data (`src/site.js`, `src/references.json`,

@@ -23,12 +23,11 @@ import slideEditor from './media/slide-editor.png'
 <h2 id="start">Start in two commands</h2>
 
 ```sh
-npx --allow-git=root github:bhoov/bloggie my-blog
+npx bloggie my-blog
 cd my-blog && npm run dev        # http://localhost:4321/
 ```
 
-The first command copies Bloggie into `my-blog/`, dates this post today, and installs its packages.
-`--allow-git=root` lets npm 12 and later fetch Bloggie from GitHub.
+The first command makes the blog in `my-blog/`, dates this post today, and installs its packages.
 Add `--title "My blog" --author "Ada Lovelace"` to it to name the blog, or set these later in `src/site.js`.
 You need Node 22 or later and git.
 

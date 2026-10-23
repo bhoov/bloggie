@@ -1,5 +1,5 @@
 // `npm run bloggie:update` (node bloggie/scripts/update.js) in a blog that keeps Bloggie as its bloggie/ folder (made
-// with `npm create bloggie <folder> -- --git`): merge Bloggie's main into bloggie/. Only bloggie/ must be committed;
+// with `npx bloggie <folder> --git`): merge Bloggie's main into bloggie/. Only bloggie/ must be committed;
 // work in progress elsewhere in the blog stays as it is (scripts/subtree.js). On a conflict it changes nothing and
 // says how to merge by hand.
 //

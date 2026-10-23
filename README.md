@@ -28,14 +28,14 @@ Every post downloads as a single HTML file that works offline.
 ## Start
 
 ```sh
-npm create bloggie my-blog           # start a new blog in my-blog/ and install its packages
-# npm create bloggie my-blog -- --title "My blog" --author "Ada Lovelace"
+npx bloggie my-blog                  # start a new blog in my-blog/ and install its packages
+# npx bloggie my-blog --title "My blog" --author "Ada Lovelace"
 # OR add metadata later to `src/site.js`
 cd my-blog && npm run dev            # http://localhost:4321/
 ```
 
 The new blog is your own git repository; Bloggie, the engine, is an npm package, and `npm run bloggie:update` installs its latest version.
-To contribute to Bloggie's engine, you can instead have bloggie as a git subtree inside your blog using `npm create bloggie my-blog -- --git`, saved to your blog's `bloggie/` folder. See [Contributing](#contributing).
+To contribute to Bloggie's engine, you can instead have bloggie as a git subtree inside your blog using `npx bloggie my-blog --git`, saved to your blog's `bloggie/` folder. See [Contributing](#contributing).
 
 Use Node 22 or later.
 See the example post, "How this blog works", for features.
@@ -133,7 +133,7 @@ Once, in the repository's Settings → Pages, set the source to GitHub Actions.
 
 ## Contributing
 
-The easiest way to contribute is to start your blog with `npm create bloggie my-blog -- --git`.
+The easiest way to contribute is to start your blog with `npx bloggie my-blog --git`.
 The blogging engine is then placed into your blog's `bloggie/` folder, a git subtree of this repository, and you work on your blog as usual.
 When you have an idea that would improve the engine for every blog, make the change in `bloggie/`, commit it, and run:
 
@@ -150,7 +150,7 @@ Once the pull request is merged, `npm run bloggie:update` brings it into your bl
 
 In a blog that uses Bloggie as an npm package, make the change in a clone of this repository instead (`gh repo fork bhoov/bloggie --clone`), and open the pull request from there.
 
-This repository is the engine; `template/` is the starter blog that `npm create bloggie` copies and the demo site shows.
+This repository is the engine; `template/` is the starter blog that `npx bloggie` copies and the demo site shows.
 To check a change to the starter blog, make one with `node scripts/create.js ../demo --copy-engine` and run `npm run build` there.
 `AGENTS.md` has the engine's rules.
 

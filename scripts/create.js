@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// `npm create bloggie <folder>` (or `npx bloggie <folder>`): a new blog in <folder> (default my-blog). npm fetches
+// `npx bloggie <folder>`: a new blog in <folder> (default my-blog). npm fetches
 // Bloggie and runs this file from it. The blog is the starter in template/: the example post, src/site.js, AGENTS.md,
 // the deploy workflow. This dates the example post today, names the blog, makes the folder a git repository with one
 // commit, and runs `npm install`.
