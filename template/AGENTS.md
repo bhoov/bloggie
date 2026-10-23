@@ -48,8 +48,9 @@ clone of Bloggie: `gh repo fork bhoov/bloggie --clone`, change it there, check i
 `bloggie/` (commit first, and resolve a conflict as any merge conflict).
 
 1. Keep the change general: no post's names, data, unpublished results or private paths (`bloggie/AGENTS.md`).
-2. `npm run bloggie:update`, then commit the change to `bloggie/` in this blog. Everything in `bloggie/` that differs
-   from Bloggie's main goes into the pull request, so check `git diff` against it in step 3.
+2. Commit the change to `bloggie/` in this blog, then run `npm run bloggie:update` (it refuses while `bloggie/` has
+   uncommitted changes). Everything in `bloggie/` that differs from Bloggie's main goes into the pull request, so check
+   the list in step 3.
 3. `npm run bloggie:push -- -m "Title" --body "What it does, why, and how you checked it"`: it lists the files that
    would change and sends nothing. Show the list to the author.
 4. Add `--yes`. With the GitHub CLI (`gh`, logged in) it makes the author's fork if needed, pushes one commit to a new

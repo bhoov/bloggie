@@ -35,7 +35,7 @@ cd my-blog && npm run dev            # http://localhost:4321/
 ```
 
 The new blog is your own git repository; Bloggie, the engine, is an npm package, and `npm run bloggie:update` installs its latest version.
-To change the engine and send pull requests, start with `npm create bloggie my-blog -- --git` instead: the engine is then your blog's `bloggie/` folder, a git subtree (see Contributing).
+To contribute to Bloggie's engine, you can instead have bloggie as a git subtree inside your blog using `npm create bloggie my-blog -- --git`, saved to your blog's `bloggie/` folder. See [Contributing](#contributing).
 
 Use Node 22 or later.
 See the example post, "How this blog works", for features.
@@ -132,14 +132,25 @@ Once, in the repository's Settings → Pages, set the source to GitHub Actions.
 
 ## Contributing
 
-This repository is the engine, and `template/` is the starter blog that `npm create bloggie` copies and the demo site shows.
-In a blog made with `--git`, the engine is the `bloggie/` folder, kept as a git subtree.
-To change it, edit `bloggie/` in your blog and commit, then run `npm run bloggie:push -- -m "What changed" --body "Why" --yes`.
-With the GitHub CLI (`gh`) logged in, it makes your fork if needed, pushes the change to a branch of it and opens a pull request here.
+The easiest way to contribute is to start your blog with `npm create bloggie my-blog -- --git`.
+The blogging engine is then placed into your blog's `bloggie/` folder, a git subtree of this repository, and you work on your blog as usual.
+When you have an idea that would improve the engine for every blog, make the change in `bloggie/`, commit it, and run:
+
+```sh
+npm run bloggie:update                                         # merge this repository's latest main first
+npm run bloggie:push -- -m "What changed" --body "Why"         # list the files that would change; nothing is sent
+npm run bloggie:push -- -m "What changed" --body "Why" --yes   # send it and open a pull request
+```
+
+With the GitHub CLI (`gh`) logged in, the last command makes your fork if needed, pushes the change to a branch of it and opens a pull request here.
 Without `gh`, fork this repository, add `--remote <your fork's URL>`, and open the pull request from the link it prints.
-Only the folder's content goes, as one commit on top of this repository's main; none of your blog's commits do.
-In a blog made before this script was added to its `package.json`, run `node bloggie/scripts/publish.js` instead.
-To check a change in the starter blog, make one with `node scripts/create.js ../demo --copy-engine` and run `npm run build` there.
+Only the content of `bloggie/` goes, as one commit on top of this repository's main; none of your blog's commits or messages do.
+Once the pull request is merged, `npm run bloggie:update` brings it into your blog.
+
+In a blog that uses Bloggie as an npm package, make the change in a clone of this repository instead (`gh repo fork bhoov/bloggie --clone`), and open the pull request from there.
+
+This repository is the engine; `template/` is the starter blog that `npm create bloggie` copies and the demo site shows.
+To check a change to the starter blog, make one with `node scripts/create.js ../demo --copy-engine` and run `npm run build` there.
 `AGENTS.md` has the engine's rules.
 
 ## License
