@@ -16,8 +16,9 @@ and figures. `template/` is the starter blog that `scripts/create.js` copies (`n
 - The engine's dependencies are in this folder's `package.json`, under `dependencies`: npm does not install the
   `devDependencies` of a package that a blog depends on. A blog lists `bloggie` as a dependency, or, with `--git`, this
   folder as an npm workspace (npm links it as `node_modules/bloggie`, so a blog's scripts and imports work in both).
-- A release goes to npm: raise `version` in `package.json` (and the template's `bloggie` dependency), then
-  `npm publish` here. Publish `create/` (`create-bloggie`) only when its `index.js` changes.
+- A release goes to npm: raise the last number of `version` in `package.json`, 0.4.0 to 0.4.1 (the middle number goes
+  up once others contribute), and the template's `bloggie` dependency with it; then `npm publish` here. Publish
+  `create/` (`create-bloggie`) only when its `index.js` changes.
 - From a blog, `npm run bloggie:push -- -m "…" --yes` (`scripts/publish.js`) publishes `bloggie/` as one new commit on
   top of the engine's main and opens a pull request: to a branch of the engine's repository if you may push there,
   else of your fork (`gh` makes it; without `gh`, `--remote <fork>`). `--main` pushes to main. None of the blog's
