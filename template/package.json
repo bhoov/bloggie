@@ -11,7 +11,7 @@
     "bloggie:update": "npm install bloggie@latest"
   },
   "dependencies": {
-    "bloggie": "^0.4.1",
+    "bloggie": "^0.4.2",
     "d3": "^7.9.0"
   },
   "overrides": {
