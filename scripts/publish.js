@@ -15,10 +15,12 @@
 // this change. It refuses unless the blog has already merged Bloggie's main (`npm run bloggie:update`), so the new
 // commit holds every change made there. With the GitHub CLI (`gh`, logged in) it finds or makes your fork and opens the
 // pull request; without it, pass --remote and open the pull request from the link it prints. After a push to main it
-// records the new commit in the blog with `git subtree merge`, so the next `bloggie:update` and publish start from it.
+// records the new commit in the blog with a merge commit (scripts/subtree.js), so the next `bloggie:update` and publish
+// start from it.
 import { execFileSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
+import { mergeIntoFolder } from './subtree.js'
 
 const root = fileURLToPath(new URL('../..', import.meta.url))
 const { values: opts } = parseArgs({ options: {
@@ -91,8 +93,12 @@ for (let attempt = 1; ; attempt++) {
 }
 console.log(`\nbloggie:push: published ${commit.slice(0, 7)} to ${target}`)
 if (opts.main) {
-  git('subtree', 'merge', '--prefix=bloggie', commit, '-m', `Record Bloggie ${commit.slice(0, 7)}, published from bloggie/`)
-  console.log('bloggie:push: recorded it in this blog (git subtree merge)')
+  try {
+    mergeIntoFolder({ root, prefix: 'bloggie', commit, message: `Record Bloggie ${commit.slice(0, 7)}, published from bloggie/` })
+    console.log('bloggie:push: recorded it in this blog with a merge commit')
+  } catch (error) {
+    stop(`published, but not recorded in this blog (${error.message}); npm run bloggie:update records it`)
+  }
   process.exit(0)
 }
 

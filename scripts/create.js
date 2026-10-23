@@ -77,7 +77,7 @@ pkg.name = title.toLowerCase().replace(/['’]/g, '').replace(/[^a-z0-9]+/g, '-'
 if (inFolder) {
   delete pkg.dependencies.bloggie
   pkg.workspaces = ['bloggie']
-  pkg.scripts['bloggie:update'] = `git subtree pull --prefix=bloggie ${opts.repo} main -m 'Update Bloggie'`
+  pkg.scripts['bloggie:update'] = `node bloggie/scripts/update.js${opts.repo === 'https://github.com/bhoov/bloggie.git' ? '' : ` --repo ${opts.repo}`}`
   pkg.scripts['bloggie:push'] = 'node bloggie/scripts/publish.js'
 } else {
   pkg.dependencies.bloggie = `^${JSON.parse(readFileSync(join(engine, 'package.json'), 'utf8')).version}`
