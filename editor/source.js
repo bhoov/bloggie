@@ -1,9 +1,9 @@
 // Source edits for the slide editor: find a block of a deck in its slides.mdx, and rewrite the
-// block's CSS or its text, or copy or delete a block or a whole slide. Each edit takes the file's
-// text and returns the new text; the dev server (integration.js) writes it. A block is named as in
-// the page, "<slide>/<block>" ("3/1"), or "<slide>/t" for the slide's title, with the indexes of
-// slidesFromHeadings and slideBlocks (bloggie/lib/slide-headings.js), which the page's markers come
-// from too.
+// block's CSS or its text, copy or delete a block, or copy, move or delete a whole slide. Each edit
+// takes the file's text and returns the new text; the dev server (integration.js) writes it. A block
+// is named as in the page, "<slide>/<block>" ("3/1"), or "<slide>/t" for the slide's title, with the
+// indexes of slidesFromHeadings and slideBlocks (bloggie/lib/slide-headings.js), which the page's
+// markers come from too.
 //
 // Where the CSS goes:
 //   a Markdown block or a figure tag   <Box style="…"> around it (a new Box when it has none)
@@ -628,12 +628,59 @@ function removeSlide(source, index) {
   return { source: next, reload: true, slide: Math.min(index, slides.length - 2) }
 }
 
+// Slide `from` moved so that it becomes slide `to`. The first `#` is the title and every later one a
+// divider, so a move can change the kind of a `#` slide whose tag names none: such a slide is given
+// its kind in a tag first, and every slide keeps the kind it had.
+function moveSlide(source, from, to) {
+  from = Number(from)
+  to = Number(to)
+  let slides = parse(source)
+  findSlide(slides, from)
+  findSlide(slides, to)
+  if (from === to) return { source, unchanged: true }
+  const order = slides.map((s) => s.index)
+  order.splice(to, 0, ...order.splice(from, 1))
+  let sawTitle = false
+  const named = []
+  for (const i of order) {
+    const { heading, implied } = slides[i]
+    const now = heading?.depth === 1 ? (sawTitle ? 'divider' : 'title') : implied
+    if (!heading || heading.depth === 1) sawTitle = true
+    if (now !== implied && !readHeading(source, slides[i]).kind) named.push(slides[i])
+  }
+  let next = source
+  for (const slide of named.sort((a, b) => b.index - a.index)) {
+    const h = readHeading(next, slide)
+    next = splice(next, h.start, h.titleStart, `${h.hashes}[${slide.implied}] `)
+  }
+  slides = parse(next)
+  const { start, end } = slideSpan(next, slides, from)
+  const text = next.slice(start, end)
+  const before = next.slice(0, start).replace(/\s+$/, '')
+  const after = next.slice(end).replace(/^\s+/, '')
+  next = after ? `${before}\n\n${after}` : `${before}\n`
+  const rest = parse(next)
+  if (to < rest.length) {
+    const at = slideSpan(next, rest, to, { imports: false }).start
+    next = splice(next, at, at, `${text}\n\n`)
+  } else {
+    const at = slideSpan(next, rest, rest.length - 1, { imports: false }).end
+    next = splice(next, at, at, `\n\n${text}`)
+  }
+  const moved = parse(next)
+  const placed = moved.length === slides.length ? slideSpan(next, moved, to, { imports: false }) : null
+  if (!placed || next.slice(placed.start, placed.end) !== text) throw new EditError('the slide could not be moved on its own; move it in slides.mdx')
+  if (moved.map((s) => s.kind).join() !== order.map((i) => slides[i].kind).join()) throw new EditError('the move would change the kind of a slide; move it in slides.mdx')
+  return { source: next, reload: true, slide: to }
+}
+
 // One edit, or a batch of them applied in order as one step:
 //   { type: 'style', id, set }            { type: 'inner', id, selector, set }
 //   { type: 'text', id, text }            { type: 'insert', after: id, text }
 //   { type: 'delete', id }                { type: 'duplicate', id }
 //   { type: 'words', id, plain, start, end, color | mark }   words selected on the page
 //   { type: 'duplicate-slide', slide }    { type: 'delete-slide', slide }
+//   { type: 'move-slide', slide, to }
 //   { type: 'batch', edits: [...] }
 // A change of CSS also returns `inverse`, the edit that undoes it (for a batch, a batch).
 export function applyEdit(source, edit) {
@@ -647,6 +694,7 @@ export function applyEdit(source, edit) {
     case 'words': return formatWords(source, edit.id, edit)
     case 'duplicate-slide': return duplicateSlide(source, edit.slide)
     case 'delete-slide': return removeSlide(source, edit.slide)
+    case 'move-slide': return moveSlide(source, edit.slide, edit.to)
     case 'batch': {
       if (!Array.isArray(edit.edits) || !edit.edits.length) throw new EditError('an empty batch')
       let text = source

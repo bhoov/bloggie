@@ -64,6 +64,7 @@ title: Jump to source check (slides)
 ---
 
 import RoleKey from '@bloggie/components/RoleKey.astro'
+import Dots from '@/figures/e2e-jump/Dots.svelte'
 
 # Jump Check Deck
 
@@ -76,6 +77,10 @@ Slide text names Aberdeen.
 ## Second Slide Shows Roles
 
 <RoleKey />
+
+## Third Slide Shows Dots
+
+<Dots client:load />
 `
 
 const DOTS = `<script>
@@ -239,7 +244,7 @@ export async function jumpChecks({ check, launch, root }) {
       }
     })
 
-    await check(LABEL, 'on a deck: a slide\'s title, its text, and a component after the notes of the slide before', async () => {
+    await check(LABEL, 'on a deck: a slide\'s title, its text, and a component after the notes of the slide before; in the slide editor, Enter on a part of a figure', async () => {
       const show = async (text) => {
         const n = await page.evaluate(`[...document.querySelectorAll('.deck > section.slide')].findIndex((s) => s.textContent.includes(${JSON.stringify(text)})) + 1`)
         await page.evaluate(`location.hash = '#${n}'`)
@@ -254,7 +259,29 @@ export async function jumpChecks({ check, launch, root }) {
       const text = opens(await jump(await page.evaluate(wordPoint('Aberdeen', active))), DECK_FILE, 'Aberdeen')
       await show('Second Slide')
       const roles = opens(await jump(await page.evaluate(boxPoint('.deck > section.slide.active .role-list li'))), DECK_FILE, '<RoleKey')
-      return { title, text, roles }
+      // In the slide editor, Enter on an element inside a figure (selected with a double-click) opens it, as a
+      // Cmd+Shift+click does.
+      await show('Third Slide')
+      await page.waitFor(`${active}.querySelector('.e2e-dots circle')?.__svelte_meta`, { what: 'the figure on the deck to hydrate' })
+      const press = async (key, code, vk, text) => {
+        await page.cdp('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode: vk, text })
+        await page.cdp('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: vk })
+      }
+      await press('e', 'KeyE', 69, 'e')
+      await page.waitFor(`document.body.classList.contains('se-on') && document.querySelector('.se-toolbar')`, { what: 'edit mode' })
+      const c = await page.evaluate(boxPoint('.deck > section.slide.active .e2e-dots circle', 8))
+      for (const clickCount of [1, 2]) {
+        await page.cdp('Input.dispatchMouseEvent', { type: 'mousePressed', x: c.x, y: c.y, button: 'left', buttons: 1, clickCount })
+        await page.cdp('Input.dispatchMouseEvent', { type: 'mouseReleased', x: c.x, y: c.y, button: 'left', clickCount })
+      }
+      await page.waitFor(`document.querySelector('.se-what')?.textContent.includes('› circle')`, { what: 'the circle selected inside the figure' })
+      const before = await page.evaluate('window.__jumps.length')
+      await press('Enter', 'Enter', 13, '\r')
+      const answer = await page.waitFor(`window.__jumps.length > ${before} && window.__jumps.at(-1)`, { what: 'the dev server to answer the editor' })
+      const editor = opens(answer, 'src/figures/e2e-jump/Dots.svelte', '<circle')
+      await press('Escape', 'Escape', 27)
+      await press('e', 'KeyE', 69, 'e')
+      return { title, text, roles, editor }
     })
 
     if (existsSync(join(copy, 'src/pages/posts/how-this-blog-works/index.mdx'))) {

@@ -175,7 +175,7 @@ function renumber(slide, to, ids) {
 }
 
 // Swap the new render's changes into the deck. Returns each kept element's old id → new id, the new
-// indexes of the slides drawn again, and whether the number of slides changed.
+// indexes of the slides drawn again, and whether slides were added, removed or moved.
 export function reconcile(deck, was, is, doc) {
   const freshDeck = doc.querySelector('.deck')
   if (!freshDeck) throw new Error('the new render has no deck')
@@ -188,7 +188,8 @@ export function reconcile(deck, was, is, doc) {
   const ids = new Map()
   const drawn = []
   let previous = null
-  for (const { op, a, b } of align(was.slides.map((s) => s.hash), is.slides.map((s) => s.hash))) {
+  const ops = align(was.slides.map((s) => s.hash), is.slides.map((s) => s.hash))
+  for (const { op, a, b } of ops) {
     if (op === 'keep') {
       renumber(live[a], b, ids)
       previous = live[a]
@@ -211,5 +212,5 @@ export function reconcile(deck, was, is, doc) {
       previous = slide
     } else live[a].remove()
   }
-  return { ids, drawn, recount: was.slides.length !== is.slides.length }
+  return { ids, drawn, recount: ops.some(({ op }) => op === 'insert' || op === 'remove') }
 }

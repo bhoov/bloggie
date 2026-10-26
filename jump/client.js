@@ -24,6 +24,15 @@ for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']
   }, { capture: true, passive: false })
 }
 
+// The slide editor (bloggie/editor/) asks for the source of an element it has selected (Enter on an element inside a
+// block, such as a part of a figure): a bloggie:jump event with the element and a point on it. Cancelling the event
+// tells the editor that this page can jump.
+window.addEventListener('bloggie:jump', (event) => {
+  event.preventDefault()
+  const { target, x, y } = event.detail
+  jump({ target, clientX: x, clientY: y, altKey: false }).catch((error) => toast(`Jump to source: ${error.message}`))
+})
+
 const storage = {
   get(key) { try { return localStorage.getItem(key) } catch { return null } },
   set(key, value) { try { localStorage.setItem(key, value) } catch {} },

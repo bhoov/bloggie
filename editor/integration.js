@@ -19,7 +19,7 @@ const ENDPOINT = '/__slide-editor'
 // The version of the requests and answers between the page (client.js) and this server. The dev
 // server loads this file when it starts, but the page's code is new on every load: after a change
 // here, the page tells the author to restart `npm run dev` rather than work with an older server.
-export const PROTOCOL = 3
+export const PROTOCOL = 4
 const HISTORY = 200 // undo steps kept per file
 
 const version = (text) => createHash('sha256').update(text).digest('hex').slice(0, 16)

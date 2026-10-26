@@ -401,6 +401,44 @@
   border-right: 1px solid var(--rule);
   font: 12px/1 var(--sans);
   color: var(--text-muted);
+  user-select: none;
+}
+
+.se-panel.se-dragging,
+.se-panel.se-dragging .se-slide {
+  cursor: grabbing;
+}
+
+.se-panel.se-dragging .se-slide .se-slide-tools {
+  display: none;
+}
+
+/* A dragged thumbnail: its place in the list is dimmed, a copy follows the pointer, and a line
+   shows where the slide goes, above the copy; the list's head stays above both. */
+.se-slide.se-dragged {
+  opacity: 0.35;
+}
+
+.se-slide-frame.se-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.75;
+  box-shadow: 0 0 0 2px var(--series-1), 0 6px 18px rgb(0 0 0 / 25%);
+}
+
+.se-drop {
+  position: absolute;
+  left: 26px;
+  right: 8px;
+  height: 3px;
+  margin-top: -1.5px;
+  z-index: 3;
+  border-radius: 2px;
+  background: var(--series-1);
+  pointer-events: none;
 }
 
 .se-slide {
@@ -494,7 +532,7 @@
 .se-panel-head {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 4;
   display: flex;
   align-items: center;
   gap: 4px;

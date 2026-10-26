@@ -124,6 +124,31 @@ export async function editorChecks({ check, launch, root }) {
     return observed
   })
 
+  // Every slide of every deck, moved to the start, the end and one place each way: every slide keeps its
+  // kind (a `#` that moves past the title is given its kind in a tag), and the moved slide keeps its text.
+  await check(LABEL, 'every slide of every deck moves, and every slide keeps its kind', () => {
+    const observed = {}
+    for (const slug of decksIn(root)) {
+      const source = readFileSync(join(root, 'src/pages/posts', slug, 'slides.mdx'), 'utf8')
+      const before = outline(source).slides
+      const n = before.length
+      let moves = 0
+      for (let from = 0; from < n; from++) {
+        for (const to of new Set([0, n - 1, from - 1, from + 1].filter((t) => t >= 0 && t < n && t !== from))) {
+          const order = before.map((s, i) => i)
+          order.splice(to, 0, ...order.splice(from, 1))
+          const after = outline(applyEdit(source, { type: 'move-slide', slide: from, to }).source).slides
+          const kinds = after.map((s) => s.kind).join()
+          if (kinds !== order.map((i) => before[i].kind).join()) throw new Error(`${slug}: moving slide ${from + 1} to ${to + 1} gives the kinds ${kinds}`)
+          if (after[to].opaque !== before[from].opaque || after[to].hashes.join() !== before[from].hashes.join()) throw new Error(`${slug}: slide ${from + 1}, moved to ${to + 1}, changed its blocks`)
+          moves++
+        }
+      }
+      observed[slug] = `${moves} moves`
+    }
+    return observed
+  })
+
   const copy = copyProject(root)
   let dev = null
   let browser = null
@@ -398,6 +423,30 @@ export async function editorChecks({ check, launch, root }) {
       return `"${value}" written, rendered as ${shown}, and undone, in place`
     })
 
+    await step('⌘S saves the Markdown being edited and a size step before its pause, and the browser does not save the page', async () => {
+      const prevented = await ev(`(() => { const e = new KeyboardEvent('keydown', { key: 's', code: 'KeyS', metaKey: true, ctrlKey: true, bubbles: true, cancelable: true }); document.body.dispatchEvent(e); return e.defaultPrevented })()`)
+      if (!prevented) throw new Error('⌘S was not prevented: the browser would save the page')
+      const p = await center(paragraph)
+      await click(p.x, p.y)
+      await key('Enter')
+      await page.waitFor(`document.querySelector('.se-source textarea')`, { timeout: 5000, what: 'the Markdown editor' })
+      await ev(`document.querySelector('.se-source textarea').value = 'Saved with ⌘S.'`)
+      await drawn(() => key('s', ['meta']))
+      if (!read().includes('Saved with ⌘S.') || (await ev(`!!document.querySelector('.se-source')`))) throw new Error('⌘S did not save and close the Markdown editor')
+      await drawn(() => key('z', ['meta']))
+      // A size step waits 450 ms before it is written; ⌘S writes it at once.
+      await click(p.x, p.y)
+      await key('.', ['meta', 'shift'])
+      const start = Date.now()
+      await key('s', ['meta'])
+      await page.waitFor(`document.querySelector('.se-status')?.textContent === 'Saving…' || document.querySelector('.se-status')?.textContent === 'Saved'`, { timeout: 2000, what: 'the size step to be sent' })
+      const sent = Date.now() - start
+      await saved()
+      if (!/font-size: \d+px/.test(readBlock(read(), target.id).style) || sent > 300) throw new Error(`after ⌘S the style is "${readBlock(read(), target.id).style}", sent after ${sent} ms`)
+      await undoAll()
+      return `⌘S prevented; the Markdown saved and the size step sent ${sent} ms after ⌘S`
+    })
+
     await step('⌘D copies a list as a list of its own, and undo removes the copy', async () => {
       const index = await ev(`[...document.querySelectorAll('.deck > .slide')].findIndex((s) => s.querySelector('.slide-body > ul[data-edit]'))`)
       await ev(`location.hash = '#${index + 1}'`)
@@ -472,6 +521,29 @@ export async function editorChecks({ check, launch, root }) {
       if (copied !== count + 1 || now !== 3) throw new Error(`after ⌘D: ${copied} slides (not ${count + 1}), on slide ${now}`)
       if (read() !== original) throw new Error('Delete on the copy did not bring slides.mdx back')
       return `${count} → ${copied} → ${count} slides; the copy was shown as slide ${now}`
+    })
+
+    await step('a dragged thumbnail moves its slide, ⌘↑ moves it back one, and undo brings slides.mdx back; nothing reloads', async () => {
+      const hashes = (text) => outline(text).slides.map((s) => s.hash)
+      const was = hashes(original)
+      await ev(`document.querySelector('.se-panel').scrollTop = 0`)
+      await sleep(200)
+      // From thumbnail 2 to the lower half of thumbnail 4: slide 2 becomes slide 4.
+      const from = await center('.se-slide[data-index="1"] .se-slide-frame')
+      const below = await ev(`(() => { const r = document.querySelector('.se-slide[data-index="3"]').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height * 0.75 } })()`)
+      await drawn(() => drag(from.x, from.y, below.x, below.y))
+      const dragged = hashes(read())
+      const state = await ev(`({ thumbs: document.querySelectorAll('.se-panel .se-slide').length, current: document.querySelector('.se-slide.se-current')?.dataset.index, ghost: !!document.querySelector('.se-ghost') })`)
+      if (dragged[3] !== was[1] || dragged[1] !== was[2] || dragged[2] !== was[3]) throw new Error('slides.mdx does not have slide 2 as slide 4')
+      if (state.thumbs !== was.length || (await at()) !== 4 || state.current !== '3' || state.ghost) throw new Error(`after the drag: ${JSON.stringify(state)}, on slide ${await at()}`)
+      await drawn(() => key('ArrowUp', ['meta']))
+      const keyed = hashes(read())
+      if (keyed[2] !== was[1] || (await at()) !== 3) throw new Error(`after ⌘↑ the slide is not slide 3 (on slide ${await at()})`)
+      await drawn(() => key('z', ['meta']))
+      await drawn(() => key('z', ['meta']))
+      if (read() !== original) throw new Error('undo did not bring slides.mdx back')
+      if ((await ev(`document.querySelectorAll('.se-panel .se-slide').length`)) !== was.length) throw new Error('the slide list lost a thumbnail')
+      return 'slide 2 → 4 by a drag, → 3 by ⌘↑, and back by two undos'
     })
 
     await step('Delete and its undo are drawn in place, and a figure on another slide keeps running', async () => {

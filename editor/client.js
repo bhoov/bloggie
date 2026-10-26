@@ -7,7 +7,8 @@
 //                                  a figure, a demo note), add one to the selection, draw a box
 //                                  around several on the slide's background
 //   ⌘+click, double-click a figure select an element inside a block, such as a figure's label;
-//                                  Esc (or Shift+Enter) goes back out to the block
+//                                  Esc (or Shift+Enter) goes back out to the block, and Enter opens
+//                                  its source, as ⌘⇧+click does (bloggie/jump/)
 //   Option+click                   use the figure under the pointer as a reader does
 //   drag                           move; it snaps to where it started and to the stage's center
 //                                  lines (hold ⌘ to place it freely)
@@ -29,9 +30,12 @@
 //   ⌘D, Delete, ⌘A                 duplicate, delete, select every block of the slide
 //   Tab, Shift+Tab                 next, previous block
 //   ⌘Z, ⌘⇧Z                        undo, redo (the dev server keeps the steps, across reloads)
+//   ⌘S                             save now: the Markdown being edited, a typed size, and a change of
+//                                  CSS still in its pause; the browser does not save the page
 //
-// The column on the left shows every slide (panel.js): click one to show it; there ⌘D duplicates
-// the slide and Delete deletes it, as do the buttons at its top for the slide on the stage.
+// The column on the left shows every slide (panel.js): click one to show it, drag one to move its
+// slide. There ⌘↑ ⌘↓ move the slide, and ⌘D duplicates it and Delete deletes it, as do the buttons
+// at the column's top for the slide on the stage.
 //
 // A change of CSS is sent to the dev server (integration.js), which writes it to slides.mdx; the
 // page shows it already. A change of text, or of the blocks or slides, the page draws from the
@@ -45,7 +49,7 @@ import { fetchRender, reconcile } from './patch.js'
 import { hex, pickColor } from './eyedropper.js'
 
 const STAGE = { width: 1600, height: 900 }
-const PROTOCOL = 3 // integration.js's: the dev server's half must be as new as this file
+const PROTOCOL = 4 // integration.js's: the dev server's half must be as new as this file
 const ENDPOINT = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}__slide-editor`
 const MANAGED = ['translate', 'width', 'max-width', 'font-family', 'font-size', 'font-weight', 'font-style', 'text-align', 'color', 'fill', 'z-index', 'position', 'display']
 const COLORS = [
@@ -479,10 +483,14 @@ export function initEditor(deck) {
     onPick: (i) => { select([]); location.hash = `#${i + 1}` },
     onDuplicate: (i) => slideEdit('duplicate-slide', i),
     onDelete: (i) => slideEdit('delete-slide', i),
+    onMove: (from, to) => {
+      select([])
+      structural({ type: 'move-slide', slide: from, to }, (data) => panel.focus(data.slide), rebuildPanel)
+    },
     current: activeIndex,
   })
   let panel = makePanel()
-  // After slides were added or removed: a new list, shown if editing is on.
+  // After slides were added, removed or moved: a new list, shown if editing is on.
   function rebuildPanel() {
     panel.hide()
     panel = makePanel()
@@ -636,13 +644,15 @@ export function initEditor(deck) {
       styleWords({ color: withAlpha(base, Number(opacityInput.value)) }, range)
     }, COMMIT_DELAY)
   })
+  function commitSize() {
+    const value = clamp(round(Number(sizeInput.value)), 6, 400)
+    if (value) setEach(() => ({ 'font-size': `${value}px` }), true)
+    sizeInput.blur()
+  }
   sizeInput.addEventListener('keydown', (event) => {
     event.stopPropagation()
-    if (event.key === 'Enter' && targets().length) {
-      const value = clamp(round(Number(sizeInput.value)), 6, 400)
-      if (value) setEach(() => ({ 'font-size': `${value}px` }), true)
-      sizeInput.blur()
-    } else if (event.key === 'Escape') sizeInput.blur()
+    if (event.key === 'Enter' && targets().length) commitSize()
+    else if (event.key === 'Escape') sizeInput.blur()
   })
 
   // --- selection ---------------------------------------------------------------------------------
@@ -1201,6 +1211,22 @@ export function initEditor(deck) {
     box.querySelector('[data-act="save"]').addEventListener('click', saveText)
   }
 
+  // ⌘S: save what is not in slides.mdx yet. Every other edit was written when it was made.
+  function saveNow(target) {
+    if (editor) return saveText()
+    if (target === sizeInput && targets().length) commitSize()
+    if (pending.size) return flush()
+    if (statusEl.dataset.kind !== 'busy') setStatus('Saved: every edit is in slides.mdx', 'ok')
+  }
+
+  // Enter on an element inside a block: open the line that writes it (a figure's .svelte, or the
+  // deck's Markdown), through jump to source.
+  function jumpToSource(el) {
+    const r = el.getBoundingClientRect()
+    const ask = new CustomEvent('bloggie:jump', { cancelable: true, detail: { target: el, x: r.left + r.width / 2, y: r.top + r.height / 2 } })
+    if (window.dispatchEvent(ask)) setStatus('Jump to source is not on in this dev server', 'error')
+  }
+
   function closeEditor() {
     editor?.panel.remove()
     editor = null
@@ -1440,6 +1466,11 @@ export function initEditor(deck) {
     const code = event.code
     const mod = event.metaKey || event.ctrlKey
     const alt = event.altKey
+    if (on && mod && !alt && code === 'KeyS') {
+      event.preventDefault()
+      event.stopPropagation()
+      return saveNow(event.target)
+    }
     if (picking || editor || typing(event.target)) return
     // The palette's opacity slider keeps its arrow keys; Esc still closes the palette.
     if (event.target instanceof Element && event.target.closest('.se-palette') && event.key !== 'Escape') return
@@ -1476,6 +1507,7 @@ export function initEditor(deck) {
     const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }
     if (moves[key] && !mod && !alt) { handled(); return nudge(...moves[key]) }
     if (key === 'Enter' && event.shiftKey && inner) { handled(); return select([inner.block]) }
+    if (key === 'Enter' && !mod && inner) { handled(); return jumpToSource(inner.el) }
     if (key === 'Enter' && !mod && !inner && selection.length === 1) { handled(); return openEditor(primary()) }
     if ((key === 'Delete' || key === 'Backspace') && !mod) { handled(); return removeSelection() }
     if (mod && !alt && code === 'KeyD') { handled(); return inner ? undefined : duplicateSelection() }
