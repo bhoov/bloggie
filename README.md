@@ -98,9 +98,13 @@ src/pages/posts/<slug>/
   index.mdx       the post: Markdown, math and figure tags
   slides.mdx      its deck (optional)
   data/  media/   the numbers and pictures it shows
+  <name>.mdx      a subpage, at /posts/<slug>/<name>/ (optional)
+  <name>/         a subpage that is a folder: its own index.mdx, and slides.mdx if it has a deck
 ```
 
 The blog's home page is an index that lists every post, newest first.
+A subpage, such as an appendix or a long table, uses the post layout but is not listed on the home page; link to it from its post.
+It can sit at any depth under the post, so a post can also hold earlier posts as an archive.
 You can ask an agent to write a post or its slides, or edit it yourself in Markdown and HTML.
 
 ## One style, written down for your agent
@@ -125,6 +129,7 @@ A note written as `((…))` anywhere in a file asks the agent to address it and 
 The <img src=".github/readme/download.svg" height="14" alt="download"> in each post's byline downloads the post as one HTML file, with its styles, figures and deck inside.
 It opens from disk with no internet, so you can present from a laptop offline or send the post by email.
 The menu beside it also offers the post as text for an AI agent.
+A subpage has no downloads unless its front matter sets `downloads: true`, since each download adds to the build's time; a post can turn them off with `downloads: false`.
 
 ## Publish
 

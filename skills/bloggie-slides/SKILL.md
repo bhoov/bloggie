@@ -123,7 +123,8 @@ its figure components the same way: the deck must run the post's real interactiv
 
 - A deck is `slides.mdx` beside the post's `index.mdx` (`src/pages/posts/<slug>/slides.mdx`), with
   `layout: '@bloggie/layouts/Slides.astro'` in its front matter; Astro serves it at
-  `/posts/<slug>/slides/`. The pairing is automatic: when `slides.mdx` exists, the post's byline
+  `/posts/<slug>/slides/`. A subpage has a deck only as a folder with its own `index.mdx`
+  (`posts/<slug>/<name>/slides.mdx`); a file subpage (`<name>.mdx`) shares its post's. The pairing is automatic: when `slides.mdx` exists, the post's byline
   links to the deck and S on the post opens it; Esc (or ✕) on the deck returns to the post, with
   its scroll position when the reader came from it. A post without a deck has neither, and
   `slides: false` in a post's front matter hides a deck that exists. `bloggie/lib/slides.js` is the

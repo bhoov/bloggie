@@ -25,6 +25,7 @@ import { editorChecks } from './editor.js'
 import { liveChecks } from './live.js'
 import { jumpChecks } from './jump.js'
 import { tocList, tocUse, tocSpace } from './toc.js'
+import { downloadNames } from '../lib/pages.js'
 
 const root = process.cwd() // the blog (lib/blog.js)
 const dist = join(root, 'dist')
@@ -64,6 +65,8 @@ const htmlPages = (dir) => readdirSync(dir, { withFileTypes: true }).flatMap((en
 })
 
 const hasDeck = (post) => existsSync(join(dist, 'posts', post, 'slides', 'index.html'))
+// A post or a subpage, at any depth under posts/ (lib/pages.js), as its path there; null for a deck or another page.
+const postPath = (path) => (/^posts\/.+\/$/.test(path) && !path.endsWith('/slides/') ? path.slice('posts/'.length, -1) : null)
 const siteUrl = (await import('../lib/blog.js')).site.url
 
 const browser = await launch()
@@ -144,7 +147,20 @@ for (const file of htmlPages(dist)) {
       return `${media.length} figures, medium="${want}"`
     })
   }
-  if (/^posts\/[^/]+\/$/.test(path)) {
+  if (postPath(path)) {
+    // The byline's links (layouts/Post.astro) go to pages and files the build made: the deck, when there is a Slides
+    // link, and the two downloads, when there is a download control. A subpage beside its post's deck has no Slides link.
+    await check(label, "the byline's Slides and download links lead to built files", async () => {
+      const links = await page.evaluate(`[...document.querySelectorAll('.byline a[href]')].map((a) => a.getAttribute('href'))`)
+      const local = links.filter((href) => !/^[a-z]+:/i.test(href) && !href.startsWith('#'))
+      const base = process.env.BASE_PATH || '/'
+      const missing = local.filter((href) => {
+        const file = join(dist, new URL(href, new URL(path, 'http://x/')).pathname.slice(base.length))
+        return !existsSync(file) && !existsSync(join(file, 'index.html'))
+      })
+      if (missing.length) throw new Error(`no built file for ${missing.join(', ')}`)
+      return local.length ? local.join(', ') : 'no Slides or download links'
+    })
     // Every section heading ends in a faint # that links to it (Post.astro), for sharing a section.
     await check(label, 'every section heading has an anchor that links to it', async () => {
       const headings = await page.evaluate(`[...document.querySelectorAll('.wrap :is(h2, h3, h4)')].filter((h) => !h.closest('astro-island, .references, .post-list')).map((h) => ({ id: h.id, text: h.textContent.trim(), href: h.querySelector('.heading-anchor')?.getAttribute('href') }))`)
@@ -276,7 +292,7 @@ for (const file of htmlPages(dist)) {
       }
     })
   }
-  const post = path.match(/^posts\/([^/]+)\/$/)?.[1]
+  const post = postPath(path)
   if (!post) continue
 
   // The table of contents (bloggie/lib/toc.js): every post lists its sections; the example post is used as a reader would.
@@ -297,11 +313,16 @@ for (const file of htmlPages(dist)) {
   await figures(label, { screenshots: true })
   await check(label, 'no errors while the figures were used', noProblems)
 
+  // A subpage offers no downloads unless its front matter asks for them (lib/pages.js); then there is nothing more to check.
+  if (!(await page.evaluate(`!!document.querySelector('[data-download]')`))) continue
+
   // The interactive download, opened from disk.
-  const download = join(dist, 'posts', post, `${post}.html`)
-  const agentFile = join(dist, 'posts', post, `${post}-agent.html`)
+  const names = downloadNames(post)
+  const folder = post.includes('/') ? post.slice(0, post.lastIndexOf('/') + 1) : '' // labels: 'slug.html' for a post
+  const download = join(dist, 'posts', post, names.page)
+  const agentFile = join(dist, 'posts', post, names.agent)
   for (const f of [download, agentFile]) if (existsSync(f)) files[relative(dist, f)] = { bytes: statSync(f).size, sha256: createHash('sha256').update(readFileSync(f)).digest('hex') }
-  const offline = `${post}.html (from disk)`
+  const offline = `${folder}${names.page} (from disk)`
   await check(offline, 'opens from file://, and every figure hydrates, with no errors', async () => {
     if (!existsSync(download)) throw new Error(`${download} is missing`)
     const islands = await open(pathToFileURL(download).href)
@@ -327,7 +348,8 @@ for (const file of htmlPages(dist)) {
       const frame = `document.querySelector('#slides iframe')`
       await page.evaluate(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 's', bubbles: true }))`)
       await page.waitFor(`${frame} && !document.getElementById('slides').hidden`, { timeout: 5000, what: 'the deck frame to open' })
-      await page.waitFor(`(() => { const d = ${frame}.contentDocument; const islands = d && [...d.querySelectorAll('astro-island')]; return islands && islands.length && islands.every((el) => !el.hasAttribute('ssr')) })()`, { timeout: 30000, what: 'the deck figures to hydrate' })
+      // A deck with no figures passes once its frame has loaded.
+      await page.waitFor(`(() => { const d = ${frame}.contentDocument; const islands = d && d.readyState === 'complete' && d.querySelector('.deck') && [...d.querySelectorAll('astro-island')]; return islands && islands.every((el) => !el.hasAttribute('ssr')) })()`, { timeout: 30000, what: 'the deck figures to hydrate' })
       const figures = await page.evaluate(`${frame}.contentDocument.querySelectorAll('astro-island').length`)
       const video = await page.waitFor(`(() => { const v = ${frame}.contentDocument.querySelector('video'); return !v ? 'no video' : v.readyState >= 1 && !v.error ? 'duration ' + v.duration.toFixed(1) + ' s' : '' })()`, { timeout: 20000, what: 'the deck video to load' })
       await page.evaluate(`${frame}.contentDocument.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))`)
@@ -338,7 +360,7 @@ for (const file of htmlPages(dist)) {
   }
 
   // The agent download: text only, one description per figure, every equation with its TeX.
-  await check(`${post}-agent.html`, 'has no scripts, describes every figure, and keeps the TeX of every equation', () => {
+  await check(`${folder}${names.agent}`, 'has no scripts, describes every figure, and keeps the TeX of every equation', () => {
     const agent = readFileSync(agentFile, 'utf8')
     const html = readFileSync(file, 'utf8')
     const count = (s, pattern) => (s.match(pattern) ?? []).length

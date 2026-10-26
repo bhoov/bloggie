@@ -112,12 +112,13 @@ const DECK_IN_FRAME = `(() => {
   }, true)
 })()`
 
-// `out` is the build's output directory; `site` the site's URL, for links back to it (see siteLinks).
+// `out` is the build's output directory; `site` the site's URL, for links back to it, and `pageUrl` the page's URL path
+// under the base, against which its relative links resolve (see siteLinks).
 // `deck` is the post's deck, already exported with `inFrame: true`, to carry inside this page.
-export async function interactivePage(html, { out = defaultDist, site, base, deck, inFrame = false } = {}) {
+export async function interactivePage(html, { out = defaultDist, site, base, pageUrl, deck, inFrame = false } = {}) {
   const asset = (url) => distAsset(url, out)
   const tree = fromHtml(html)
-  siteLinks(tree, { site, base })
+  siteLinks(tree, { site, base, pageUrl })
   const modules = new Map() // file in dist -> key in the bundle's module table
   const sideEffects = [] // module scripts the page runs for their effects
   const element = (tagName, properties, value) => ({ type: 'element', tagName, properties, children: [{ type: 'text', value }] })

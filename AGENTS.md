@@ -19,6 +19,10 @@ and figures. `template/` is the starter blog that `scripts/create.js` copies (`n
 - A release goes to npm: raise the last number of `version` in `package.json`, 0.4.0 to 0.4.1 (the middle number goes
   up once others contribute), and the template's `bloggie` dependency with it; then `npm publish` here. Publish
   `create/` (`create-bloggie`) only when its `index.js` changes.
+- An agent never runs `npm publish`: it needs the maintainer's npm login and a one-time password. When asked to
+  publish, an agent prepares the release (the version numbers, the commits) and then prints the commands for the
+  maintainer to run, with full paths: `cd <this folder> && npm publish`, and the same in `create/` when it changes.
+  After the maintainer says it is done, the agent checks the release with `npm view bloggie version`.
 - From a blog, `npm run bloggie:push -- -m "…" --yes` (`scripts/publish.js`) publishes `bloggie/` as one new commit on
   top of the engine's main and opens a pull request: to a branch of the engine's repository if you may push there,
   else of your fork (`gh` makes it; without `gh`, `--remote <fork>`). `--main` pushes to main. None of the blog's

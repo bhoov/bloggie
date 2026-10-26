@@ -2,61 +2,88 @@
 // The home page: every post under the blog's src/pages/posts/<slug>/index.mdx, newest first. The engine adds it as
 // the route / (astro.config.js), unless the blog has a src/pages/index.astro of its own. A folder whose
 // name starts with "_" is not a page (Astro skips it), so it is not listed either.
-// A post with no tags is part of the main story. Front matter `tags: [wip]` or `tags: [archived]` sets a post apart:
-// the reader shows or hides each tag with a checkbox above the list, and a post shows when none of its tags is off.
-// Front matter `edited:` is the date of the post's last edit. When the reader checks "Last edited", the list shows it
-// after the publication date (for a post edited after the day it was published) and orders the posts by it, most
-// recently edited first; a post with no `edited:` counts as last edited on its publication date.
+//
+// Tags. Front matter `tags: [wip]` or `tags: [archived]` marks a post; a post with no tags is part of the main story.
+// One tag is computed, not written: `slides`, for a post with a deck (slides.mdx beside it, unless its front matter
+// sets `slides: false`, as for its byline in layouts/Post.astro). Such a post has the slides icon to the left of its
+// title, a link to the deck.
+//
+// Above the list, a chip per tag in use filters the list, one at a time: "All" shows every post but those with a
+// hidden tag (archived), a tag's chip shows only the posts with that tag (and none with a hidden tag, unless the chip
+// is that tag), and a click on the chosen chip goes back to All. A menu sorts the list: newest first, recently
+// updated first (front matter `edited:`, else the publication date), or oldest first. A post edited after the day it
+// was published shows "updated <date>". The chip and the sort are in the URL (?tag=slides&sort=updated), so a view can
+// be linked to, and Back comes back to it.
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import Base from '../layouts/Base.astro'
 import { parseFrontmatter } from '@astrojs/markdown-remark'
 import { site, longDate, isoDate } from '@/site.js'
 
-// Each tag's name, its mark after a post's title (an icon, else the name), and whether it starts hidden.
-// A tag not listed here is shown, with its own word as its name.
+const SLIDES_ICON = '<svg class="slides-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M1 2.5h14M2.5 2.5v8h11v-8M8 10.5V13M8 13l-2.5 2.5M8 13l2.5 2.5M5 8.5l2-2 1.5 1.5L11 5" /></svg>'
+
+// Each tag's name, its mark after a post's title (an icon, else the name; `svg` is drawn in the chip only), and
+// whether it is left out of All. A tag not listed here is shown, with its own word as its name.
 const TAGS = {
+  slides: { name: 'Slides', svg: SLIDES_ICON, computed: true },
   wip: { name: 'Work in progress', icon: '🚧' },
   archived: { name: 'Archived', hidden: true },
 }
 const tag = (id) => TAGS[id] ?? { name: id }
+const SORTS = [['newest', 'Newest'], ['updated', 'Recently updated'], ['oldest', 'Oldest']]
 
 // Each post is read as text, for its front matter only. Importing it would compile the post and every figure it uses,
 // so one post that does not compile (an agent in the middle of an edit) would take this page down with it.
 const posts = Object.entries(import.meta.glob(['/src/pages/posts/*/index.mdx', '!/src/pages/posts/_*/index.mdx'], { query: '?raw', import: 'default', eager: true }))
-  .map(([path, text]) => ({ ...parseFrontmatter(text).frontmatter, url: import.meta.env.BASE_URL + path.slice('/src/pages/'.length, -'index.mdx'.length) }))
-  .map((post) => ({ ...post, tags: [post.tags ?? []].flat().map(String) }))
+  .map(([path, text]) => ({ ...parseFrontmatter(text).frontmatter, path, url: import.meta.env.BASE_URL + path.slice('/src/pages/'.length, -'index.mdx'.length) }))
+  .map((post) => ({ ...post, deck: post.slides !== false && existsSync(join(process.cwd(), post.path.slice(1, -'index.mdx'.length), 'slides.mdx')) }))
+  .map((post) => ({ ...post, tags: [...(post.deck ? ['slides'] : []), ...[post.tags ?? []].flat().map(String).filter((id) => !tag(id).computed)] }))
   .sort((a, b) => new Date(b.date) - new Date(a.date))
 
-// The tags in use, those of TAGS first and in its order, each with its number of posts.
-const used = [...new Set([...Object.keys(TAGS), ...posts.flatMap((post) => post.tags)])]
-  .map((id) => ({ id, ...tag(id), count: posts.filter((post) => post.tags.includes(id)).length }))
+const hidden = (post) => post.tags.some((id) => tag(id).hidden)
+// The posts a chip shows (the chip of `id`, or All for null), as the script below also decides.
+const shows = (post, id) => (id ? post.tags.includes(id) && (tag(id).hidden || !hidden(post)) : !hidden(post))
+// The tags in use, those of TAGS first and in its order, each with the number of posts its chip shows.
+const chips = [...new Set([...Object.keys(TAGS), ...posts.flatMap((post) => post.tags)])]
+  .map((id) => ({ id, ...tag(id), count: posts.filter((post) => shows(post, id)).length }))
   .filter((t) => t.count)
-const hiddenAtFirst = (post) => post.tags.some((id) => tag(id).hidden)
 const wasEdited = (post) => post.edited && isoDate(post.edited) > isoDate(post.date)
 ---
 <Base title={site.title}>
   <main class="wrap">
     <h1>{site.title}</h1>
     <p class="lede">{site.lede}</p>
-    <fieldset class="post-filter">
-      <legend>Show</legend>
-      {used.map((t) => (
-        <label>
-          <input type="checkbox" name="tag" value={t.id} checked={!t.hidden} />
-          {t.icon && <span aria-hidden="true">{t.icon}</span>} {t.name} <span class="count">({t.count})</span>
-        </label>
-      ))}
-      <label>
-        <input type="checkbox" name="edited" /> Last edited
+    <div class="post-controls">
+      <fieldset class="post-filter" data-hidden={Object.keys(TAGS).filter((id) => TAGS[id].hidden).join(' ')}>
+        <legend>Tags</legend>
+        <label class="chip"><input type="radio" name="tag" value="" checked /> All <span class="count">{posts.filter((post) => shows(post, null)).length}</span></label>
+        {chips.map((t) => (
+          <label class="chip">
+            <input type="radio" name="tag" value={t.id} />
+            {t.svg ? <Fragment set:html={t.svg} /> : t.icon && <span aria-hidden="true">{t.icon}</span>} {t.name} <span class="count">{t.count}</span>
+          </label>
+        ))}
+      </fieldset>
+      <label class="post-sort">
+        Sort
+        <select name="sort">
+          {SORTS.map(([value, name]) => <option value={value}>{name}</option>)}
+        </select>
       </label>
-    </fieldset>
-    <ol class="post-list" reversed>
+    </div>
+    <ol class="post-list">
       {posts.map((post, n) => (
-        <li data-order={n} data-tags={post.tags.join(' ')} data-date={isoDate(post.date)} data-edited={isoDate(post.edited ?? post.date)} hidden={hiddenAtFirst(post)}>
+        <li data-order={n} data-tags={post.tags.join(' ')} data-date={isoDate(post.date)} data-edited={isoDate(post.edited ?? post.date)} hidden={!shows(post, null)}>
           <time datetime={isoDate(post.date)}>{longDate(post.date)}</time>
-          {wasEdited(post) && <span class="post-edited" hidden> · edited <time datetime={isoDate(post.edited)}>{longDate(post.edited)}</time></span>}
+          {wasEdited(post) && <span class="post-edited"> · updated <time datetime={isoDate(post.edited)}>{longDate(post.edited)}</time></span>}
           <h2>
+            {post.deck && (
+              <a class="post-deck" href={`${post.url}slides/`} title="Slides" aria-label={`Slides: ${post.title}`}>
+                <Fragment set:html={SLIDES_ICON} />
+              </a>
+            )}
             <a href={post.url}>{post.title}</a>
-            {post.tags.map((id) => tag(id).icon
+            {post.tags.filter((id) => !tag(id).computed).map((id) => tag(id).icon
               ? <span class="post-icon" title={tag(id).name} role="img" aria-label={tag(id).name}>{tag(id).icon}</span>
               : <span class="post-tag">{tag(id).name}</span>)}
           </h2>
@@ -68,22 +95,47 @@ const wasEdited = (post) => post.edited && isoDate(post.edited) > isoDate(post.d
 </Base>
 
 <script>
-  // A post shows when none of its tags is unchecked. "Last edited" shows each edit date and orders the posts by it;
-  // unchecked, they are in publication order, newest first. The first render hides the tags that start hidden and every
-  // edit date, in publication order, so the page is right before this runs; the browser may restore a checkbox on Back,
-  // so this also runs once at load.
+  // The chip and the sort, from the URL and back into it (replaceState: no history entry per click). The first render
+  // is All and Newest, so the page is right before this runs.
   const filter = document.querySelector('.post-filter')
+  const sort = document.querySelector('.post-sort select')
   const list = document.querySelector('.post-list')
+  const hiddenTags = new Set(filter.dataset.hidden.split(' ').filter(Boolean))
+  const chip = () => filter.querySelector('input[name="tag"]:checked')?.value ?? ''
+
   const update = () => {
-    const off = [...filter.querySelectorAll('input[name="tag"]:not(:checked)')].map((input) => input.value)
+    const id = chip()
     for (const li of list.children) {
-      li.hidden = li.dataset.tags.split(' ').some((id) => off.includes(id))
+      const tags = li.dataset.tags.split(' ')
+      const isHidden = tags.some((t) => hiddenTags.has(t))
+      li.hidden = id ? !tags.includes(id) || (isHidden && !hiddenTags.has(id)) : isHidden
     }
-    const edited = filter.querySelector('input[name="edited"]').checked
-    for (const span of list.querySelectorAll('.post-edited')) span.hidden = !edited
-    const key = (li) => (edited ? li.dataset.edited : '') + li.dataset.date
-    list.append(...[...list.children].sort((a, b) => key(b).localeCompare(key(a)) || a.dataset.order - b.dataset.order))
+    const key = { newest: (li) => li.dataset.date, updated: (li) => li.dataset.edited + li.dataset.date, oldest: (li) => li.dataset.date }[sort.value]
+    const sign = sort.value === 'oldest' ? -1 : 1
+    list.append(...[...list.children].sort((a, b) => sign * key(b).localeCompare(key(a)) || a.dataset.order - b.dataset.order))
+    const params = new URLSearchParams(location.search)
+    id ? params.set('tag', id) : params.delete('tag')
+    sort.value !== 'newest' ? params.set('sort', sort.value) : params.delete('sort')
+    const query = params.toString()
+    history.replaceState(history.state, '', `${location.pathname}${query ? `?${query}` : ''}${location.hash}`)
   }
+
+  // A click on the chosen chip goes back to All.
+  let before = ''
+  filter.addEventListener('pointerdown', () => { before = chip() })
+  filter.addEventListener('keydown', () => { before = chip() })
+  filter.addEventListener('click', (event) => {
+    const input = event.target instanceof HTMLInputElement ? event.target : null
+    if (input?.value && input.value === before) filter.querySelector('input[value=""]').checked = true
+    before = chip()
+    update()
+  })
   filter.addEventListener('change', update)
+  sort.addEventListener('change', update)
+
+  const params = new URLSearchParams(location.search)
+  const chosen = filter.querySelector(`input[name="tag"][value="${CSS.escape(params.get('tag') ?? '')}"]`)
+  if (chosen) chosen.checked = true
+  if ([...sort.options].some((o) => o.value === params.get('sort'))) sort.value = params.get('sort')
   update()
 </script>

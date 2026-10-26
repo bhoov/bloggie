@@ -57,10 +57,10 @@ function keptText(island) {
 const box = (html) => raw(`<div class="fig-text">${html}</div>`)
 
 // `out` is the build's output directory; `site` the site's URL, for links back to it (see siteLinks).
-export async function agentPage(html, { references, out = dist, site, base }) {
+export async function agentPage(html, { references, out = dist, site, base, pageUrl }) {
   const figures = await describers()
   const tree = fromHtml(html)
-  siteLinks(tree, { site, base })
+  siteLinks(tree, { site, base, pageUrl })
   const meta = (name) => {
     let content = ''
     visit(tree, 'element', (node) => { if (node.tagName === 'meta' && node.properties.name === name) content = node.properties.content })

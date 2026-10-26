@@ -26,19 +26,21 @@ export default function postDownloads() {
         const base = process.env.BASE_PATH || '/'
         const root = server.config.root
         const out = join(root, 'node_modules/.cache/post-downloads')
-        const pattern = new RegExp(`^${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}posts/([^/]+)/([^/]+)\\.html$`)
+        // A page's downloads sit beside it, at any depth under posts/ (lib/pages.js), named after its last part.
+        const pattern = new RegExp(`^${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}posts/(.+)/([^/]+)\\.html$`)
         server.middlewares.use(async (req, res, next) => {
           const match = decodeURIComponent((req.url || '').split('?')[0]).match(pattern)
-          const [, slug, name] = match ?? []
-          if (!match || (name !== slug && name !== `${slug}-agent`)) return next()
+          const [, path, name] = match ?? []
+          const last = path?.split('/').at(-1)
+          if (!match || (name !== last && name !== `${last}-agent`)) return next()
           try {
             logger.info(`building the ${name}.html download`)
             await scratchBuild(root, out)
             const { exportPost } = await import('./index.js')
-            const files = await exportPost({ out, slug, base })
+            const files = await exportPost({ out, path, base })
             res.setHeader('Content-Type', 'text/html; charset=utf-8')
             res.setHeader('Content-Disposition', `attachment; filename="${name}.html"`)
-            res.end(name === slug ? files.page : files.agent)
+            res.end(name === last ? files.page : files.agent)
           } catch (error) {
             logger.error(String(error.stack || error))
             res.statusCode = 500

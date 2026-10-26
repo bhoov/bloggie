@@ -1,34 +1,40 @@
 ---
 // Layout of a post: src/pages/posts/<slug>/index.mdx sets `layout: ../../../layouts/Post.astro`.
+// A subpage (lib/pages.js: any other .mdx page under src/pages/posts/) uses the same layout.
 // Front matter: title, date, edited (the date of the last edit, shown after the date when it is later),
 // description, eyebrow, lede, author, slides (false hides a deck that exists),
+// downloads (whether the byline offers the two downloads; true for a post, false for a subpage, by default),
 // equationNumbers (false turns numbering off), toc (false hides the table of contents),
 // agentSummary (a short statement of the post's question, placed at the top of the agent download).
 // `roles` is set by remarkRoles (bloggie/lib/roles.js): the symbol roles the post's math uses, shown as a key.
 import { existsSync } from 'node:fs'
-import { dirname, join } from 'node:path'
+import { basename, dirname, join } from 'node:path'
 import { createMarkdownProcessor } from '@astrojs/markdown-remark'
 import Base from './Base.astro'
 import { site, longDate, isoDate } from '@/site.js'
 import { siteUrl } from '../lib/site-url.js'
 import { roles } from '../lib/roles.js'
+import { pagePath, offersDownloads, downloadNames } from '../lib/pages.js'
 
 const { frontmatter, file } = Astro.props
 // The lede is Markdown (links, emphasis, code): front matter is plain data, so render it here, and
 // strip the <p> the processor wraps it in.
 const markdown = await createMarkdownProcessor()
 const lede = frontmatter.lede && (await markdown.render(frontmatter.lede)).code.replace(/^\s*<p>|<\/p>\s*$/g, '')
-// A post has a deck when slides.mdx sits beside its index.mdx; the byline then links to it and
-// the S key opens it. Without one, neither appears.
-const hasSlides = frontmatter.slides !== false && !!file && existsSync(join(dirname(file), 'slides.mdx'))
+// A page has a deck when it is an index.mdx with slides.mdx beside it, at any depth; the byline then links to it
+// and the S key opens it. Without one, neither appears. A file subpage (<name>.mdx) shares its folder with its post's
+// index.mdx, so slides.mdx there is the post's deck, not the subpage's; a subpage with a deck is a folder,
+// <name>/index.mdx and <name>/slides.mdx.
+const hasSlides = frontmatter.slides !== false && !!file && basename(file) === 'index.mdx' && existsSync(join(dirname(file), 'slides.mdx'))
 // Absolute, so the link works whether or not the post's URL ends in a slash.
 const postHref = Astro.url.pathname.replace(/\/?$/, '/')
 const slidesHref = `${postHref}slides/`
-// bloggie/scripts/export-posts.js writes both files beside the post after `astro build`.
-const slug = postHref.split('/').filter(Boolean).at(-1)
-const downloads = { page: `${slug}.html`, agent: `${slug}-agent.html` }
-// A heading's anchor copies a link to the deployed post, even from a downloaded copy.
-const shareUrl = new URL(`posts/${slug}/`, siteUrl).href
+const path = pagePath(postHref, import.meta.env.BASE_URL) ?? postHref.split('/').filter(Boolean).at(-1)
+// bloggie/scripts/export-posts.js writes both files beside the page after `astro build`, for each page whose byline
+// offers them (the [data-download] control).
+const downloads = offersDownloads(frontmatter, path) ? downloadNames(path) : null
+// A heading's anchor copies a link to the deployed page, even from a downloaded copy.
+const shareUrl = new URL(`posts/${path}/`, siteUrl).href
 const keyRoles = roles.filter((role) => frontmatter.roles?.includes(role.name))
 ---
 <Base title={frontmatter.title} description={frontmatter.description}>
@@ -45,7 +51,7 @@ const keyRoles = roles.filter((role) => frontmatter.roles?.includes(role.name))
         <time datetime={isoDate(frontmatter.date)}>{longDate(frontmatter.date)}</time>
         {frontmatter.edited && isoDate(frontmatter.edited) > isoDate(frontmatter.date) && <>{' '}(edited <time datetime={isoDate(frontmatter.edited)}>{longDate(frontmatter.edited)}</time>)</>}
         {hasSlides && <><span aria-hidden="true">/</span> <a href={slidesHref} data-slides-link title="Slides (S)">Slides</a></>}
-        <span aria-hidden="true">/</span>
+        {downloads && <><span aria-hidden="true">/</span>
         <span class="download" data-download>
           <a class="download-main" href={`${postHref}${downloads.page}`} download={downloads.page}
             title="Download this post as one HTML file with working figures" aria-label="Download this post as one HTML file with working figures">
@@ -64,7 +70,7 @@ const keyRoles = roles.filter((role) => frontmatter.roles?.includes(role.name))
               </a>
             </div>
           </details>
-        </span>
+        </span></>}
       </div>
       {keyRoles.length > 0 && (
         <p class="role-key">

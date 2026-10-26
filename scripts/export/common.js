@@ -46,9 +46,10 @@ export const hasClass = (node, name) => (node.properties?.className || []).inclu
 
 // Links back to the site: each root-relative link (the blog index, the Slides link) becomes a link to
 // the deployed site, src/site.js `url`, so it works from a downloaded file when the reader is online.
-// `base` is the base path the page was built with (BASE_PATH, as in astro.config.mjs). The download
-// control is removed.
-export function siteLinks(tree, { site = siteUrl, base = process.env.BASE_PATH || '/' } = {}) {
+// `base` is the base path the page was built with (BASE_PATH, as in astro.config.mjs). `pageUrl`, the page's own
+// URL path under the base ('posts/<path>/'), makes a relative link (`../other-post/`, `./subpage/`) one to the
+// deployed site too; without it, relative links stay as they are. The download control is removed.
+export function siteLinks(tree, { site = siteUrl, base = process.env.BASE_PATH || '/', pageUrl = null } = {}) {
   visit(tree, 'element', (node, index, parent) => {
     if (node.properties?.dataDownload !== undefined) {
       parent.children.splice(index, 1)
@@ -56,7 +57,12 @@ export function siteLinks(tree, { site = siteUrl, base = process.env.BASE_PATH |
     }
     const href = node.tagName === 'a' ? node.properties.href : null
     // Built assets stay relative: each download inlines them (distAsset).
-    if (typeof href !== 'string' || !href.startsWith(base) || href.startsWith('//') || distAsset(href)) return
+    if (typeof href !== 'string' || href.startsWith('//') || distAsset(href)) return
+    if (pageUrl && !href.startsWith('/') && !href.startsWith('#') && !/^[a-z][a-z0-9+.-]*:/i.test(href)) {
+      node.properties.href = new URL(href, new URL(pageUrl, site)).href
+      return
+    }
+    if (!href.startsWith(base)) return
     node.properties.href = new URL(href.slice(base.length), site).href
   })
   // The byline separators (" / ") left without anything after them.
