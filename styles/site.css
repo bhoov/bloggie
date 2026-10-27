@@ -757,6 +757,12 @@ blockquote {
   overflow-y: hidden;
 }
 
+/* Inline math with the punctuation that touches it (lib/math-punctuation.js), as one box, so that a line never breaks
+   between them. As an inline-block, math wider than the line still wraps inside the box. */
+.math-nowrap {
+  display: inline-block;
+}
+
 /* --- post index ---------------------------------------------------------- */
 
 .post-list {

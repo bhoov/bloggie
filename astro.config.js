@@ -16,6 +16,7 @@ import { root } from './lib/blog.js'
 import { katexMacros, remarkRoles } from './lib/roles.js'
 import remarkPostTables from './lib/post-tables.js'
 import remarkSlideHeadings, { rehypeSlideBoxes } from './lib/slide-headings.js'
+import rehypeMathPunctuation from './lib/math-punctuation.js'
 import postDownloads from './scripts/export/dev.js'
 import slideEditor from './editor/integration.js'
 import liveUpdate from './live/integration.js'
@@ -126,7 +127,7 @@ export default defineConfig({
         macros: katexMacros,
         trust: (context) => context.command === '\\htmlClass',
         strict: (code) => (code === 'htmlExtension' ? 'ignore' : 'warn'),
-      }], rehypeSlideBoxes, rehypeSourcePositions], // slide-boxes: a <Box style> in slides.mdx styles the element it holds; source-positions: dev only, last (jump/annotate.js)
+      }], rehypeMathPunctuation, rehypeSlideBoxes, rehypeSourcePositions], // math-punctuation: no line break between inline math and its punctuation; slide-boxes: a <Box style> in slides.mdx styles the element it holds; source-positions: dev only, last (jump/annotate.js)
     }),
   },
 })
