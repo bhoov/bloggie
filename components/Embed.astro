@@ -1,0 +1,35 @@
+---
+// A live web page inside the post or the deck, for an interactive article or a demo that lives on another site. In a
+// post it fills the column at 16:9 and loads when the reader scrolls to it. On an `embed` slide it fills the stage, and
+// it loads only when its slide or the one before it is shown (components/slides/Slide.astro, lib/slides.js), so the
+// pages of a deck do not all run at once. The site must allow framing (no X-Frame-Options or frame-ancestors block).
+//
+//   <Embed src="https://distill.pub/2020/growing-ca/" title="Growing Neural Cellular Automata" />
+//
+// With `crop`, only one rectangle of the page shows, such as the demo of an article that has no page of its own: the
+// page is laid out `layout` CSS pixels wide, does not scroll, and the rectangle is scaled to fill the frame.
+//
+//   <Embed src="https://distill.pub/2020/growing-ca/" title="Growing NCA, the demo" crop="260 236 920 650" />
+//
+// src     the page's URL
+// title   the page's title, for screen readers
+// crop    optional: "x y width height", the rectangle to show, in CSS pixels of the page laid out `layout` wide
+// layout  optional, with crop: the width the page is laid out at (default 1440)
+const { src, title, crop, layout = 1440 } = Astro.props
+const allow = 'fullscreen; clipboard-write; accelerometer; gyroscope'
+const [x, y, w, h] = crop ? crop.trim().split(/\s+/).map(Number) : []
+---
+{crop ? (
+  <div class="embed-crop" data-crop-width={w} style={`aspect-ratio: ${w} / ${h}`}>
+    <iframe class="embed" src={src} title={title} loading="lazy" allow={allow} allowfullscreen referrerpolicy="strict-origin-when-cross-origin" scrolling="no" style={`width: ${layout}px; height: ${y + h}px; transform: scale(var(--crop-scale, 1)) translate(${-x}px, ${-y}px)`}></iframe>
+  </div>
+) : (
+  <iframe class="embed" src={src} title={title} loading="lazy" allow={allow} allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
+)}
+
+<script>
+  // A cropped page is scaled so that its rectangle fills the frame's width, in a post or on a slide.
+  const fit = (frame: HTMLElement) => frame.style.setProperty('--crop-scale', String(frame.clientWidth / Number(frame.dataset.cropWidth)))
+  const observer = new ResizeObserver((entries) => entries.forEach((entry) => fit(entry.target as HTMLElement)))
+  document.querySelectorAll<HTMLElement>('.embed-crop').forEach((frame) => { fit(frame); observer.observe(frame) })
+</script>

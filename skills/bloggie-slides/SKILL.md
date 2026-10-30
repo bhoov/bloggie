@@ -75,7 +75,8 @@ a time, with the post's own interactive figures.
    - do not repeat a symbol explained on the previous slide or very recently; if it returns
      much later, give a one-line reminder.
 7. **Minimize builds.** Every animation is overhead for the presenter. Default to none. Use a
-   build only when the slide asks a question and the build reveals the answer.
+   build only when the slide asks a question and the build reveals the answer, or when the author asks for one.
+   `## [text build=true] Title` reveals the slide's list items one per click.
 8. **Prefer a short list to cards.** Use cards only when items need a visual group that a list
    cannot give. When an item has a main idea and a description, make the size difference
    large: main idea 56px bold, description 40px in the secondary color.
@@ -170,7 +171,16 @@ its figure components the same way: the deck must run the post's real interactiv
     `<p slot="note">…</p>`, placed with `noteTop=310px` (from the top of the figure area); one
     sentence. It scrolls with the figure, so it never covers text the figure scrolls up.
   - `video`: only the `<video>`, full bleed on `bg` (sample the color from the poster image);
-    the heading is not shown, and names the slide in the speaker view.
+    the heading is not shown, and names the slide in the speaker view. A video on YouTube is
+    `<YouTube id="…" title="…" />` (import it from `@bloggie/components/YouTube.astro`) on `bg=#000`:
+    YouTube's own player fills the stage, and the deck pauses it when the slide is left.
+  - `embed`: only a live web page, `<Embed src="…" title="…" />` (import it from
+    `@bloggie/components/Embed.astro`), the full width of the stage, for an interactive article the
+    presenter explores in the talk. The page loads when its slide or the one before it is shown. A
+    24px band at the bottom stays the deck's: a click there gives the keys back to the deck, and the
+    pointer there shows the nav in full screen. Check first that the site allows framing. To show
+    only an article's demo, give `crop="x y width height"`: the rectangle of the page, laid out
+    1440 px wide (`layout` changes it), that the slide shows; measure it in a headless browser.
 - A `title` prop on a hand-written `<Slide>` is HTML, not Markdown; a heading title can hold math.
 - Code blocks are highlighted by Shiki at build time; the fence's language picks the grammar
   (rule 16), and the syntax a slide teaches must be the part that is colored. Fence MDX source as

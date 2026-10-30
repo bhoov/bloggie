@@ -1004,6 +1004,47 @@ figure video {
   border-radius: 4px;
 }
 
+/* A YouTube player in a post (components/YouTube.astro), the width of the text column at 16:9. */
+iframe.youtube {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: 4px;
+  background: #000;
+}
+
+/* A live web page in a post (components/Embed.astro), the width of the figure at 16:9. */
+iframe.embed {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: #fff;
+}
+
+/* A cropped page (Embed crop="…"): only its rectangle shows, scaled to the frame's width by the component's script. */
+.embed-crop {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: #fff;
+}
+
+.embed-crop iframe.embed {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: none;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 0;
+  transform-origin: 0 0;
+}
+
 /* A picture in a post, such as a screenshot (How this blog works), framed so it stands off the page. */
 figure img {
   display: block;

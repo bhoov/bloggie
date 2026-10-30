@@ -496,6 +496,43 @@
   background: var(--video-bg, #101826);
 }
 
+/* An embed slide is a live web page (components/Embed.astro) the full width of the stage. A 24px band at the bottom
+   stays the deck's: the page takes every pointer and key event over it, so the pointer in the band shows the nav in
+   full screen, and a click in the band gives the keys back to the deck. */
+.slide.embed-slide {
+  padding: 0 0 24px;
+  gap: 0;
+  background: var(--video-bg, #fff);
+}
+
+.slide.embed-slide > iframe.embed {
+  display: block;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: #fff;
+}
+
+/* A cropped page fills the stage's height at its own aspect ratio, centered. */
+.slide.embed-slide .embed-crop {
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  align-self: center;
+  border: 0;
+  border-radius: 0;
+}
+
+/* A YouTube player (components/YouTube.astro) fills the 16:9 stage; the slide's background is black, as is YouTube's. */
+.slide.video-slide iframe.youtube {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
 .slide.video-slide video {
   display: block;
   height: 100%;

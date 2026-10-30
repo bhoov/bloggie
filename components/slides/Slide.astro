@@ -23,7 +23,10 @@
 //                     description placed over the figure's empty region (`noteTop`, from the top
 //                     of the figure area, in stage pixels; default 440px)
 //           table     a title over a table from the post: <PostTable id="tbl-…" /> (bloggie/lib/post-tables.js)
-//           video     only the video, full bleed, on `bg` (the video's own background color)
+//           video     only the video (a <video>, or a <YouTube id=…> player), full bleed, on `bg` (the video's own background color)
+//           embed     only a live web page (<Embed src=…>), the full width of the stage, on `bg` (default white); a
+//                     thin band at the bottom stays the deck's, so the pointer there shows the nav in full screen and a
+//                     click there gives the keys back to the deck. The page loads when its slide or the one before it is shown.
 // title     the slide's title, as HTML (a `title` slot, from a heading, may also hold Markdown math)
 // label     the name the speaker view shows for this slide; defaults to the title, untagged
 // zoom      demo: figure zoom so its labels read from the back of the room (default 1.6)
@@ -33,14 +36,15 @@
 // size      divider: the phrase's font size in px, for a long phrase (default 112); a paragraph under a
 //           divider's heading is a one-line subtitle; table: the table's font size in px for a short table (default
 //           34, with headers at 0.8 of it); with a size, the headers take the same size
+// build     reveal the slide's list items one at a time, one per click (lib/slides.js); `## [text build=true] Title`
 // eyebrow   a small line over the title that names the part of the talk, e.g. "What's next"
 // titleStyle  CSS for the title, e.g. "font-size: 60px" (the slide editor writes it)
 // edit      set under `npm run dev` only: the slide's index, for the slide editor (bloggie/editor/)
-const { kind = 'text', title: titleProp = '', byline, label, zoom, svgMax, eqSize, size, noteTop, bg, titleStyle, edit, cols, eyebrow } = Astro.props
+const { kind = 'text', title: titleProp = '', byline, label, zoom, svgMax, eqSize, size, noteTop, bg, titleStyle, edit, cols, eyebrow, build } = Astro.props
 const titleEdit = edit == null ? undefined : `${edit}/t`
 const title = Astro.slots.has('title') ? await Astro.slots.render('title') : titleProp
 
-const kindClass = { title: 'title-slide', divider: 'divider', text: 'text', reasons: 'text reasons', equation: 'equation', problem: 'problem', demo: 'demo-slide', table: 'table-slide', video: 'video-slide' }[kind]
+const kindClass = { title: 'title-slide', divider: 'divider', text: 'text', reasons: 'text reasons', equation: 'equation', problem: 'problem', demo: 'demo-slide', table: 'table-slide', video: 'video-slide', embed: 'embed-slide' }[kind]
 if (!kindClass) throw new Error(`Slide: unknown kind "${kind}"`)
 const plainTitle = label ?? title.replace(/<br\s*\/?>/g, ' ').replace(/<[^>]+>/g, '').replace(/\$/g, '')
 const style = [
@@ -53,6 +57,11 @@ const style = [
 ].filter(Boolean).join('; ') || undefined
 const hasNote = Astro.slots.has('note')
 
+// An embed slide's page waits in data-src until lib/slides.js loads it, a slide before it is shown.
+const embedBody = kind === 'embed' && Astro.slots.has('default')
+  ? (await Astro.slots.render('default')).replace(/<iframe class="embed" src=/g, '<iframe class="embed" data-src=')
+  : ''
+
 // Body kinds render their Markdown here so a list item that *starts* with $math$ or **bold** can be
 // tagged: `sym` (an equation legend's symbol column) and `lead` (a reason's main idea). CSS alone
 // cannot tell "starts with" from "contains": :first-child ignores the text before an element.
@@ -63,7 +72,7 @@ const body = bodyKinds.includes(kind) && Astro.slots.has('default')
       .replace(/<li>(\s*)<strong>/g, '<li>$1<strong class="lead">')
   : ''
 ---
-<section class={`slide ${kindClass}${cols ? ' cols' : ''}`} data-title={plainTitle} style={style} data-edit-slide={edit}>
+<section class={`slide ${kindClass}${cols ? ' cols' : ''}`} data-title={plainTitle} style={style} data-edit-slide={edit} data-build={build && build !== 'false' ? '' : undefined}>
   {kind === 'title' && (
     <>
       <h1 set:html={title} style={titleStyle} data-edit={titleEdit} />
@@ -78,6 +87,7 @@ const body = bodyKinds.includes(kind) && Astro.slots.has('default')
     </>
   )}
   {kind === 'video' && <slot />}
+  {kind === 'embed' && <Fragment set:html={embedBody} />}
   {kind === 'demo' && (
     <>
       {eyebrow && <p class="slide-eyebrow">{eyebrow}</p>}

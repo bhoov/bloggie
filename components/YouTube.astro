@@ -1,0 +1,15 @@
+---
+// A YouTube video in YouTube's own player, for a talk or a demo that lives on YouTube rather than in the post's
+// media/. In a post it fills the text column at 16:9; on a `video` slide it fills the stage. The player loads from
+// youtube-nocookie.com, which sets no cookie until the reader plays the video. Its JavaScript API is on
+// (enablejsapi=1) so that the deck can pause it when its slide is left (lib/slides.js).
+//
+//   <YouTube id="dQw4w9WgXcQ" title="The video's title" />
+//
+// id     the video's id: the v= of its watch URL
+// title  the video's title, for screen readers
+// start  optional: the second to start at
+const { id, title, start } = Astro.props
+const src = `https://www.youtube-nocookie.com/embed/${id}?enablejsapi=1&rel=0${start ? `&start=${start}` : ''}`
+---
+<iframe class="youtube" src={src} title={title} allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>
