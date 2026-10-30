@@ -2,7 +2,9 @@
 // change into its slides.mdx. Slides.astro loads this file only when import.meta.env.DEV is set,
 // so a built deck has no trace of it. The keys follow Figma's where they can.
 //
-//   E, or Edit in the deck's nav   turn editing on; Esc with nothing selected turns it off
+//   E, or Edit in the deck's nav   turn editing on; Esc with nothing selected (or ✕, or Edit) turns it off.
+//                                  While editing, E does not turn it off: in selected text, a letter
+//                                  opens the block's Markdown, as Enter does
 //   click, Shift+click, drag       select a block (the title, a paragraph, a list, an equation, code,
 //                                  a figure, a demo note), add one to the selection, draw a box
 //                                  around several on the slide's background
@@ -11,7 +13,8 @@
 //                                  its source, as ⌘⇧+click does (bloggie/jump/)
 //   Option+click                   use the figure under the pointer as a reader does
 //   drag                           move; it snaps to where it started and to the stage's center
-//                                  lines (hold ⌘ to place it freely)
+//                                  lines (hold ⌘ to place it freely, Shift to keep it on a horizontal,
+//                                  vertical or 45° line, as in Figma)
 //   side / corner handle           width; text size and width together
 //   ←↑→↓, Shift+←↑→↓               move 1 px, 10 px
 //   ⌘B, ⌘I, ⌘⇧> ⌘⇧<                bold, italic, larger, smaller text
@@ -76,12 +79,12 @@ const RECENT_KEY = 'slide-editor:colors'
 const RECENT = 10
 
 const KEYS = [
-  ['E, Esc', 'edit on; off (with nothing selected)'],
+  ['E, Esc', 'edit on; off (Esc, with nothing selected)'],
   ['click, Shift+click', 'select, add to the selection'],
   ['drag the background', 'select the blocks in a box'],
   ['⌘+click, double-click', 'an element inside a block or figure'],
   ['Option+click', 'use the figure as a reader does'],
-  ['drag (⌘: free)', 'move, snapping to guides'],
+  ['drag (⌘: free, Shift: straight)', 'move, snapping to guides'],
   ['side / corner handle', 'width / scale'],
   ['← ↑ → ↓ (Shift)', 'move 1 px (10 px)'],
   ['⌘B, ⌘I, ⌘⇧> ⌘⇧<', 'bold, italic, text size'],
@@ -740,7 +743,7 @@ export function initEditor(deck) {
 
   // Move the selected blocks together (or the element inside a block) by the pointer's travel. The
   // one under the pointer snaps to where it started and to the stage's center lines.
-  function startMove(event, lead) {
+  function startMove(event, lead, onClick) {
     const movers = targets().map((el) => {
       const [x, y] = readTranslate(el)
       return { el, unit: unitOf(el), x, y, initial: el.style.getPropertyValue('translate') || null }
@@ -752,15 +755,27 @@ export function initEditor(deck) {
     const start = { x: event.clientX, y: event.clientY }
     const within = inner
     let moved = false
-    listen((ev) => {
+    let last = null // the last pointer event, to move again when Shift goes down or up mid-drag
+    const move = (ev) => {
+      last = { clientX: ev.clientX, clientY: ev.clientY, shiftKey: ev.shiftKey, metaKey: ev.metaKey, ctrlKey: ev.ctrlKey }
       if (!moved && Math.hypot(ev.clientX - start.x, ev.clientY - start.y) < 3) return
       moved = true
       dragging = true
-      let dx = leader.x * leader.unit + ev.clientX - start.x
-      let dy = leader.y * leader.unit + ev.clientY - start.y
+      let tx = ev.clientX - start.x
+      let ty = ev.clientY - start.y
+      // Shift keeps the move on a straight line: horizontal, vertical or 45°, whichever is nearest (as in Figma).
+      let diagonal = false
+      if (ev.shiftKey) {
+        const [ax, ay] = [Math.abs(tx), Math.abs(ty)]
+        if (ax > ay * Math.tan(Math.PI * 3 / 8)) ty = 0
+        else if (ay > ax * Math.tan(Math.PI * 3 / 8)) tx = 0
+        else { const d = (ax + ay) / 2; tx = Math.sign(tx) * d; ty = Math.sign(ty) * d; diagonal = true }
+      }
+      let dx = leader.x * leader.unit + tx
+      let dy = leader.y * leader.unit + ty
       let gx = null
       let gy = null
-      if (!(ev.metaKey || ev.ctrlKey)) {
+      if (!(ev.metaKey || ev.ctrlKey) && !diagonal) {
         const d = deck.getBoundingClientRect()
         const scale = stageScale()
         const near = SNAP * scale
@@ -768,22 +783,32 @@ export function initEditor(deck) {
         const centerY = d.top + (STAGE.height / 2) * scale
         const toCenterX = centerX - home.left - home.width / 2
         const toCenterY = centerY - home.top - home.height / 2
-        if (Math.abs(dx) < near && Math.abs(dx) <= Math.abs(dx - toCenterX)) { dx = 0; gx = home.left }
-        else if (Math.abs(dx - toCenterX) < near) { dx = toCenterX; gx = centerX }
-        if (Math.abs(dy) < near && Math.abs(dy) <= Math.abs(dy - toCenterY)) { dy = 0; gy = home.top }
-        else if (Math.abs(dy - toCenterY) < near) { dy = toCenterY; gy = centerY }
+        // A locked axis stays where it is; only the axis that moves snaps.
+        const lockX = ev.shiftKey && tx === 0
+        const lockY = ev.shiftKey && ty === 0
+        if (!lockX && Math.abs(dx) < near && Math.abs(dx) <= Math.abs(dx - toCenterX)) { dx = 0; gx = home.left }
+        else if (!lockX && Math.abs(dx - toCenterX) < near) { dx = toCenterX; gx = centerX }
+        if (!lockY && Math.abs(dy) < near && Math.abs(dy) <= Math.abs(dy - toCenterY)) { dy = 0; gy = home.top }
+        else if (!lockY && Math.abs(dy - toCenterY) < near) { dy = toCenterY; gy = centerY }
       }
       showGuide(guideV, gx)
       showGuide(guideH, gy)
       // Every element moves by the leader's travel on screen, in its own CSS px.
-      const tx = dx - leader.x * leader.unit
-      const ty = dy - leader.y * leader.unit
-      for (const m of movers) m.el.style.setProperty('translate', `${round(m.x + tx / m.unit)}px ${round(m.y + ty / m.unit)}px`)
-    }, () => {
+      const ox = dx - leader.x * leader.unit
+      const oy = dy - leader.y * leader.unit
+      for (const m of movers) m.el.style.setProperty('translate', `${round(m.x + ox / m.unit)}px ${round(m.y + oy / m.unit)}px`)
+    }
+    // Shift pressed or released without moving the pointer: move again with the new constraint.
+    const shift = (ev) => { if (ev.key === 'Shift' && last) move({ ...last, shiftKey: ev.type === 'keydown' }) }
+    window.addEventListener('keydown', shift, true)
+    window.addEventListener('keyup', shift, true)
+    listen(move, () => {
+      window.removeEventListener('keydown', shift, true)
+      window.removeEventListener('keyup', shift, true)
       showGuide(guideV, null)
       showGuide(guideH, null)
       dragging = false
-      if (!moved) return
+      if (!moved) return onClick?.()
       for (const m of movers) {
         const translate = translateValue(...readTranslate(m.el))
         applyStyle(m.el, { translate: m.initial }) // so that stage() records the value from before the drag
@@ -1430,10 +1455,11 @@ export function initEditor(deck) {
       selectInner(block, target)
       return startMove(event, inner?.el)
     }
-    if (event.shiftKey) {
-      select(selection.includes(block) ? selection.filter((el) => el !== block) : [...selection, block])
-      if (!selection.includes(block)) return
-    } else if (!selection.includes(block) || inner) select([block])
+    // Shift adds a block to the selection when pressed; a selected one leaves it only on a click, not a drag, so
+    // that Shift can also keep the drag of a selection straight (startMove).
+    if (event.shiftKey && selection.includes(block)) return startMove(event, block, () => select(selection.filter((el) => el !== block)))
+    if (event.shiftKey) select([...selection, block])
+    else if (!selection.includes(block) || inner) select([block])
     startMove(event, block)
   }, true)
 
@@ -1474,13 +1500,19 @@ export function initEditor(deck) {
     if (picking || editor || typing(event.target)) return
     // The palette's opacity slider keeps its arrow keys; Esc still closes the palette.
     if (event.target instanceof Element && event.target.closest('.se-palette') && event.key !== 'Escape') return
-    if (code === 'KeyE' && !mod && !alt) {
+    if (code === 'KeyE' && !mod && !alt && !on) {
       event.preventDefault()
       event.stopPropagation()
-      return on ? turnOff() : turnOn()
+      return turnOn()
     }
     if (!on) return
     const handled = () => { event.preventDefault(); event.stopPropagation() }
+    // A letter typed into selected text edits it, as in a text box: in selected words, or with one text block
+    // selected, it opens the block's Markdown (the letter itself is not typed, so a stray key changes nothing).
+    const letter = key.length === 1 && /\p{L}/u.test(key) && !mod && !alt
+    const textBlock = words ?? (!inner && selection.length === 1 && !isFigure(selection[0]) ? selection[0] : null)
+    if (letter && textBlock) { handled(); const el = textBlock; exitWords(); return openEditor(el) }
+    if (code === 'KeyE' && !mod && !alt) return handled() // editing stays on: Esc turns it off
     // Esc goes out one level: from an element inside a block to the block, from the selection to
     // nothing, and from nothing out of editing. It never leaves the deck while editing.
     if (key === 'Escape') {

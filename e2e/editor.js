@@ -76,11 +76,12 @@ function inputs(page) {
         await mouse('mouseReleased', x, y, { clickCount })
       }
     },
-    async drag(x0, y0, x1, y1) {
-      await mouse('mouseMoved', x0, y0, { button: 'none' })
-      await mouse('mousePressed', x0, y0, { buttons: 1 })
-      for (let i = 1; i <= 10; i++) await mouse('mouseMoved', x0 + ((x1 - x0) * i) / 10, y0 + ((y1 - y0) * i) / 10, { buttons: 1 })
-      await mouse('mouseReleased', x1, y1)
+    async drag(x0, y0, x1, y1, mods = []) {
+      const modifiers = bits(mods)
+      await mouse('mouseMoved', x0, y0, { button: 'none', modifiers })
+      await mouse('mousePressed', x0, y0, { buttons: 1, modifiers })
+      for (let i = 1; i <= 10; i++) await mouse('mouseMoved', x0 + ((x1 - x0) * i) / 10, y0 + ((y1 - y0) * i) / 10, { buttons: 1, modifiers })
+      await mouse('mouseReleased', x1, y1, { modifiers })
     },
     // A key by its name ('e', 'Enter', 'ArrowDown') or, with `code`, by its place on the keyboard
     // (⌥A types "å", but its code is KeyA).
@@ -212,7 +213,7 @@ export async function editorChecks({ check, launch, root }) {
         const state = await ev(`({ blocked: document.querySelector('.se-toolbar').classList.contains('se-blocked'), status: document.querySelector('.se-status').textContent, blocks: document.querySelectorAll('.deck [data-edit]').length })`)
         if (state.blocked) throw new Error(`${slug}: ${state.status}`)
         observed[slug] = `${state.blocks} blocks and titles`
-        await key('e')
+        await key('Escape')
       }
       if (page.problems.length) throw new Error(page.problems.join('\n'))
       return observed
@@ -249,6 +250,40 @@ export async function editorChecks({ check, launch, root }) {
       const inPage = await ev(`document.querySelector(${JSON.stringify(paragraph)}).style.translate`)
       if (inPage !== `${found[1]}px ${found[2]}px`) throw new Error(`the page shows translate "${inPage}", the file ${found[0]}`)
       return `translate: ${found[1]}px ${found[2]}px, in the file and the page`
+    })
+
+    await step('Shift keeps a drag on a straight line: horizontal, then 45°', async () => {
+      const at = async () => (await ev(`document.querySelector(${JSON.stringify(paragraph)}).style.translate`)).split(' ').map(parseFloat)
+      const [x0, y0] = await at()
+      let p = await center(paragraph)
+      await drag(p.x, p.y, p.x + 90, p.y + 25, ['shift'])
+      await saved()
+      const [x1, y1] = await at()
+      if (y1 !== y0 || x1 === x0) throw new Error(`a Shift-drag right and a little down moved it from ${x0}, ${y0} to ${x1}, ${y1}: it should move right only`)
+      p = await center(paragraph)
+      await drag(p.x, p.y, p.x + 40, p.y + 30, ['shift'])
+      await saved()
+      const [x2, y2] = await at()
+      if (Math.abs(Math.abs(x2 - x1) - Math.abs(y2 - y1)) > 1 || y2 === y1) throw new Error(`a Shift-drag down and right moved it by ${x2 - x1}, ${y2 - y1}: it should move as far across as down`)
+      return `right only (${x0} -> ${x1}), then 45° (${x2 - x1}, ${y2 - y1})`
+    })
+
+    await step('E while editing leaves editing on; a letter typed with a paragraph selected opens its Markdown', async () => {
+      let p = await center(paragraph)
+      await click(p.x, p.y)
+      await key('Escape') // the paragraph selected: Esc selects nothing, and editing stays on
+      await key('e')
+      await sleep(300)
+      if (!(await ev(`document.body.classList.contains('se-on')`))) throw new Error('E turned editing off')
+      p = await center(paragraph)
+      await click(p.x, p.y)
+      await key('e')
+      // The editor opens once the dev server has sent the block's Markdown.
+      for (let i = 0; i < 40 && !(await ev(`!!document.querySelector('.se-source textarea')`)); i++) await sleep(100)
+      const open = await ev(`({ source: !!document.querySelector('.se-source textarea'), on: document.body.classList.contains('se-on') })`)
+      if (!open.source || !open.on) throw new Error(`after E on a selected paragraph: ${JSON.stringify(open)}`)
+      await key('Escape') // closes the Markdown editor, unchanged
+      return 'editing stays on; E on the paragraph opened its Markdown'
     })
 
     await step('⌘⇧> twice and ⌘B are written to the Box; undo brings slides.mdx back byte for byte', async () => {
