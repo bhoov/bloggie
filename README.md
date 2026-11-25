@@ -21,7 +21,7 @@ Every post downloads as a single HTML file that works offline.
   Everything is HTML, CSS and JavaScript.
   Readers play the demos in the post and on the slides.
 - **Works offline.**
-  Each post downloads as one HTML file with working figures, and as a text version for AI readers.
+  Each post downloads as one HTML file with working figures, as a text version for AI readers, and as PDFs of the post and its slides.
 - **Easy to host.**
   A static site, with a workflow that deploys it to GitHub Pages.
 
@@ -46,7 +46,7 @@ You can copy that post's folder, `src/pages/posts/how-this-blog-works/`, to `src
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Preview at http://localhost:4321/ while you write |
-| `npm run build` | Check links and citations, then build `dist/` and each post's downloads |
+| `npm run build` | Check links and citations, then build `dist/` and each post's downloads (the PDFs need Chrome or Chromium) |
 
 When developing with `npm run dev`, pressing `e` on a deck opens the slide editor that saves without page reloads, and downloads are prepared on click.
 Cmd+Shift+click (Ctrl+Shift+click) on any text, formula or figure of a post or deck opens its source in VS Code at that line, also when the dev server runs on a machine that VS Code reaches over SSH.
@@ -128,7 +128,21 @@ A note written as `((…))` anywhere in a file asks the agent to address it and 
 
 The <img src=".github/readme/download.svg" height="14" alt="download"> in each post's byline downloads the post as one HTML file, with its styles, figures and deck inside.
 It opens from disk with no internet, so you can present from a laptop offline or send the post by email.
-The menu beside it also offers the post as text for an AI agent.
+The menu beside it also offers the post as text for an AI agent, and two PDFs: **Blog as PDF**, and **Slides as PDF** with one slide per page, for a presentation machine that cannot run the deck.
+
+A PDF cannot play a demo or a video, so each one shows as a still: one image that gives the idea the animation is there to give.
+Write it right after the figure or the video:
+
+```mdx
+<AttentionWalk client:visible />
+
+<Still src={walkStill} alt="After the last loop, the walker is on the flag." />
+```
+
+The page does not show or load a still; print and the PDFs put it in the animation's place.
+Without one, a figure prints as it first appears, a video prints as its poster, and a YouTube player or an embedded page prints as its title and link.
+`npm run build` prints the PDFs with Chrome or Chromium (`CHROME` names another browser).
+On a machine with neither, or with `BLOGGIE_PDF=0`, it builds the site without the PDFs and without their two links.
 A subpage has no downloads unless its front matter sets `downloads: true`, since each download adds to the build's time; a post can turn them off with `downloads: false`.
 
 ## Publish

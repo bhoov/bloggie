@@ -1,4 +1,4 @@
-// Astro integration: under `npm run dev`, answer the download control's two links. The dev server has no
+// Astro integration: under `npm run dev`, answer the download control's links (the two HTML files and the two PDFs). The dev server has no
 // built files, so a request runs `astro build` into a scratch directory and exports the post from there
 // (a few seconds). `npm run build` writes the same files with bloggie/scripts/export-posts.js.
 import { spawn } from 'node:child_process'
@@ -27,15 +27,28 @@ export default function postDownloads() {
         const root = server.config.root
         const out = join(root, 'node_modules/.cache/post-downloads')
         // A page's downloads sit beside it, at any depth under posts/ (lib/pages.js), named after its last part.
-        const pattern = new RegExp(`^${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}posts/(.+)/([^/]+)\\.html$`)
+        const pattern = new RegExp(`^${base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}posts/(.+)/([^/]+)\\.(html|pdf)$`)
         server.middlewares.use(async (req, res, next) => {
           const match = decodeURIComponent((req.url || '').split('?')[0]).match(pattern)
-          const [, path, name] = match ?? []
+          const [, path, name, type] = match ?? []
           const last = path?.split('/').at(-1)
-          if (!match || (name !== last && name !== `${last}-agent`)) return next()
+          if (!match || (name !== last && name !== `${last}-${type === 'pdf' ? 'slides' : 'agent'}`)) return next()
           try {
-            logger.info(`building the ${name}.html download`)
+            logger.info(`building the ${name}.${type} download`)
             await scratchBuild(root, out)
+            if (type === 'pdf') {
+              // Needs Chrome or Chromium (bloggie/scripts/export/pdf.js); without one, the error says so.
+              const printer = await (await import('./pdf.js')).openPrinter({ out, base })
+              try {
+                const { pdf } = await printer.print(path, name === last ? 'post' : 'slides')
+                res.setHeader('Content-Type', 'application/pdf')
+                res.setHeader('Content-Disposition', `attachment; filename="${name}.pdf"`)
+                res.end(pdf)
+              } finally {
+                await printer.close()
+              }
+              return
+            }
             const { exportPost } = await import('./index.js')
             const files = await exportPost({ out, path, base })
             res.setHeader('Content-Type', 'text/html; charset=utf-8')

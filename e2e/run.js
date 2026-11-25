@@ -1,7 +1,7 @@
 // End-to-end test of the built site (`npm run e2e` builds it first). It serves dist/, opens every page in
 // headless Chromium, and uses each figure the way a reader would (the figure's own e2e.js, loaded by
 // bloggie/e2e/figures.js). It then opens each post's interactive download from disk, as a double click would,
-// and checks it the same way, and reads each post's agent download. Each post's table of contents lists its sections,
+// and checks it the same way, reads each post's agent download, and counts the pages of its PDF downloads. Each post's table of contents lists its sections,
 // and on the example post it is used at a narrow and a wide width (bloggie/e2e/toc.js). Last, it uses the slide editor on a
 // copy of the project (bloggie/e2e/editor.js), and saves files under a copy's dev server to see each drawn without a reload
 // (the live update, bloggie/e2e/live.js), and Cmd+Shift+clicks posts and a deck there to open their source (jump to
@@ -26,6 +26,7 @@ import { liveChecks } from './live.js'
 import { jumpChecks } from './jump.js'
 import { tocList, tocUse, tocSpace } from './toc.js'
 import { downloadNames } from '../lib/pages.js'
+import { pdfPages } from '../lib/pdf-pages.js'
 
 const root = process.cwd() // the blog (lib/blog.js)
 const dist = join(root, 'dist')
@@ -373,6 +374,32 @@ for (const file of htmlPages(dist)) {
     if (tex !== equations) throw new Error(`${tex} equations with TeX for ${equations} equations in the post's text`)
     return { figures: described, equations: tex, bytes: agent.length }
   })
+
+  // The PDF downloads (bloggie/scripts/export/pdf.js): each one the byline links to is a PDF, and the deck's has one
+  // page per slide. A build with no browser to print them has no such links. A PDF holds its date, so the report
+  // gives its size and no hash.
+  await check(`${folder}${names.pdf}`, 'the PDF downloads are PDFs; the deck has one page per slide', () => {
+    const html = readFileSync(file, 'utf8')
+    const kinds = [...html.matchAll(/<a\b[^>]*\sdata-pdf="(\w+)"/g)].map((m) => m[1])
+    if (!kinds.length) return 'no PDF links (the build had no browser to print them)'
+    const observed = {}
+    for (const kind of kinds) {
+      const name = kind === 'slides' ? names.slidesPdf : names.pdf
+      const pdfFile = join(dist, 'posts', post, name)
+      if (!existsSync(pdfFile)) throw new Error(`${name} is missing`)
+      const pdf = readFileSync(pdfFile)
+      if (pdf.subarray(0, 5).toString() !== '%PDF-') throw new Error(`${name} is not a PDF`)
+      const pages = pdfPages(pdf)
+      if (!pages) throw new Error(`${name} has no pages`)
+      if (kind === 'slides') {
+        const slides = (readFileSync(join(dist, 'posts', post, 'slides', 'index.html'), 'utf8').match(/<section class="slide[ "]/g) ?? []).length
+        if (pages !== slides) throw new Error(`${name} has ${pages} pages for ${slides} slides`)
+      }
+      files[relative(dist, pdfFile)] = { bytes: pdf.length, pages }
+      observed[name] = `${pages} pages`
+    }
+    return observed
+  })
 }
 
 await page.close()
@@ -380,7 +407,7 @@ await browser.close()
 server.close()
 
 // The download links under `npm run dev`, which has no built files: the dev server builds them on request.
-await check('npm run dev', 'the download links return both files', async () => {
+await check('npm run dev', 'the download links return the two HTML files and the PDF', async () => {
   const post = readdirSync(join(dist, 'posts')).find((slug) => existsSync(join(dist, 'posts', slug, 'index.html')))
   // A dev server of this checkout's own, beside any the author has running (--ignore-lock), so the check
   // tests this code and not an older server's. --ignore-lock also keeps it in this process: run by an
@@ -399,7 +426,7 @@ await check('npm run dev', 'the download links return both files', async () => {
     const base = `${origin}${process.env.BASE_PATH || '/'}posts/${post}/`
     const observed = {}
     // Markers every export has: the interactive page's module table, the agent download's opening note.
-    for (const [name, marker] of [[`${post}.html`, 'window.__postModules'], [`${post}-agent.html`, '<b>About this file.</b>']]) {
+    for (const [name, marker] of [[`${post}.html`, 'window.__postModules'], [`${post}-agent.html`, '<b>About this file.</b>'], [`${post}.pdf`, '%PDF-']]) {
       // The dev server restarts when a source file changes; a dropped connection is retried once.
       const get = () => fetch(base + name).then(async (res) => ({ res, body: await res.text() }))
       const { res, body } = await get().catch(() => new Promise((r) => setTimeout(r, 3000)).then(get)).catch((error) => { throw new Error(`${name}: ${error.cause?.code ?? error.message}`) })

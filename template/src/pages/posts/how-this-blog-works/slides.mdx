@@ -6,6 +6,7 @@ description: The talk version of "How this blog works"; its source uses each way
 
 import AttentionWalk from '@/figures/attention-walk/AttentionWalk.svelte'
 import RoleKey from '@bloggie/components/RoleKey.astro'
+import walkStill from './media/attention-walk-still.webp'
 
 # How This Blog Works
 
@@ -26,9 +27,11 @@ cd my-blog && npm run dev
 
 <AttentionWalk client:visible />
 
+<Still src={walkStill} alt="After the last loop, the walker is on the flag, node H, with probability 0.95." />
+
 <p slot="note">The same figure as in the post: it **waits for Play**.</p>
 
-<Notes>A figure is a demo the reader drives, an ordinary web component. Write it yourself, or describe what it should show and an agent builds it and checks it in a browser. A slow demo waits behind a Load demo button.</Notes>
+<Notes>A figure is a demo the reader drives, an ordinary web component. Write it yourself, or describe what it should show and an agent builds it and checks it in a browser. A slow demo waits behind a Load demo button. The Still tag under the figure is the image that the deck's PDF shows in its place: the walker on the flag.</Notes>
 
 ## [equation eqSize=54] Equations Explain Themselves
 
@@ -111,8 +114,9 @@ Change the post, then ask the agent to **update the deck**. Your layout stays.
 
 - **Interactive page** one HTML file that works offline, deck inside
 - **For agents** text, math as TeX, figures described, source code
+- **Blog and slides as PDF** each animation as one still image
 
-<Notes>The download icon in the byline, and the menu beside it. Present from a laptop without a network, or hand the post to another agent as reading material.</Notes>
+<Notes>The download icon in the byline, and the menu beside it. Present from a laptop without a network, or hand the post to another agent as reading material. The PDF of the slides is for a machine that cannot run the deck: one slide per page, and each demo or video is the still image its slide names.</Notes>
 
 <Slide kind="text" title="Push to Publish">
 

@@ -68,8 +68,9 @@ const embedBody = kind === 'embed' && Astro.slots.has('default')
 const bodyKinds = ['text', 'reasons', 'equation', 'problem', 'table']
 const body = bodyKinds.includes(kind) && Astro.slots.has('default')
   ? (await Astro.slots.render('default'))
-      .replace(/<li>(\s*)<span class="katex">/g, '<li>$1<span class="katex sym">')
-      .replace(/<li>(\s*)<strong>/g, '<li>$1<strong class="lead">')
+      // Under `npm run dev`, jump to source (bloggie/jump/) gives these tags attributes, so allow them.
+      .replace(/<li([^>]*)>(\s*)<span class="katex"/g, '<li$1>$2<span class="katex sym"')
+      .replace(/<li([^>]*)>(\s*)<strong(?=[\s>])/g, '<li$1>$2<strong class="lead"')
   : ''
 ---
 <section class={`slide ${kindClass}${cols ? ' cols' : ''}`} data-title={plainTitle} style={style} data-edit-slide={edit} data-build={build && build !== 'false' ? '' : undefined}>

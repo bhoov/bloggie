@@ -207,7 +207,7 @@ For example:
 
 <h2 id="downloads">Download for offline distribution</h2>
 
-The <svg viewBox="0 0 16 16" width="15" height="15" aria-label="download" style="vertical-align: -2px"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg> in each post's byline downloads the post as one file, and the menu beside it offers two kinds:
+The <svg viewBox="0 0 16 16" width="15" height="15" aria-label="download" style="vertical-align: -2px"><path d="M8 2v8m-3.5-3.5L8 10l3.5-3.5M3 13h10" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" /></svg> in each post's byline downloads the post as one file, and the menu beside it offers four kinds:
 
 - **Interactive page.**
   Styles, fonts, images, video, figures and the deck, all inside one HTML file.
@@ -216,6 +216,16 @@ The <svg viewBox="0 0 16 16" width="15" height="15" aria-label="download" style=
   The post as text for a language model, with math as MathML and its TeX source.
   Each figure becomes a description with traces from its own numbers, and the figures' source code is appended.
   Give it to another agent as reading material.
+- **Blog as PDF.**
+  The post as static pages, to print or to read where a browser cannot run it.
+- **Slides as PDF.**
+  The deck with one slide per page, for a presentation machine that cannot run the deck.
+
+A PDF cannot play a demo or a video, so each one shows as a **still**: one image that gives the idea the animation is there to give.
+Write it under the figure or the video, `<Still src={walkStill} alt="The walker is on the flag." />`, as this post's deck does for [](#fig-walk).
+The page never shows or loads it; print and the PDFs put it in the animation's place.
+Without a still, a figure prints as it first appears and a video prints as its poster.
+`npm run build` prints the PDFs with Chrome or Chromium; on a machine with neither, it builds the site without them.
 
 <h2 id="publish">Publish</h2>
 

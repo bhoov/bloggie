@@ -3,7 +3,7 @@
 // A subpage (lib/pages.js: any other .mdx page under src/pages/posts/) uses the same layout.
 // Front matter: title, date, edited (the date of the last edit, shown after the date when it is later),
 // description, eyebrow, lede, author, slides (false hides a deck that exists),
-// downloads (whether the byline offers the two downloads; true for a post, false for a subpage, by default),
+// downloads (whether the byline offers the downloads; true for a post, false for a subpage, by default),
 // equationNumbers (false turns numbering off), toc (false hides the table of contents),
 // agentSummary (a short statement of the post's question, placed at the top of the agent download).
 // `roles` is set by remarkRoles (bloggie/lib/roles.js): the symbol roles the post's math uses, shown as a key.
@@ -30,7 +30,7 @@ const hasSlides = frontmatter.slides !== false && !!file && basename(file) === '
 const postHref = Astro.url.pathname.replace(/\/?$/, '/')
 const slidesHref = `${postHref}slides/`
 const path = pagePath(postHref, import.meta.env.BASE_URL) ?? postHref.split('/').filter(Boolean).at(-1)
-// bloggie/scripts/export-posts.js writes both files beside the page after `astro build`, for each page whose byline
+// bloggie/scripts/export-posts.js writes the files beside the page after `astro build`, for each page whose byline
 // offers them (the [data-download] control).
 const downloads = offersDownloads(frontmatter, path) ? downloadNames(path) : null
 // A heading's anchor copies a link to the deployed page, even from a downloaded copy.
@@ -68,6 +68,13 @@ const keyRoles = roles.filter((role) => frontmatter.roles?.includes(role.name))
               <a href={`${postHref}${downloads.agent}`} download={downloads.agent}>
                 For agents<small>Text, math as TeX, figure traces and source code.</small>
               </a>
+              {/* The PDFs (scripts/export/pdf.js). A build with no browser to print them removes these links. */}
+              <a href={`${postHref}${downloads.pdf}`} download={downloads.pdf} data-pdf="post">
+                Blog as PDF<small>Static pages. Each animation is one still image.</small>
+              </a>
+              {hasSlides && <a href={`${postHref}${downloads.slidesPdf}`} download={downloads.slidesPdf} data-pdf="slides">
+                Slides as PDF<small>One slide per page, for a machine that cannot run the deck.</small>
+              </a>}
             </div>
           </details>
         </span></>}

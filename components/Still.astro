@@ -1,0 +1,29 @@
+---
+// The still image of an animation, for print and the PDF downloads (scripts/export/pdf.js): one image that shows the
+// idea the animation is there to give, such as the frame where the result appears. Put it right after the element it
+// stands for: a figure tag, a <video>, a <YouTube> or an <Embed>. On screen it is not shown and not loaded. In print
+// it takes that element's place (styles/site.css, styles/slides.css). A deck imports Still by itself
+// (lib/slide-headings.js); a post imports it.
+//
+//   import Still from '@bloggie/components/Still.astro'
+//   import walkStill from './media/attention-walk-still.webp'
+//
+//   <AttentionWalk client:visible />
+//   <Still src={walkStill} alt="After five loops the walker is on the flag." />
+//
+// A <video> with a poster needs no Still when the poster shows the idea: the PDF uses the poster.
+//
+// src            the image: an import, which carries its width and height, or a URL
+// alt            what the image shows, in a sentence: the idea the animation gives
+// width, height  the image's size in pixels, when src is a URL
+const { src, alt, width, height } = Astro.props
+if (!src) throw new Error('Still: give src, the image (an import or a URL)')
+if (!alt) throw new Error('Still: give alt, a sentence that says what the image shows')
+const url = typeof src === 'string' ? src : src.src
+---
+<img class="still" src={url} alt={alt} width={width ?? src.width} height={height ?? src.height} loading="lazy" decoding="async" />
+
+<script>
+  // A still is lazy so that a reader on screen never fetches it; load them all when the reader prints the page.
+  addEventListener('beforeprint', () => document.querySelectorAll<HTMLImageElement>('img.still').forEach((img) => { img.loading = 'eager' }))
+</script>

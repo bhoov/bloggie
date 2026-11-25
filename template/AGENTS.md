@@ -101,6 +101,10 @@ that needs it, and in a shared file add the new export beside the old one before
 - A deck is `slides.mdx` beside the post: `#` is the title or a divider, `## [kind] Title` a slide. Follow the
   `bloggie-slides` skill. The slide editor (E on a deck under `npm run dev`) writes `<Box style>`, `style` and
   `titleStyle` into `slides.mdx`; keep them when you revise a deck.
+- A post and its deck also download as PDFs, which cannot play a demo or a video. Give each animation a still,
+  `<Still src={…} alt="…" />` right after it (`node_modules/bloggie/components/Still.astro`): one small image
+  (WebP, AVIF or SVG) that gives the idea the animation is there to give. The page does not show it; print and the
+  PDFs put it in the animation's place. The `bloggie-slides` skill has the rule and a script that captures one.
 
 ## Figures
 

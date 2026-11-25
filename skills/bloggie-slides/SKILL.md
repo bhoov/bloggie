@@ -1,6 +1,6 @@
 ---
 name: bloggie-slides
-description: Make, revise or check the slide deck of a Bloggie post (src/pages/posts/<slug>/slides.mdx), with the post's live figures. Use when asked to make, revise or review slides from a post, or to update a deck after the post changed. Covers the story (one idea per slide), text sizes for the back of the room, full-slide interactive demos, equation slides with symbol legends, and the feedback to give on the post afterwards.
+description: Make, revise or check the slide deck of a Bloggie post (src/pages/posts/<slug>/slides.mdx), with the post's live figures. Use when asked to make, revise or review slides from a post, or to update a deck after the post changed. Covers the story (one idea per slide), text sizes for the back of the room, full-slide interactive demos, equation slides with symbol legends, the still image that stands for each animation in the deck's PDF download, and the feedback to give on the post afterwards.
 ---
 
 # Bloggie slides
@@ -38,7 +38,8 @@ description: Make, revise or check the slide deck of a Bloggie post (src/pages/p
 3. Run `npm run dev`, then check every slide:
    `node .agents/skills/bloggie-slides/check-slides.mjs http://localhost:4321/posts/<slug>/slides/ <out-dir>`
    (nothing to install; see Checking). Look at the screenshots, fix, and check again.
-4. Report the deck's URL, the slide list, and feedback on the post (see Feedback on the post).
+4. Give each animation a still image for the deck's PDF (rule 18), and look at its `sNN-pdf.png`.
+5. Report the deck's URL, the slide list, the stills, and feedback on the post (see Feedback on the post).
 
 When the post changes, revise the deck the same way: carry each change to the slides that show it, and keep the
 author's layout (see the slide editor under Mechanics).
@@ -116,6 +117,26 @@ a time, with the post's own interactive figures.
     in the rendered slide, and look at the result: a grammar can leave a snippet in one color.
     Something that is not code (a folder tree, a file name, a branch name) is text or a list, not
     a code block; do not use inline code on a slide.
+18. **Every animation has a still.** The deck also downloads as a PDF ("Slides as PDF" in the post's download
+    menu), for a presentation machine that cannot run the deck. A PDF holds one image for each animation: a demo
+    that plays or that the presenter drives, a video, a YouTube player, an embedded page. For each animation,
+    check that a still image gives its core idea without motion, and attach that image with `<Still>` (see
+    Mechanics):
+    - **Find one first.** Look in the post and its `media/` for an image that already shows the idea: a
+      video's poster, a figure from the paper, a frame that the post shows.
+    - **If there is none, capture one** at the state that shows the idea (`capture-still.mjs`, see Checking). This is
+      seldom the first frame: capture the frame where the result is visible ("the walker is on the flag"), not
+      the frame where the demo waits for Play.
+    - **Judge it on the PDF page**, the `sNN-pdf.png` that the check writes. With only the title and the still,
+      does the slide make its point? When the idea is the change itself, one frame cannot show it: make one image
+      that shows the change, such as the start and the end side by side, or the path drawn over the last frame.
+    - **Keep it small.** A still is at most 300 KB and at most 3200 px wide (twice the stage). Use WebP or AVIF
+      for a raster image (`capture-still.mjs` writes WebP) and SVG for a diagram. Do not use a GIF, or a PNG
+      above about 150 KB.
+
+    A demo whose first frame already shows the idea needs no still. A video whose poster shows the idea needs
+    none: the PDF uses the poster. A YouTube player or an embedded page always needs one: without it, the PDF
+    shows only a title and a link.
 
 ## Mechanics in a Bloggie blog
 
@@ -203,6 +224,15 @@ its figure components the same way: the deck must run the post's real interactiv
   its style goes on the element it holds. When you revise a deck, keep these as they are: they are
   the author's layout, not yours to normalize. A Box's `inner` rules follow the figure's markup, so
   when you change a figure's markup, check the slides that style it.
+- `<Still src={…} alt="…" />` is the still image of the animation just before it (rule 18;
+  `bloggie/components/Still.astro`; a deck needs no import for it). Write it after the figure tag, the `<video>`,
+  the `<YouTube>` or the `<Embed>` (after the `<Box>` around it, when it has one), with a blank line between
+  them. Import the image from the post's `media/` (`import walkStill from './media/walk-still.webp'`). `alt` is
+  a sentence that says what the image shows. On screen the still is not shown and not loaded. In print and in
+  "Slides as PDF", it takes the animation's place at the same size, and a demo slide's `note` stays over it. The
+  same tag works in the post (import `@bloggie/components/Still.astro` there), for "Blog as PDF".
+  `npm run build` prints both PDFs when the machine has Chrome or Chromium, and names each animation that a
+  PDF cannot show.
 - A figure on a slide is told `medium="slide"` (the deck passes it to every figure tag; a post's
   figure is `medium="blog"`). When a slide needs a figure to differ from the post (fewer panels, larger
   labels, a different layout, starting over each time the slide is shown), give the figure a slide
@@ -219,7 +249,10 @@ its figure components the same way: the deck must run the post's real interactiv
 4. Write the slides. Symbols: track where each was last explained.
 5. Render and check every slide at 1600×900 (see below). Fix overflow by splitting or by
    sizing the demo, never by reducing text below the sizes in rule 2.
-6. Report to the user: the deck link, the slide list, and the feedback.
+6. For each animation, find or capture its still (rule 18), attach it with `<Still>`, check again, and look at
+   the slide's `sNN-pdf.png`.
+7. Report to the user: the deck link, the slide list, the still of each animation (or why it needs none), and
+   the feedback.
 
 ## Checking
 
@@ -237,6 +270,25 @@ it, and flags a slide that fails these checks:
 - every KaTeX block rendered (no `.katex-error`);
 - every code block is highlighted (at least two token colors) and the slide has no inline code
   (rule 16); then look at the screenshot to see that the syntax the slide teaches is colored.
+
+After the slides, the check lists the stills (rule 18): for each animation, its still's file, size in pixels and
+in KB, and `alt`, or that it has none. It flags a still over 300 KB or 3200 px wide, a GIF, a large PNG, a video
+with no still and no poster, and a YouTube player or embedded page with no still. For each slide with an
+animation it writes `sNN-pdf.png`, the slide as "Slides as PDF" holds it.
+
+To capture a still, bring the figure to the state that shows its idea and save that frame:
+
+```sh
+node .agents/skills/bloggie-slides/capture-still.mjs "http://localhost:4321/posts/<slug>/slides/#4" \
+  src/pages/posts/<slug>/media/walk-still.webp --set "loop iteration=5" --wait 500
+```
+
+`--press <aria-label>` clicks one of the figure's buttons and `--set <aria-label>=<value>` sets a slider or a
+select, in the order given; `--wait` is the time in ms that the animation needs to reach the state. On a deck it
+captures the shown slide's figure area at twice the stage's resolution, without the figure's controls and the
+slide's note, which print leaves out or draws itself. `--selector` captures another element, such as a figure in
+the post (`--selector "#fig-walk"`). For a video, the still is a frame of the video: use its poster, or export
+the frame that shows the idea and encode it as WebP.
 
 Look at the screenshots; the numbers do not show a crowded or unbalanced slide. If a slide
 renders garbled markup that its source does not contain, the dev server is serving a stale

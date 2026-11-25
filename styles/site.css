@@ -1054,6 +1054,36 @@ figure img {
   border-radius: 4px;
 }
 
+/* The still image of an animation (components/Still.astro), right after the figure, video or frame it stands for.
+   Shown only in print, where it takes that element's place. */
+.still {
+  display: none;
+}
+
+/* A YouTube player or an embedded page that has no still, in a PDF download (lib/print.js): its title and link. */
+.print-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 1.5em;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--surface-1);
+  color: var(--text-secondary);
+  font-family: var(--sans);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.print-placeholder strong {
+  color: var(--text-primary);
+}
+
 /* A text description of a video, for readers who cannot watch it and for the agent download. */
 .media-description {
   max-width: var(--content-width);
@@ -1569,6 +1599,22 @@ svg text.mark-label {
 }
 
 @media print {
+  /* A post's page (Letter or A4, as the reader's printer has it). scripts/export/pdf.js sizes its window to match. */
+  @page {
+    margin: 16mm;
+  }
+  :has(+ .still) {
+    display: none !important;
+  }
+  .still {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+  .byline > span:has(+ .download),
+  .download,
+  .heading-anchor,
   .toc,
   .citation-preview,
   .reference-export,
@@ -1580,9 +1626,21 @@ svg text.mark-label {
     max-width: none;
     padding: 0;
   }
+  /* White paper: the page's tint would print as a box inside the margins. A deck keeps its stage color. */
+  body:not(.slides-body) {
+    background: #fff;
+  }
   .viz,
+  figure,
+  pre,
+  tr,
   .reference-list li {
     break-inside: avoid;
+  }
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
   }
 }
 

@@ -35,5 +35,9 @@ and figures. `template/` is the starter blog that `scripts/create.js` copies (`n
 - Styles: `styles/site.css` and `styles/slides.css` make posts and decks work and look good with no other CSS. A
   blog's own look goes in its `src/styles/*.css`, which loads after them; the template's holds a few writing styles.
   Put a convention that only some blogs use (a callout, a table variant) in the template, not here.
+- The PDF downloads (`scripts/export/pdf.js`) are printed by the headless browser that the e2e runner uses
+  (`e2e/browser.js`), from the built pages in print media. Keep the print rules of `styles/site.css` and
+  `styles/slides.css` working when you change a layout, and keep a build with no browser working: it has no PDFs
+  and no links to them. The browser opens only the build's own files.
 - Check a change in a blog: `npm run build` and `npm run e2e` there. For the starter blog, make one with
   `node scripts/create.js <folder> --copy-engine` and run the same.
