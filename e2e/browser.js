@@ -71,7 +71,9 @@ export async function launch() {
         proc.kill()
         await exited
       }
-      rmSync(profile, { recursive: true, force: true, maxRetries: 5 })
+      // On Linux the browser's other processes can still write to the profile for a moment after it quits, and the
+      // removal fails (ENOTEMPTY). A build must not fail on that: the next launch removes the profile (above).
+      try { rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }) } catch {}
     },
   }
 }
